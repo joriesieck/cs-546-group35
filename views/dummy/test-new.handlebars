@@ -1,0 +1,46 @@
+<!--https://www.w3schools.com/html/html_form_input_types.asp-->
+
+<main>
+	<form id="new-user-form">
+		<label for="first-name">First Name</label>
+		<input type="text" id="first-name" name="first-name">
+
+		<label for="last-name">Last Name</label>
+		<input type="text" id="last-name" name="last-name">
+
+		<label for="email">Email</label>
+		<input  id="email" name="email">
+
+		<label for="username">Username</label>
+		<input type="text" id="username" name="username">
+
+		<label for="password">Password</label>
+		<input  id="password" name=="password">
+
+		<label for="confirm-password">Confirm Password</label>
+		<input  id="confirm-password" name="confirm-password">
+
+		<label for="grad-year">Graduation Year</label>
+		<input id="grad-year" name="grad-year">
+
+		<!-- the subject field is required for tutors, but not for students -->
+		{{#if isTutor}}
+		<label for="subjects">Subjects <span class="input-description">Enter the subjects you are able to tutor, separated by a comma.</span></label>
+		<input type="textarea" id="subjects">
+		{{else}}
+		<label for="subjects">Subjects <span class="input-description">Enter any subjects you are interested in receiving help with, separated by a comma.</span></label>
+		<input type="textarea" id="subjects">
+		{{/if}}
+
+		<!-- send whether the user is a tutor as a hidden input -->
+		<input type="hidden" id="is-tutor" name="is-tutor" value={{isTutor}}>
+
+		<button type="submit">Create Account</button>
+	</form>
+
+	<ul id="new-user-input-errors"></ul>
+
+	<a href="/">Home</a>
+</main>
+
+<script src="/public/js/newUser.js"></script>

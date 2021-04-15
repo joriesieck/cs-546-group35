@@ -1,0 +1,141 @@
+/**
+ * Table of Contents
+ * 1) Overall Site Styles
+ * 2) Login Page
+ * 		- Landing
+ * 		- Tutor
+ * 		- Student
+ * 3) Create User Page
+ * 		- Landing
+ * 		- Tutor
+ * 		- Student
+ */
+
+/* Overall Site Styles */
+html {
+	height: 100%;	/* for footer styling */
+}
+
+body {
+	background-color: #173f5f;
+	color: #fff;
+	/* for footer styling */
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: center;
+	height: 100%;
+	margin: 0;
+}
+
+/* header */
+header {
+	background-color: #0f2a3f;
+	width: 100%;
+}
+header h1 {
+	height: 15%;
+	width: 100%;
+	text-align: center;
+}
+
+/* footer */
+footer {
+	background-color: #0f2a3f;
+	height: 5%;
+	width: 100%;
+	display: flex;
+	align-items: center;
+}
+footer p {
+	margin-left: 2%;
+	/* margin-bottom: 2%; */
+	font-style: italic;
+}
+
+/* main */
+main {
+	height: 100%;
+	width: 100%;
+	padding-top: 10px;
+}
+
+/* links */
+a {
+	color: #8fdd7e;
+}
+a:hover {
+	color: #f9f871;
+	font-weight: bold;
+}
+
+/* forms */
+form {
+	max-width: 30%;
+	display: flex;
+	flex-direction: column;
+	/* align-items: center; */
+	margin-left: auto;
+	margin-right: auto;
+	font-size: large;
+}
+label {
+	/* text-align: left;
+	width: 100%; */
+	margin: 5px;
+}
+input {
+	margin: 5px;
+}
+form button {
+	margin-top: 10px;
+}
+
+/* buttons - bevel? */
+button {
+	background-color: #009197;
+	color: #000;
+	border-radius: 5px;
+	border: 2px solid #000;
+	padding: 10px;
+}
+button:hover {
+	background-color: #f9f871;
+	/* color: #fff;
+	border-color: #fff; */
+}
+
+/* Login Styles */
+/* Landing */
+.login-landing {
+	text-align: center;
+}
+
+button.login-landing {
+	font-size:xx-large;
+	font-weight: bold;
+	border-width: 4px;
+}
+
+/* Student, Tutor */
+
+
+/* Create User Styles */
+/* Landing */
+.new-user-landing {
+	text-align: center;
+}
+
+button.new-user-landing {
+	font-size:xx-large;
+	font-weight: bold;
+	border-width: 4px;
+}
+
+/* Student, Tutor */
+.input-description {
+	font-size: small;
+	width: 100%;
+	font-style: italic;
+	margin: 0;
+}

@@ -1,6 +1,18 @@
 <main>
-	<p>login page</p>
+	<form id='login'>
+		<label for="username">Username</label>
+		<input type="text" id="username" name="username" placeholder="johndoe" required>
 
+		<label for="password">Password</label>
+		<input type="password" id="password" name=="password" placeholder="12345" required>
+
+		<!-- send whether the user is a tutor as a hidden input -->
+		<input type="hidden" id="is-tutor" name="is-tutor" value={{isTutor}}>
+
+		<button type="submit">Login</button>
+	</form>
+
+	<a href="/login">Change User Type</a>
 	<a href="/">Home</a>
 
 </main>
