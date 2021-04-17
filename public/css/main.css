@@ -17,8 +17,8 @@ html {
 }
 
 body {
-	background-color: #173f5f;
-	color: #fff;
+	background-color: #49d8af;
+	color: #003dac;
 	/* for footer styling */
 	display: flex;
 	flex-direction: column;
@@ -30,7 +30,8 @@ body {
 
 /* header */
 header {
-	background-color: #0f2a3f;
+	background-color: #0078d8;
+	color: #fff;
 	width: 100%;
 }
 header h1 {
@@ -39,9 +40,26 @@ header h1 {
 	text-align: center;
 }
 
+/* nav menu */
+#main-menu {
+	margin-top: 3%;
+	margin-bottom: 0;
+	padding-bottom: 0;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+	background-color: #003dac;
+	padding: 1%;
+}
+#main-menu a {
+	color: #fff;
+	text-decoration: none;
+}
+
 /* footer */
 footer {
-	background-color: #0f2a3f;
+	background-color: #0078d8;
+	color: #fff;
 	height: 5%;
 	width: 100%;
 	display: flex;
@@ -62,11 +80,12 @@ main {
 
 /* links */
 a {
-	color: #8fdd7e;
+	color: #003dac;
 }
 a:hover {
-	color: #f9f871;
-	font-weight: bold;
+	/* color: #4055be; */
+	text-decoration: none;
+	cursor: pointer;
 }
 
 /* forms */
@@ -93,16 +112,17 @@ form button {
 
 /* buttons - bevel? */
 button {
-	background-color: #009197;
-	color: #000;
+	background-color: #0078d8;
+	color: #fff;
 	border-radius: 5px;
-	border: 2px solid #000;
-	padding: 10px;
+	border: 2px solid #fff;
+	padding: 5px;
 }
 button:hover {
-	background-color: #f9f871;
-	/* color: #fff;
-	border-color: #fff; */
+	background-color: #0062b1;
+	/* color: #000;
+	border-color: #000; */
+	cursor: pointer;
 }
 
 /* Login Styles */
@@ -111,11 +131,11 @@ button:hover {
 	text-align: center;
 }
 
-button.login-landing {
-	font-size:xx-large;
+/* button.login-landing {
+	font-size:large;
 	font-weight: bold;
-	border-width: 4px;
-}
+	border-width: 1px;
+} */
 
 /* Student, Tutor */
 
@@ -126,11 +146,11 @@ button.login-landing {
 	text-align: center;
 }
 
-button.new-user-landing {
+/* button.new-user-landing {
 	font-size:xx-large;
 	font-weight: bold;
 	border-width: 4px;
-}
+} */
 
 /* Student, Tutor */
 .input-description {
