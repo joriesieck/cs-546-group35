@@ -1,10 +1,3 @@
-/**
- * DONT FORGET TO ADD DB STUFF!!
- * 1) check if email already in db
- * 2) check if username already in db
- * 3) store user
- */
-
 (function() {
 	console.log("hello new user page!");
 
@@ -28,7 +21,7 @@
 		let username = document.getElementById('username').value.toLowerCase();
 		let password = document.getElementById('password').value;
 		let confirmPassword = document.getElementById('confirm-password').value;
-		let gradYear = parseInt(document.getElementById('grad-year').value);
+		let year = parseInt(document.getElementById('grad-year').value);
 		let subjects = document.getElementById('subjects').value;
 		// 0 = false, 1 = true
 		const isTutor = parseInt(document.getElementById('is-tutor').value);
@@ -36,7 +29,7 @@
 		// store all the error strings in an array
 		let errorList = [];
 
-		console.log({firstName,lastName,email,username,password,confirmPassword,gradYear,subjects,isTutor});
+		console.log({firstName,lastName,email,username,password,confirmPassword,year,subjects,isTutor});
 
 		// check first and last name - must exist, must be strings, must not be only spaces
 		try {
@@ -69,10 +62,6 @@
 			// regex source: https://www.geeksforgeeks.org/write-regular-expressions/
 			const emailRE = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
 			if (!emailRE.test(email)) throw 'Email must be of the format example@domain.suffix';
-			// must not already be in database
-			/****ADD DB FUNC TO CHECK IF EMAIL ALREADY EXISTS HERE*****/
-			const inDB = false;
-			if (inDB) throw 'This email address is already associated with an account. Please log in instead.';
 		} catch (e) {
 			errorList.push(e);
 		}
@@ -89,10 +78,6 @@
 			// must not contain whitespace characters
 			const usernameRE = /[ 	]/;
 			if (usernameRE.test(username)) throw 'Username must not contain any whitespace characters.';
-			// must not already be in databaase
-			/****ADD DB FUNC TO CHECK IF USERNAME ALREADY EXISTS HERE*****/
-			const inDB = false;
-			if (inDB) throw 'This username is already associated with an account. Please log in instead.';
 		} catch (e) {
 			errorList.push(e);
 		}
@@ -121,14 +106,14 @@
 		// check graduation year
 		try {
 			// must exist
-			if (gradYear===undefined || gradYear==='') throw 'Graduation Year is required.';
+			if (year===undefined || year==='') throw 'Graduation Year is required.';
 			// must be a number
-			if (isNaN(gradYear)) throw 'Graduation Year must be a number.';
+			if (isNaN(year)) throw 'Graduation Year must be a number.';
 			// must be >= 0
-			if (gradYear < 0) throw 'Graduation Year must be greater than 0.';
+			if (year < 0) throw 'Graduation Year must be greater than 0.';
 			// must be of the form YYYY
-			const gradYearRE = /^\d\d\d\d$/;
-			if (!gradYearRE.test(gradYear)) throw 'Graduation Year must be of the form YYYY.';
+			const yearRE = /^\d\d\d\d$/;
+			if (!yearRE.test(year)) throw 'Graduation Year must be of the form YYYY.';
 		} catch (e) {
 			errorList.push(e);
 		}

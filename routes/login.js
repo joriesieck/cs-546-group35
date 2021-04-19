@@ -41,7 +41,7 @@ router.post('/do-login', async (req,res) => {
 	const {username, password} = req.body;
 
 	// get hashedPassword for the user from the database
-	const hashedPassword = userData.getHashedPassword(username);
+	const {hashedPassword} = userData.getUserByUsername(username);
 	// if no user was found, render an error
 	// TODO AJAX
 

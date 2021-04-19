@@ -4,7 +4,10 @@
   "description": "user login and new user pages",
   "main": "app.js",
   "scripts": {
-    "test": "node app.js"
+    "test": "node tasks/testSeed.js",
+    "drop": "node tasks/drop.js",
+    "seed": "node tasks/seed.js",
+    "start": "node app.js"
   },
   "repository": {
     "type": "git",
