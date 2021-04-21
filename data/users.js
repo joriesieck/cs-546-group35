@@ -1,81 +1,3 @@
-/**
- * old check input method for createUser
- * 	// for (let field of userInfo) {
-	// 	let value = userInfo[field];
-	// 	// input must exist
-	// 	if (value===undefined) throw `Error in function createUser: ${field} undefined.`;
-
-	// 	// year must be a number
-	// 	if (field==='year' && (typeof value !== 'number' || isNaN(value))) throw `Error in function createUser: year is not a number.`;
-	// 	// relevantSubjects must be an array
-	// 	else if (field==='relevantSubjects' && !Array.isArray(value)) throw `Error in function createUser: relevantSubjects is not an array.`;
-	// 	// isTutor must be a boolean
-	// 	else if (field==='isTutor' && typeof value !== 'boolean') throw `Error in function createUser: isTutor is not an array.`;
-	// 	// all other fields must be strings
-	// 	else if (typeof value !== 'string') throw `Error in function createUser: ${field} is not a string.`;
-
-	// 	// strings must not be all whitespace - except hashedPasswords
-	// 	if (typeof value === 'string') {
-	// 		if (field!=='hashedPassword') value = value.trim();	// hashedPasswords can be all strings, but they can't be empty
-	// 		if (value === '') throw `Error in function createUser: ${field} is all whitespace characters.`;
-	// 		// update trimmed value in userInfo
-	// 		userInfo[field] = value;
-	// 	}
-	// }
-
-	// // deconstruct inputs and check inputs with individual requirements
-	// const { firstName, lastName, email, username, hashedPassword, year, relevantSubjects, isTutor } = userInfo;
-	
-	// // email
-	// // must be in correct email format
-	// // regex source: https://www.geeksforgeeks.org/write-regular-expressions/
-	// const emailRE = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
-	// if (!emailRE.test(email)) throw 'Error in function createUser: email is not in correct format.';
-	// // must not already be in the database
-	// try {
-	// 	getUserByEmail(email);
-	// 	// user is already in the database, so error
-	// 	throw 'Error in function createUser: email exists.';
-	// } catch {
-	// 	// user is not in the database, so continue (no op)
-	// }
-
-	// // username
-	// // must not contain any whitespace characters
-	// const usernameRE = /[ 	]/;
-	// if (usernameRE.test(username)) throw 'Error in function createUser: username contains whitespace characters';
-	// // must not already be in the database
-	// try {
-	// 	getUserByUsername(username);
-	// 	// user is already in the database, so error
-	// 	throw 'Error in function createUser: username exists.';
-	// } catch {
-	// 	// user is not in the database, so continue (no op)
-	// }
-
-	// // year
-	// // must be greater than 0
-	// if (year < 0) throw 'Error in function createUser: year is less than 0.';
-	// // must be of the form YYYY
-	// const yearRE = /^\d\d\d\d$/;
-	// if (!yearRE.test(year)) throw 'Error in function createUser: year is not of the form YYYY.';
-
-	// // relevantSubjects
-	// // if isTutor, must not be empty
-	// if (isTutor && relevantSubjects.length <= 0) throw 'Error in function createUser: user is tutor but relevantSubjects is empty.';
-	// // if nonempty, all inputs must be strings and contain at least one non-whitespace character
-	// relevantSubjects.forEach((subject,i) => {
-	// 	// must be strings
-	// 	if (typeof subject !== 'string') throw 'Error in function createUser: relevantSubjects contains nonstrings.';
-	// 	// must contain at least one non-whitespace character
-	// 	subject = subject.trim();
-	// 	if (subject==='') throw 'Error in function createUser: relevantSubjects contains whitespace strings.';
-	// 	// set relevantSubjects[i] to trimmed subject
-	// 	relevantSubjects[i] = subject;
-	// });
- */
-
-
 // import required files
 const users = require('../config/mongoCollections').users;
 const { ObjectId } = require('mongodb');
@@ -97,10 +19,10 @@ const __checkInputs = (inputs, fn) => {
 		let required = inputs[field].required;
 
 		// input must exist
-		if (required && value===undefined) throw `Error in function ${fn}: ${field} undefined.`;
+		if (required && (value===undefined || value===null)) throw `Error in function ${fn}: ${field} not provided.`;
 
 		// if it's not required, only do checks if it exists
-		if (value!==undefined) {
+		if (value!==undefined && value!==null) {
 			// special case: array
 			if (type==='array' && !Array.isArray(value)) throw `Error in function ${fn}: ${field} is not an array.`;
 			// special case: number
@@ -108,11 +30,13 @@ const __checkInputs = (inputs, fn) => {
 			// special case: ObjectId
 			if (type==='ObjectId') {
 				try {
-					if (value !== ObjectId(value)) throw `Error in function ${fn}: ${value} is not an ObjectId().`;
+					if (value !== ObjectId(value)) throw `Error in function ${fn}: ${value} is not an ObjectId.`;
 				} catch {
-					throw `Error in function ${fn}: ${value} is not an ObjectId().`;
+					throw `Error in function ${fn}: ${value} is not an ObjectId.`;
 				}
 			}
+			// special case: object
+			if (type==='object' && Array.isArray(value)) throw `Error in function ${fn}: ${value} is not an object.`;
 			// all other cases:
 			if (type!=='array' && type!=='ObjectId' && typeof value !== type) throw `Error in function ${fn}: ${field} is not a ${type}.`;
 
@@ -131,25 +55,29 @@ const __checkInputs = (inputs, fn) => {
 
 	// check inputs with individual requirements
 	// email
-	if (inputs.email) {
+	if (inputs.email && inputs.email.value) {
 		const email = inputs.email.value;
 		// must be in correct email format
 		// regex source: https://www.geeksforgeeks.org/write-regular-expressions/
 		const emailRE = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
 
 		if (!emailRE.test(email)) throw `Error in function ${fn}: email is not in correct format.`;
+		// set email to all lowercase
+		inputVals.email = email.toLowerCase();
 	}
 
 	// username
-	if (inputs.username) {
+	if (inputs.username && inputs.username.value) {
 		const username = inputs.username.value;
 		// must not contain any whitespace characters
 		const usernameRE = /[ 	]/;
 		if (usernameRE.test(username)) throw `Error in function ${fn}: username contains whitespace characters`;
+		// set username to all lowercase
+		inputVals.username = username.toLowerCase();
 	}
 
 	// year
-	if (inputs.year) {
+	if (inputs.year && inputs.year.value) {
 		const year = inputs.year.value;
 		// must be greater than 0
 		if (year < 0) throw `Error in function ${fn}: year is less than 0.`;
@@ -159,10 +87,10 @@ const __checkInputs = (inputs, fn) => {
 	}
 
 	// relevantSubjects
-	if ((inputs.isTutor && inputs.isTutor.value) || inputs.relevantSubjects) {
+	if ((inputs.isTutor && inputs.isTutor.value) || (inputs.relevantSubjects && inputs.relevantSubjects.value)) {
 		const relevantSubjects = inputs.relevantSubjects.value;
 		// if isTutor, must not be empty
-		if (inputs.isTutor.value && relevantSubjects.length <= 0) throw `Error in function ${fn}: user is tutor but relevantSubjects is empty.`;
+		if ((inputs.isTutor && inputs.isTutor.value) && relevantSubjects.length <= 0) throw `Error in function ${fn}: user is tutor but relevantSubjects is empty.`;
 		// if nonempty, all inputs must be strings and contain at least one non-whitespace character
 		relevantSubjects.forEach((subject,i) => {
 			// must be strings
@@ -173,6 +101,58 @@ const __checkInputs = (inputs, fn) => {
 			// set relevantSubjects[i] to trimmed subject
 			inputs.relevantSubjects[i] = subject;
 		});
+	}
+
+	// userType (different from isTutor - this refers to the value that actually gets stored in the database)
+	if (inputs.userType && inputs.userType.value) {
+		let userType = inputs.userType.value;
+		// can only be 'student' or 'tutor'
+		userType = userType.toLowerCase();
+		if (userType!=='student' && userType!=='tutor') throw `Error in function ${fn}: invalid userType '${userType}', expected 'student' or 'tutor'.`;
+	}
+
+	// questionIDs and tutorList
+	if (inputs.questionIDs && inputs.questionIDs.value) {
+		const questionIDs = inputs.questionIDs.value;
+		// can only contain ObjectIds
+		questionIDs.forEach((qid) => {
+			try {
+				if (qid !== ObjectId(qid)) throw `Error in function ${fn}: ${qid} is not an ObjectId.`;
+			} catch {
+				throw `Error in function ${fn}: ${qid} is not an ObjectId.`;
+			}
+		});
+	}
+	if (inputs.tutorList && inputs.tutorList.value) {
+		const tutorList = inputs.tutorList.value;
+		// can only contain ObjectIds
+		tutorList.forEach((uid) => {
+			try {
+				if (uid !== ObjectId(uid)) throw `Error in function ${fn}: ${uid} is not an ObjectId.`;
+			} catch {
+				throw `Error in function ${fn}: ${uid} is not an ObjectId.`;
+			}
+		});
+	}
+
+	// ratings
+	if (inputs.ratings && inputs.ratings.value) {
+		const ratings = inputs.ratings.value;
+		// must contain at least one of answerRatingByStudents, answerRatingByTutors, tutorRating
+		if (!ratings.answerRatingByStudents && !ratings.answerRatingByTutors && !ratings.tutorRating) throw `Error in function ${fn}: 'ratings' must have at least one valid key.`;
+
+		// each value for each key must be an array of ObjectIds
+		for (key in ratings) {
+			const value = ratings[key];
+			if (!Array.isArray(value)) throw `Error in function ${fn}: value for ratings.${key} is not an array.`;
+			value.forEach((rid) => {
+				try {
+					if (rid !== ObjectId(rid)) throw `Error in function ${fn}: ${rid} is not an ObjectId.`;
+				} catch {
+					throw `Error in function ${fn}: ${rid} is not an ObjectId.`;
+				}
+			});
+		}
 	}
 
 	// return the values from the inputs object (with trimmed strings)
@@ -210,17 +190,19 @@ const createUser = async (userInfo) => {
 	try {
 		await getUserByEmail(email);
 		// user is already in the database, so error
-		throw `Error in function ${fn}: email exists.`;
-	} catch {
-		// user is not in the database, so continue (no op) - THIS IS WRONG
+		throw `Error in function createUser: email exists.`;
+	} catch (e) {
+		// if the error isn't user not found, bubble it
+		if (!`${e}`.includes('not found')) throw e;
 	}
 	// username
 	try {
 		await getUserByUsername(username);
 		// user is already in the database, so error
-		throw `Error in function ${fn}: username exists.`;
-	} catch {
-		// user is not in the database, so continue (no op)
+		throw `Error in function createUser: username exists.`;
+	} catch (e) {
+		// if the error isn't user not found, bubble it
+		if (!`${e}`.includes('not found')) throw e;
 	}
 
 	// get the collection
@@ -304,7 +286,7 @@ const createUser = async (userInfo) => {
  */
 const getUserByUsername = async (username) => {
 	// check username - existence, type, and format
-	 __checkInputs({iusername: {value:username, type:'string', required:true}},
+	 __checkInputs({username: {value:username, type:'string', required:true}},
 	'getUserByUsername');
 
 	// get the collection
@@ -319,35 +301,35 @@ const getUserByUsername = async (username) => {
 }
 
 /**
- * getRelevantUsers
+ * getRelatedUsers
  * @param id: the id of the user whose relevant users should be obtained
  * @returns an array of user objects corresponding to the given user's tutorList
  */
-const getRelevantUsers = async (id) => {
+const getRelatedUsers = async (id) => {
 	// check id - existence and type
 	 __checkInputs({id: {value:id, type:'ObjectId', required:true}},
-	'getRelevantUsers');
+	'getRelatedUsers');
 
 	// get the user data - throws if no user exists
 	const user = await getUserById(id);
 
 	// loop over the tutorList array and get each user object
 	const relUsers = [];
-	user.tutorList.forEach(async (relUserId) => {
+	for (relUserId of user.tutorList) {
 		// check relUserId - existence and type
 		// if a userID is invalid, just skip it
 		try {
-			if (relUserId!==undefined && relUserId === ObjectId(id)) {
-				const userObj = await getUserById(relUserId)
+			if (relUserId!==undefined && relUserId!==null && relUserId === ObjectId(relUserId)) {
+				const userObj = await getUserById(relUserId);
 				// remove hashedPassword
-				userObj.hashedPassword = null;
+				delete userObj.hashedPassword;
 				// add userObj to relUsers
 				relUsers.push(userObj);
 			}
 		} catch {
 			// no op - just move on to the next user
 		}
-	});
+	}
 
 	// return relUsers - if there weren't any, this will just be an empty array
 	return relUsers;
@@ -360,7 +342,7 @@ const getRelevantUsers = async (id) => {
  */
  const updateUser = async (userInfo) => {
 	// check inputs - id must exist, all others are optional but there must be at least one updateable field
-	if (userInfo===undefined) throw 'Error in function updateUser: missing input object.';
+	if (userInfo===undefined || userInfo===null) throw 'Error in function updateUser: missing input object.';
 
 	const numInputs = Object.keys(userInfo).length;
 	if (numInputs < 2) throw `Error in function updateUser: ${numInputs} inputs provided, expected at least 2.`;
@@ -374,18 +356,65 @@ const getRelevantUsers = async (id) => {
 		hashedPassword: {value:userInfo.hashedPassword, type:'string', required:false},
 		year: {value:userInfo.year, type:'number', required:false},
 		relevantSubjects: {value:userInfo.relevantSubjects, type:'array', required:false},
-		isTutor: {value:userInfo.isTutor, type:'boolean', required:false}
-	}, updateUser);
+		userType: {value:userInfo.userType, type:'string', required:false},
+		tutorList: {value:userInfo.tutorList, type:'array', required:false},
+		questionIDs: {value:userInfo.questionIDs, type:'array', required:false},
+		ratings: {value:userInfo.ratings, type:'object', required: false}
+	}, 'updateUser');
+
+	// get the user id and delete it from userInfo so it doesn't get readded
+	const id = userInfo.id;
+	delete userInfo.id;
+	// make sure only provided fields get updated and data doesn't get removed from arrays or objects
+	const currentUser = await getUserById(id);
+	for (field in userInfo) {
+		const value = userInfo[field];
+		// if field wasn't provided, delete it
+		if (value===undefined || value===null) {
+			delete userInfo[field];
+		}
+		// if value is an array, add to the old value
+		if (Array.isArray(value)) {
+			const oldValue = currentUser[field];
+			userInfo[field] = oldValue ? oldValue.concat(value) : value;
+		}
+	}
+
+	// deal with ratings and name separately since they're special cases
+	for (key in userInfo.ratings) {
+		const oldValue = currentUser.ratings[key];
+		userInfo.ratings[key] = oldValue ? oldValue.concat(userInfo.ratings[key]) : userInfo.ratings[key];
+	}
+
+	if (userInfo.firstName || userInfo.lastName) {
+		// if either name was provided, update the provided name
+		userInfo.name = {
+				firstName: userInfo.firstName || currentUser.name.firstName,
+				lastName: userInfo.lastName || currentUser.name.lastName
+			};
+
+		// delete the fields for firstName and lastName
+		delete userInfo.firstName;
+		delete userInfo.lastName;
+	}
+	// if user is changing to a tutor, update ratings to be [] instead of null, and vice versa
+	// but if ratings were also passed in, just leave them
+	if (userInfo.userType && !userInfo.ratings) {
+		userInfo.ratings = userInfo.userType==='student' ? null : [];
+	}
+
+	// if userInfo is empty at this point, throw an error
+	if (Object.keys(userInfo).length<=0) throw 'Error in updateUser: no valid inputs provided.';
 
 	// get the collection
 	const userCollection = await users();
 
 	// update user and throw if unsuccessful
-	const updateInfo = await userCollection.updateOne({_id:userInfo.id}, {$set: userInfo});
+	const updateInfo = await userCollection.updateOne({_id:id}, {$set: userInfo});
 	if (updateInfo.modifiedCount<=0) throw `Error in function updateUser: could not update user ${userInfo.username}.`;
 
 	// get and return the updated user
-	const updatedUser = getUserById(userInfo.id);
+	const updatedUser = getUserById(id);
 	return updatedUser;
 }
 
@@ -412,5 +441,5 @@ const getRelevantUsers = async (id) => {
 
 
 module.exports = {
-	createUser, getUserById, getUserByEmail, getUserByUsername, getRelevantUsers, updateUser, deleteUser
+	createUser, getUserById, getUserByEmail, getUserByUsername, getRelatedUsers, updateUser, deleteUser
 }
