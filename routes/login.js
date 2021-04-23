@@ -1,6 +1,7 @@
-// import required packages
+// import express, xss, and bcrypt
 const express = require('express');
 const router = express.Router();
+const xss = require('xss');
 const bcrypt = require('bcryptjs');
 // import data
 const userData = require('../data/users');
@@ -65,6 +66,6 @@ router.get('/logout', async (req, res) => {
 	req.session.destroy();
 	// redirect to the homepage
 	res.redirect('/');
-})
+});
 
 module.exports = router;

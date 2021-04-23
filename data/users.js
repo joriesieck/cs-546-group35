@@ -79,7 +79,7 @@ const __checkInputs = (inputs, fn) => {
 	// year
 	if (inputs.year && inputs.year.value) {
 		const year = inputs.year.value;
-		// must be greater than 0
+		// must be greater than or equal to 0
 		if (year < 0) throw `Error in function ${fn}: year is less than 0.`;
 		// must be of the form YYYY
 		const yearRE = /^\d\d\d\d$/;

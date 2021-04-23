@@ -1,35 +1,31 @@
-(function() {
-	console.log("hello new user page!");
-
-	// get the form DOM element
-	const newUserForm = document.getElementById('new-user-form');
+(function($) {
+	// get the form element
+	var newUserForm = $('#new-user-form');
 
 	// add an event listener for submit
-	newUserForm.addEventListener('submit', (e) => {
+	newUserForm.submit(function (event) {
 		// stop page refresh
-		e.preventDefault();
+		event.preventDefault();
 
 		// get the error list element
-		const errors = document.getElementById('new-user-input-errors');
+		var errors = $('#new-user-input-errors');
 		// remove any old errors
-		errors.innerHTML = "";
+		errors.empty();
 
 		// get each input in the form
-		let firstName = document.getElementById('first-name').value;
-		let lastName = document.getElementById('last-name').value;
-		let email = document.getElementById('email').value.toLowerCase();
-		let username = document.getElementById('username').value.toLowerCase();
-		let password = document.getElementById('password').value;
-		let confirmPassword = document.getElementById('confirm-password').value;
-		let year = parseInt(document.getElementById('grad-year').value);
-		let subjects = document.getElementById('subjects').value;
+		var firstName = $('#first-name').val();
+		var lastName = $('#last-name').val();
+		var email = $('#email').val().toLowerCase();
+		var username = $('#username').val().toLowerCase();
+		var password = $('#password').val();
+		var confirmPassword = $('#confirm-password').val();
+		var year = parseInt($('#grad-year').val());
+		var subjects = $('#subjects').val();
 		// 0 = false, 1 = true
-		const isTutor = parseInt(document.getElementById('is-tutor').value);
+		var isTutor = parseInt($('#is-tutor').val());
 
 		// store all the error strings in an array
-		let errorList = [];
-
-		console.log({firstName,lastName,email,username,password,confirmPassword,year,subjects,isTutor});
+		var errorList = [];
 
 		// check first and last name - must exist, must be strings, must not be only spaces
 		try {
@@ -156,15 +152,45 @@
 			console.log(errorList);
 			// add each error as an li to errors
 			errorList.forEach((errorStr) => {
+				console.log(errorStr);
 				// create an li element
-				const errorEl = document.createElement('li');
+				var errorEl = $('<li>');
 				// add the text
-				errorEl.innerText = errorStr;
+				errorEl.text(errorStr);
 				// append the child to errors
-				errors.appendChild(errorEl);
+				errorEl.appendTo(errors);
+			});
+		} else {
+			// no errors, so submit ajax request to POST /new-user/create
+			var requestConfig = {
+				method: 'POST',
+				url: '/new-user/create',
+				contentType: 'application/json',
+				data: JSON.stringify({
+					firstName,
+					lastName,
+					email,
+					username,
+					password,
+					year,
+					subjects,
+					isTutor
+				}),
+				error: function(e) {
+					console.log(e);
+					// TODO
+				}
+			};
+			$.ajax(requestConfig).then(function (res) {
+				// if message = 'success', hide the form and display the success message
+				if (res.message==='success' && res.username) {
+					$('#new-user').hide();
+					var successMsg = $('<p>');
+					successMsg.text(`User ${res.username} created successfully! You are now logged in.`);
+					successMsg.appendTo('main');
+				}
 			});
 		}
-		
 	})
 	
-})();
+})(window.jQuery);
