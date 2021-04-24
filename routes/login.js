@@ -38,34 +38,82 @@ router.get('/tutor', async (req,res) => {
 
 // log the user in
 router.post('/do-login', async (req,res) => {
-	// get the username and password from the request body
-	const {username, password} = req.body;
+	// get the username and password from the request body, one at a time because of xss
+	let username = xss(req.body.username);
+	let password = xss(req.body.password);
+
+	/* error checking - no point in querying database if missing/invalid inputs */
+	// make sure username and password exist
+	try {
+		if (username===undefined || username===null) throw 'username';
+		if (password===undefined || password===null) throw 'password';
+	} catch (e) {
+		res.status(400).json({error: `Error in POST /login/do-login: missing input "${e}"`});
+		return;
+	}
+	
+	// make sure username and password are strings
+	try {
+		if (typeof username !== 'string') throw 'username';
+		if (typeof password !== 'string') throw 'password';
+	} catch (e) {
+		res.status(400).json({error: `Error in POST /login/do-login: invalid type for input "${e}"`});
+		return;	
+	}
+
+	// trim and check for all whitespace
+	try {
+		username = username.trim();
+		if (username==='') throw 'username';
+		password = password.trim();
+		if (password==='') throw 'password';
+	} catch (e) {
+		res.status(400).json({error: `Error in POST /login/do-login: empty input "${e}"`});
+		return;	
+	}
+
+	// make sure username does not contain any whitespace
+	const usernameRE = /[ 	]/;
+	if (usernameRE.test(username)) {
+		res.status(400).json({error:'Username must not contain any whitespace characters.'});
+		return;
+	}
 
 	// get hashedPassword for the user from the database
-	const {hashedPassword} = userData.getUserByUsername(username);
-	// if no user was found, render an error
-	// TODO AJAX
+	let hashedPassword;
+	try {
+		({hashedPassword} = await userData.getUserByUsername(username));
+		// const user = userData.getUserByUsername(username);
+		// console.log(user);
+		// return;
+		if (!hashedPassword) {
+			console.log('something went wrong....');
+			return;
+		}
+	} catch (e) {
+		// if the error isn't user not found, bubble it
+		if (!`${e}`.includes('not found')) {
+			res.status(400).json({error: e});
+			return;
+		}
+		// otherwise, we don't want to reveal that it was specifically the username, so error with 'invalid username or password'
+		res.status(400).json({error: 'Invalid username or password.'});
+		return;
+	}
 
 	// compare passwords using bcrypt
 	const match = await bcrypt.compare(password,hashedPassword);
 
-	// if the passwords match, set cookie and redirect to home
+	// if the passwords match, set cookie and return success
 		// TODO should i include more stuff like name here?
 	if (match) {
 		req.session.user = {username};
-		res.redirect('/');
+		res.status(200).json({message:'success'});
 	} else {
-		// show an error
-		// TODO AJAX
+		// we don't want to reveal that it was specifically the password, so error with 'invalid username or password'
+		res.status(400).json({error: 'Invalid username or password.'});
+		return;
 	}
-});
-
-// log the user out
-router.get('/logout', async (req, res) => {
-	// expire the cookie
-	req.session.destroy();
-	// redirect to the homepage
-	res.redirect('/');
 });
 
 module.exports = router;

@@ -11,21 +11,26 @@ const saltRounds = 16;
 
 // render the create user landing page
 router.get('/',(req,res) => {
+	// TODO this should only be allowed if the user is not logged in
+
 	res.render('users/new-landing',{title:"Create an Account"});
 });
 
 // render the create student user page
 router.get('/student',(req,res) => {
+	// TODO this should only be allowed if the user is not logged in
 	res.render('users/new',{title:"Create a Student Account",isTutor:0});
 });
 
 // render the create tutor user page
 router.get('/tutor',(req,res) => {
+	// TODO this should only be allowed if the user is not logged in
 	res.render('users/new',{title:"Create a Tutor Account",isTutor:1});
 });
 
 // post to create user
 router.post('/create',async (req,res) => {
+	// TODO this should only be allowed if the user is not logged in
 	// get inputs from req body, one at a time because of xss
 	let firstName = xss(req.body.firstName);
 	let lastName = xss(req.body.lastName);
@@ -35,8 +40,6 @@ router.post('/create',async (req,res) => {
 	let year = parseInt(xss(req.body.year));
 	let subjects = xss(req.body.subjects);
 	let isTutor = xss(req.body.isTutor);
-
-	console.log({firstName,lastName,email,username,password,year,subjects,isTutor});
 
 	/* error check inputs */
 	// all inputs must exist
@@ -139,15 +142,18 @@ router.post('/create',async (req,res) => {
 		const userByEmail = await userData.getUserByEmail(email);
 		if (userByEmail) {
 			res.status(400).json({error: 'Error in POST /new-user/create: email exists'});
+			return;
 		}
 		const userByUsername = await userData.getUserByUsername(username);
 		if (userByUsername) {
 			res.status(400).json({error: 'Error in POST /new-user/create: username exists'});
+			return;
 		}
 	} catch (e) {
 		// if the error isn't user not found, bubble it
 		if (!`${e}`.includes('not found')) {
 			res.status(400).json({error: e});
+			return;
 		}
 	}
 

@@ -1,7 +1,6 @@
 <!--https://www.w3schools.com/html/html_form_input_types.asp-->
 
 <main>
-<div id="new-user">
 	<form id="new-user-form">
 		<label for="first-name">First Name</label>
 		<input type="text" id="first-name" name="first-name" placeholder="John" required>
@@ -39,11 +38,10 @@
 		<button type="submit">Create Account</button>
 	</form>
 
-	<ul id="new-user-input-errors"></ul>
+	<ul id="new-user-input-errors" class="error"></ul>
 
 	<a href="/new-user">Change User Type</a>
 	<a href="/">Home</a>
-</div>
 </main>
 
 <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>

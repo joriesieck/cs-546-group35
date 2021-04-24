@@ -21,6 +21,14 @@ app.use(session({
 
 // set up middleware
 // TODO
+// logging middleware - JUST FOR TESTING
+app.use(async (req, res, next) => {
+	// log information to the console
+	console.log(`[${new Date().toUTCString()}]: ${req.method} ${req.originalUrl} (${!req.session.user ? 'Non-' : ''}Authenticated User)`);
+
+	// call next middleware
+	next();
+})
 
 app.engine('handlebars', exphbs({defaultLayout: 'main'}));
 app.set('view engine','handlebars');

@@ -184,10 +184,10 @@
 			$.ajax(requestConfig).then(function (res) {
 				// if message = 'success', hide the form and display the success message
 				if (res.message==='success' && res.username) {
-					$('#new-user').hide();
+					newUserForm.hide();
 					var successMsg = $('<p>');
 					successMsg.text(`User ${res.username} created successfully! You are now logged in.`);
-					successMsg.appendTo('main');
+					newUserForm.before(successMsg);
 				}
 			});
 		}
