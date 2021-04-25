@@ -21,11 +21,21 @@
 		var confirmPassword = $('#confirm-password').val();
 		var year = parseInt($('#grad-year').val());
 		var subjects = $('#subjects').val();
-		// 0 = false, 1 = true
+		// 1 = false, 2 = true
 		var isTutor = parseInt($('#is-tutor').val());
 
 		// store all the error strings in an array
 		var errorList = [];
+
+		// check isTutor - must exist and must be 1 or 2
+		try {
+			if (isTutor===undefined || isTutor===null) throw 'Missing';
+			if (typeof isTutor !== 'number' || isNaN(isTutor)) throw 'Invalid type for';
+			if (isTutor!==1 && isTutor!==2) throw 'Invalid value for';
+		} catch (e) {
+			// TODO how to handle this error, since it's not the user's fault?
+			errorList.push(`${e} isTutor.`);
+		}
 
 		// check first and last name - must exist, must be strings, must not be only spaces
 		try {
@@ -115,7 +125,7 @@
 		}
 
 		// check subjects
-		if (isTutor) {
+		if (isTutor===2) {
 			// required field
 			try {
 				// must exist
@@ -161,10 +171,10 @@
 				errorEl.appendTo(errors);
 			});
 		} else {
-			// no errors, so submit ajax request to POST /new-user/create
+			// no errors, so submit ajax request to POST /new-user
 			var requestConfig = {
 				method: 'POST',
-				url: '/new-user/create',
+				url: '/new-user',
 				contentType: 'application/json',
 				data: JSON.stringify({
 					firstName,
@@ -177,14 +187,17 @@
 					isTutor
 				}),
 				error: function(e) {
-					console.log(e);
-					// TODO
+					// TODO - decide what to actually do here
+					var errorMsg = $('<p>');
+					errorMsg.text(e.responseJSON.error);
+					errorMsg.appendTo(errors);
 				}
 			};
 			$.ajax(requestConfig).then(function (res) {
 				// if message = 'success', hide the form and display the success message
 				if (res.message==='success' && res.username) {
 					newUserForm.hide();
+					$('#change-user').hide();
 					var successMsg = $('<p>');
 					successMsg.text(`User ${res.username} created successfully! You are now logged in.`);
 					newUserForm.before(successMsg);

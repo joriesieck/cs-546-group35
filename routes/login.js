@@ -23,7 +23,7 @@ router.get('/student', async (req,res) => {
 		return res.redirect('/profile');
 	}
 
-	res.render('users/login',{title:"Login as Student",isTutor:0});
+	res.render('users/login',{title:"Login as Student",isTutor:1});
 });
 
 // render the login tutor page
@@ -33,22 +33,30 @@ router.get('/tutor', async (req,res) => {
 		return res.redirect('/profile');
 	}
 
-	res.render('users/login',{title:"Login as Tutor",isTutor:1});
+	res.render('users/login',{title:"Login as Tutor",isTutor:2});
 });
 
 // log the user in
-router.post('/do-login', async (req,res) => {
+router.post('/', async (req,res) => {
 	// get the username and password from the request body, one at a time because of xss
 	let username = xss(req.body.username);
 	let password = xss(req.body.password);
+	let isTutor = xss(req.body.isTutor);	// '1' = student, '2' = tutor
 
 	/* error checking - no point in querying database if missing/invalid inputs */
+	// isTutor = '1' means false/student, '2' means true/tutor
+	if (isTutor!=='1' && isTutor!=='2') {
+		res.status(400).json({error: 'Error in POST /login: invalid argument for input "isTutor"'});
+		return;
+	}
+	isTutor = isTutor==='2';	// convert to a boolean
+
 	// make sure username and password exist
 	try {
 		if (username===undefined || username===null) throw 'username';
 		if (password===undefined || password===null) throw 'password';
 	} catch (e) {
-		res.status(400).json({error: `Error in POST /login/do-login: missing input "${e}"`});
+		res.status(400).json({error: `Error in POST /login: missing input "${e}"`});
 		return;
 	}
 	
@@ -57,39 +65,28 @@ router.post('/do-login', async (req,res) => {
 		if (typeof username !== 'string') throw 'username';
 		if (typeof password !== 'string') throw 'password';
 	} catch (e) {
-		res.status(400).json({error: `Error in POST /login/do-login: invalid type for input "${e}"`});
+		res.status(400).json({error: `Error in POST /login: invalid type for input "${e}"`});
 		return;	
 	}
 
-	// trim and check for all whitespace
+	// trim username, convert to lowercase, check for any whitespace (password should not be trimmed)
 	try {
-		username = username.trim();
-		if (username==='') throw 'username';
-		password = password.trim();
-		if (password==='') throw 'password';
+		username = username.trim().toLowerCase();
+		if (username==='') throw 'empty';
+		const usernameRE = /[ 	]/;
+		if (usernameRE.test(username)) throw 'invalid whitespace character in '
 	} catch (e) {
-		res.status(400).json({error: `Error in POST /login/do-login: empty input "${e}"`});
+		res.status(400).json({error: `Error in POST /login: ${e} input "username"`});
 		return;	
 	}
 
-	// make sure username does not contain any whitespace
-	const usernameRE = /[ 	]/;
-	if (usernameRE.test(username)) {
-		res.status(400).json({error:'Username must not contain any whitespace characters.'});
-		return;
-	}
-
-	// get hashedPassword for the user from the database
-	let hashedPassword;
+	// get hashedPassword and userType for the user from the database
+	let hashedPassword, userType;
 	try {
-		({hashedPassword} = await userData.getUserByUsername(username));
-		// const user = userData.getUserByUsername(username);
-		// console.log(user);
-		// return;
-		if (!hashedPassword) {
-			console.log('something went wrong....');
-			return;
-		}
+		({hashedPassword, userType} = await userData.getUserByUsername(username));
+		if (!hashedPassword) throw `No password found for user ${username}.`;	// TODO is this a good message?
+		// if userType doesn't match with isTutor, error
+		if ((isTutor && userType!=='tutor') || (!isTutor && userType!=='student')) throw `No ${isTutor ? 'tutor' : 'student'} found for this username and password. Try logging in as a ${userType} instead.`;
 	} catch (e) {
 		// if the error isn't user not found, bubble it
 		if (!`${e}`.includes('not found')) {
@@ -107,7 +104,7 @@ router.post('/do-login', async (req,res) => {
 	// if the passwords match, set cookie and return success
 		// TODO should i include more stuff like name here?
 	if (match) {
-		req.session.user = {username};
+		req.session.user = {username,isTutor};
 		res.status(200).json({message:'success'});
 	} else {
 		// we don't want to reveal that it was specifically the password, so error with 'invalid username or password'

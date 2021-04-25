@@ -11,26 +11,37 @@ const saltRounds = 16;
 
 // render the create user landing page
 router.get('/',(req,res) => {
-	// TODO this should only be allowed if the user is not logged in
-
+	// if user is already logged in, redirect to their profile
+	if (req.session.user) {
+		return res.redirect('/profile');
+	}
 	res.render('users/new-landing',{title:"Create an Account"});
 });
 
 // render the create student user page
 router.get('/student',(req,res) => {
-	// TODO this should only be allowed if the user is not logged in
-	res.render('users/new',{title:"Create a Student Account",isTutor:0});
+	// if user is already logged in, redirect to their profile
+	if (req.session.user) {
+		return res.redirect('/profile');
+	}
+	res.render('users/new',{title:"Create a Student Account",isTutor:1});
 });
 
 // render the create tutor user page
 router.get('/tutor',(req,res) => {
-	// TODO this should only be allowed if the user is not logged in
-	res.render('users/new',{title:"Create a Tutor Account",isTutor:1});
+	// if user is already logged in, redirect to their profile
+	if (req.session.user) {
+		return res.redirect('/profile');
+	}
+	res.render('users/new',{title:"Create a Tutor Account",isTutor:2});
 });
 
 // post to create user
-router.post('/create',async (req,res) => {
-	// TODO this should only be allowed if the user is not logged in
+router.post('/',async (req,res) => {
+	// if user is already logged in, redirect to their profile
+	if (req.session.user) {
+		return res.redirect('/profile');
+	}
 	// get inputs from req body, one at a time because of xss
 	let firstName = xss(req.body.firstName);
 	let lastName = xss(req.body.lastName);
@@ -39,7 +50,7 @@ router.post('/create',async (req,res) => {
 	let password = xss(req.body.password);
 	let year = parseInt(xss(req.body.year));
 	let subjects = xss(req.body.subjects);
-	let isTutor = xss(req.body.isTutor);
+	let isTutor = xss(req.body.isTutor);	// '1' means student, '2' means student
 
 	/* error check inputs */
 	// all inputs must exist
@@ -53,16 +64,16 @@ router.post('/create',async (req,res) => {
 		if (subjects===undefined || subjects===null) throw 'subjects';
 		if (isTutor===undefined || isTutor===null) throw 'isTutor';
 	} catch (e) {
-		res.status(400).json({error: `Error in POST /new-user/create: missing input "${e}"`});
+		res.status(400).json({error: `Error in POST /new-user: missing input "${e}"`});
 		return;
 	}
 
-	// isTutor = '' means false/student, '1' means true/tutor (because of the way xss parses the data)
-	if (isTutor!=='' && isTutor!=='1') {
-		res.status(400).json({error: 'Error in POST /new-user/create: invalid argument for input "isTutor"'});
+	// isTutor = '1' means false/student, '2' means true/tutor (because of the way xss parses the data)
+	if (isTutor!=='1' && isTutor!=='2') {
+		res.status(400).json({error: 'Error in POST /new-user: invalid argument for input "isTutor"'});
 		return;
 	}
-	isTutor = !!isTutor;	// convert to a boolean
+	isTutor = isTutor==='2';	// convert to a boolean
 
 	// all inputs must be of the correct type - all strings at this point except for year (number) and isTutor (boolean)
 	try {
@@ -75,26 +86,27 @@ router.post('/create',async (req,res) => {
 		if (typeof subjects !== 'string') throw 'subjects';
 		if (typeof isTutor !== 'boolean') throw 'isTutor';
 	} catch (e) {
-		res.status(400).json({error: `Error in POST /new-user/create: invalid type for input "${e}"`});
+		res.status(400).json({error: `Error in POST /new-user: invalid type for input "${e}"`});
 		return;
 	}
 
 	// all inputs except year, isTutor, and subjects if student must not be all whitespace
+	// make email and username all lowercase
 	try {
 		firstName = firstName.trim();
 		if (firstName==='') throw 'firstName';
 		lastName = lastName.trim();
 		if (lastName==='') throw 'lastName';
-		email = email.trim();
+		email = email.trim().toLowerCase();
 		if (email==='') throw 'email';
-		username = username.trim();
+		username = username.trim().toLowerCase();
 		if (username==='') throw 'username';
 		password = password.trim();
 		if (password==='') throw 'password';
 		subjects = subjects.trim();
 		if (isTutor && subjects==='') throw 'subjects';
 	} catch (e) {
-		res.status(400).json({error: `Error in POST /new-user/create: empty (whitespace) input "${e}"`});
+		res.status(400).json({error: `Error in POST /new-user: empty (whitespace) input "${e}"`});
 		return;
 	}
 
@@ -111,7 +123,7 @@ router.post('/create',async (req,res) => {
 		const yearRE = /^\d\d\d\d$/;
 		if (!yearRE.test(year)) throw 'year';
 	} catch (e) {
-		res.status(400).json({error: `Error in POST /new-user/create: invalid format for input "${e}"`});
+		res.status(400).json({error: `Error in POST /new-user: invalid format for input "${e}"`});
 		return;
 	}
 
@@ -129,7 +141,7 @@ router.post('/create',async (req,res) => {
 			subjects = subjects.map((subj) => subj.trim());	// trim strings
 			if (!subjects.every((subj) => subj!=='')) throw 'empty elements';
 		} catch (e) {
-			res.status(400).json({error: `Error in POST /new-user/create: ${e} for "subjects"`});
+			res.status(400).json({error: `Error in POST /new-user: ${e} for "subjects"`});
 			return;
 		}
 	} else {
@@ -139,14 +151,22 @@ router.post('/create',async (req,res) => {
 
 	// username and email cannot already be in the database
 	try {
-		const userByEmail = await userData.getUserByEmail(email);
-		if (userByEmail) {
-			res.status(400).json({error: 'Error in POST /new-user/create: email exists'});
-			return;
-		}
 		const userByUsername = await userData.getUserByUsername(username);
 		if (userByUsername) {
-			res.status(400).json({error: 'Error in POST /new-user/create: username exists'});
+			res.status(400).json({error: 'Error in POST /new-user: username exists'});
+			return;
+		}
+	} catch (e) {
+		// if the error isn't user not found, bubble it
+		if (!`${e}`.includes('not found')) {
+			res.status(400).json({error: e});
+			return;
+		}
+	}
+	try {
+		const userByEmail = await userData.getUserByEmail(email);
+		if (userByEmail) {
+			res.status(400).json({error: 'Error in POST /new-user: email exists'});
 			return;
 		}
 	} catch (e) {
