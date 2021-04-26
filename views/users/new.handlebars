@@ -24,7 +24,7 @@
 		<input type="number" id="grad-year" name="grad-year" placeholder="2021" required>
 
 		<!-- the subject field is required for tutors, but not for students -->
-		{{#if isTutor}}
+		{{#if subjReq}}
 		<label for="subjects">Subjects <p class="input-description">Enter the subjects you are able to tutor, separated by a comma.</p></label>
 		<input type="textarea" id="subjects" name="subjects" placeholder="web programming, web programming II" required>
 		{{else}}

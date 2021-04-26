@@ -40,9 +40,9 @@ const __checkInputs = (inputs, fn) => {
 			// all other cases:
 			if (type!=='array' && type!=='ObjectId' && typeof value !== type) throw `Error in function ${fn}: ${field} is not a ${type}.`;
 
-			// strings must not be all whitespace - except hashedPasswords
+			// strings must not be all whitespace
 			if (type === 'string') {
-				if (field!=='hashedPassword') value = value.trim();	// hashedPasswords can be all whitespace, but they can't be empty
+				if (field!=='hashedPassword') value = value.trim();	// don't trim password
 				if (value === '') throw `Error in function ${fn}: ${field} is all whitespace characters.`;
 				// update trimmed value in inputs
 				inputs[field].value = value;
@@ -54,13 +54,32 @@ const __checkInputs = (inputs, fn) => {
 	}
 
 	// check inputs with individual requirements
+	// first/last name
+	if(inputs.firstName && inputs.firstName.value) {
+		const firstName = inputs.firstName.value;
+		// must be less than or equal to 254 characters
+		if (firstName.length > 254) throw `Error in function ${fn}: firstName cannot be longer than 254 characters.`;
+		// must be alphabet characters, ', -, or space
+		const nameRE = /^([a-zA-Z'\- ]+)$/;
+		if (!nameRE.test(firstName)) throw `Error in function ${fn}: firstName can only contain alphabetical characters, ', -, or space.`;
+	}
+	if(inputs.lastName && inputs.lastName.value) {
+		const lastName = inputs.lastName.value;
+		// must be less than or equal to 254 characters
+		if (lastName.length > 254) throw `Error in function ${fn}: lastName cannot be longer than 254 characters.`;
+		// must be alphabet characters, ', -, or space
+		const nameRE = /^([a-zA-Z'\- ]+)$/;
+		if (!nameRE.test(lastName)) throw `Error in function ${fn}: lastName can only contain alphabetical characters, ', -, or space.`;
+	}
+
 	// email
 	if (inputs.email && inputs.email.value) {
 		const email = inputs.email.value;
+		// must be less than or equal to 254 characters
+		if (email.length > 254) throw `Error in function ${fn}: email cannot be longer than 254 characters.`;
 		// must be in correct email format
 		// regex source: https://www.geeksforgeeks.org/write-regular-expressions/
 		const emailRE = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
-
 		if (!emailRE.test(email)) throw `Error in function ${fn}: email is not in correct format.`;
 		// set email to all lowercase
 		inputVals.email = email.toLowerCase();
@@ -69,9 +88,11 @@ const __checkInputs = (inputs, fn) => {
 	// username
 	if (inputs.username && inputs.username.value) {
 		const username = inputs.username.value;
-		// must not contain any whitespace characters
-		const usernameRE = /[ 	]/;
-		if (usernameRE.test(username)) throw `Error in function ${fn}: username contains whitespace characters`;
+		// must be less than or equal to 254 characters
+		if (username.length > 254) throw `Error in function ${fn}: username cannot be longer than 254 characters.`;
+		// can only contain alphabet characters, numbers, -, _, and .
+		const usernameRE = /^([a-zA-Z0-9\-\_\.]+)$/;
+		if (!usernameRE.test(username)) throw `Error in function ${fn}: username may only contain alphanumeric characters, -, _, and .`;
 		// set username to all lowercase
 		inputVals.username = username.toLowerCase();
 	}

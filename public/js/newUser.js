@@ -37,20 +37,36 @@
 			errorList.push(`${e} isTutor.`);
 		}
 
-		// check first and last name - must exist, must be strings, must not be only spaces
+		// check first and last name
 		try {
+			// must exist
 			if (firstName===undefined || firstName==='') throw 'First Name is required.';
+			// must be a string
 			if (typeof firstName !== 'string') throw 'First Name must be a string.';
+			// must not be only spaces
 			firstName = firstName.trim();
 			if (firstName==='') throw 'First Name must contain at least one non-whitespace character.';
+			// must be <= 254 characters
+			if (firstName.length > 254) throw 'First Name may not contain more than 254 characters.';
+			// must be alphabet characters, ', -, or space
+			const nameRE = /^([a-zA-Z'\- ]+)$/;
+			if (!nameRE.test(firstName)) throw 'First Name may only contain alphabet characters, \' , -, or space.';
 		} catch (e) {
 			errorList.push(e);
 		}
 		try {
+			// must exist
 			if (lastName===undefined || lastName==='') throw 'Last Name is required.';
+			// must be a string
 			if (typeof lastName !== 'string') throw 'Last Name must be a string.';
+			// must not be only spaces
 			lastName = lastName.trim();
 			if (lastName==='') throw 'Last Name must contain at least one non-whitespace character.';
+			// must be <= 254 characters
+			if (lastName.length > 254) throw 'Last Name may not contain more than 254 characters.';
+			// must be alphabet characters, ', -, or space
+			const nameRE = /^([a-zA-Z'\- ]+)$/;
+			if (!nameRE.test(lastName)) throw 'Last Name may only contain alphabet characters, \' , -, or space.';
 		} catch (e) {
 			errorList.push(e);
 		}
@@ -64,6 +80,8 @@
 			// must not be only spaces
 			email = email.trim();
 			if (email==='') throw 'Email must contain at least one non-whitespace character.';
+			// must be <= 254 characters
+			if (email.length > 254) throw 'Email may not contain more than 254 characters.';
 			// must be in correct email format
 			// regex source: https://www.geeksforgeeks.org/write-regular-expressions/
 			const emailRE = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
@@ -81,23 +99,46 @@
 			// must not be only spaces
 			username = username.trim()
 			if (username==='') throw 'Username must contain at least one non-whitespace character.';
-			// must not contain whitespace characters
-			const usernameRE = /[ 	]/;
-			if (usernameRE.test(username)) throw 'Username must not contain any whitespace characters.';
+			// must be <= 254 characters
+			if (username.length > 254) throw 'Username may not contain more than 254 characters.';
+			// can only contain alphabet characters, numbers, -, _, and .
+			const usernameRE = /^([a-zA-Z0-9\-\_\.]+)$/;
+			console.log(username);
+			if (!usernameRE.test(username)) throw 'Username may only contain alphanumeric characters, ., _, or -.';
 		} catch (e) {
 			errorList.push(e);
 		}
 
-		// check password/confirm password - must exist, must be strings
+		// check password/confirm password
 		try {
+			// must exist
 			if (password===undefined || password==='') throw 'Password is required.';
+			// must be a string
 			if (typeof password !== 'string') throw 'Password must be a string.';
+			// must be at least 8 characters
+			if (password.length < 8) throw 'Password must contain at least 8 characters';
+			// must be less than or equal to 254 characters
+			if (password.length > 254) throw 'Password may not contain more than 254 characters.';
+			// must contain at least one letter and one number
+			const passwordNumRE = /[0-9]+/;
+			const passwordAlphRE = /[a-zA-Z]+/;
+			if (!passwordNumRE.test(password) || !passwordAlphRE.test(password)) throw 'Password must contain at least one letter and one number.';
 		} catch (e) {
 			errorList.push(e);
 		}
 		try {
+			// must exist
 			if (confirmPassword===undefined || confirmPassword==='') throw 'Confirm Password is required.';
+			// must be a string
 			if (typeof confirmPassword !== 'string') throw 'Confirm Password must be a string.';
+			// must be at least 8 characters
+			if (confirmPassword.length < 8) throw 'Confirm Password must contain at least 8 characters';
+			// must be less than or equal to 254 characters
+			if (confirmPassword.length > 254) throw 'Confirm Password may not contain more than 254 characters.';
+			// must contain at least one letter and one number
+			const passwordNumRE = /[0-9]+/;
+			const passwordAlphRE = /[a-zA-Z]+/;
+			if (!passwordNumRE.test(confirmPassword) || !passwordAlphRE.test(confirmPassword)) throw 'Confirm Password must contain at least one letter and one number.';
 		} catch (e) {
 			errorList.push(e);
 		}
@@ -159,10 +200,8 @@
 
 		// if there were errors, don't submit and instead print each error as an li
 		if (errorList.length>0) {
-			console.log(errorList);
 			// add each error as an li to errors
 			errorList.forEach((errorStr) => {
-				console.log(errorStr);
 				// create an li element
 				var errorEl = $('<li>');
 				// add the text
@@ -188,6 +227,7 @@
 				}),
 				error: function(e) {
 					// TODO - decide what to actually do here
+					console.log(e);
 					var errorMsg = $('<p>');
 					errorMsg.text(e.responseJSON.error);
 					errorMsg.appendTo(errors);

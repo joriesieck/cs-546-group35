@@ -24,7 +24,7 @@ router.get('/student',(req,res) => {
 	if (req.session.user) {
 		return res.redirect('/profile');
 	}
-	res.render('users/new',{title:"Create a Student Account",isTutor:1});
+	res.render('users/new',{title:"Create a Student Account",isTutor:1,subjReq:false});
 });
 
 // render the create tutor user page
@@ -33,7 +33,7 @@ router.get('/tutor',(req,res) => {
 	if (req.session.user) {
 		return res.redirect('/profile');
 	}
-	res.render('users/new',{title:"Create a Tutor Account",isTutor:2});
+	res.render('users/new',{title:"Create a Tutor Account",isTutor:2,subjReq:true});
 });
 
 // post to create user
@@ -110,20 +110,76 @@ router.post('/',async (req,res) => {
 		return;
 	}
 
-	// format - email, username, year
+	// first and last name
 	try {
-		// email must be in correct email format (regex source: https://www.geeksforgeeks.org/write-regular-expressions/)
-		const emailRE = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
-		if (!emailRE.test(email)) throw 'email';
-		// username must not contain whitespace characters
-		const usernameRE = /[ 	]/;
-		if (usernameRE.test(username)) throw 'username';
-		// year must be >= 0 and of the form YYYY
-		if (year < 0) throw 'year';
-		const yearRE = /^\d\d\d\d$/;
-		if (!yearRE.test(year)) throw 'year';
+		// must be <= 254 characters
+		if (firstName.length > 254) throw 'more than 254 characters';
+		// must be alphabet characters, ', -, or space
+		const nameRE = /^([a-zA-Z'\- ]+)$/;
+		if (!nameRE.test(firstName)) throw 'invalid characters'
 	} catch (e) {
-		res.status(400).json({error: `Error in POST /new-user: invalid format for input "${e}"`});
+		res.status(400).json({error: `Error in POST /new-user: ${e} for input "firstName"`});
+		return;
+	}
+	try {
+		// must be <= 254 characters
+		if (lastName.length > 254) throw 'more than 254 characters';
+		// must be alphabet characters, ', -, or space
+		const nameRE = /^([a-zA-Z'\- ]+)$/;
+		if (!nameRE.test(lastName)) throw 'invalid characters'
+	} catch (e) {
+		res.status(400).json({error: `Error in POST /new-user: ${e} for input "lastName"`});
+		return;
+	}
+	
+	// email
+	try {
+		// must be less than or equal to 254 characters
+		if (email.length > 254) throw 'more than 254 characters';
+		// must be in correct email format
+		// regex source: https://www.geeksforgeeks.org/write-regular-expressions/
+		const emailRE = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
+		if (!emailRE.test(email)) throw 'invalid format';	
+	} catch (e) {
+		res.status(400).json({error: `Error in POST /new-user: ${e} for input "email"`});
+		return;
+	}
+	
+	// username
+	try {
+		// must be less than or equal to 254 characters
+		if (username.length > 254) throw 'more than 254 characters';
+		// can only contain alphabet characters, numbers, -, _, and .
+		const usernameRE = /^([a-zA-Z0-9\-\_\.]+)$/;
+		if (!usernameRE.test(username)) throw 'invalid characters';
+	} catch (e) {
+		res.status(400).json({error: `Error in POST /new-user: ${e} for input "username"`});
+		return;
+	}
+	
+	// password
+	try {
+		// must be at least 8 characters
+		if (password.length < 8) throw 'less than 8 characters';
+		// must be less than or equal to 254 characters
+		if (password.length > 254) throw 'more than 254 characters';
+		// must contain at least one letter and one number
+		const passwordNumRE = /[0-9]+/;
+		const passwordAlphRE = /[a-zA-Z]+/;
+		if (!passwordNumRE.test(password) || !passwordAlphRE.test(password)) throw 'missing required characters';
+	} catch (e) {
+		res.status(400).json({error: `Error in POST /new-user: ${e} for input "password"`});
+		return;
+	}
+
+	// year
+	try {
+		// year must be >= 0 and of the form YYYY
+		if (year < 0) throw 'invalid year';
+		const yearRE = /^\d\d\d\d$/;
+		if (!yearRE.test(year)) throw 'invalid format';
+	} catch (e) {
+		res.status(400).json({error: `Error in POST /new-user: ${e} for input "year"`});
 		return;
 	}
 
@@ -159,7 +215,7 @@ router.post('/',async (req,res) => {
 	} catch (e) {
 		// if the error isn't user not found, bubble it
 		if (!`${e}`.includes('not found')) {
-			res.status(400).json({error: e});
+			res.status(400).json({error: e,location:162});
 			return;
 		}
 	}
@@ -172,7 +228,7 @@ router.post('/',async (req,res) => {
 	} catch (e) {
 		// if the error isn't user not found, bubble it
 		if (!`${e}`.includes('not found')) {
-			res.status(400).json({error: e});
+			res.status(400).json({error: e,location:175});
 			return;
 		}
 	}
@@ -181,7 +237,7 @@ router.post('/',async (req,res) => {
 	bcrypt.hash(password,saltRounds, async (err,hash) => {
 		if (err) {
 			// just bubble the error
-			res.status(400).json({error: err});
+			res.status(400).json({error: err,location:184});
 			return;
 		}
 		
@@ -205,7 +261,7 @@ router.post('/',async (req,res) => {
 			}
 		} catch (e) {
 			// just bubble the error
-			res.status(400).json({error: e});
+			res.status(400).json({error: e,location:208});
 			return;
 		}
 	});
@@ -213,10 +269,10 @@ router.post('/',async (req,res) => {
 
 // just for testing purposes - render the testing creation page
 router.get('/student-test',(req,res) => {
-	res.render('dummy/test-new',{title: "Create an Account", isTutor:0});
+	res.render('dummy/test-new',{title: "Create an Account", isTutor:1});
 });
 router.get('/tutor-test',(req,res) => {
-	res.render('dummy/test-new',{title: "Create an Account", isTutor:1});
+	res.render('dummy/test-new',{title: "Create an Account", isTutor:2});
 });
 
 module.exports = router;
