@@ -202,7 +202,7 @@ const createUser = async (userInfo) => {
 	const numInputs = Object.keys(userInfo).length;
 	if (numInputs < 8) throw `Error in function createUser: ${numInputs} inputs provided, expected 8.`;
 
-	const { firstName, lastName, email, username, hashedPassword, year, relevantSubjects, profilePic, isTutor } =  __checkInputs({
+	const { firstName, lastName, email, username, hashedPassword, year, relevantSubjects, isTutor } =  __checkInputs({
 		firstName: {value:userInfo.firstName, type:'string', required:true},
 		lastName: {value:userInfo.lastName, type:'string', required:true},
 		email: {value:userInfo.email, type:'string', required:true},
@@ -210,7 +210,6 @@ const createUser = async (userInfo) => {
 		hashedPassword: {value:userInfo.hashedPassword, type:'string', required:true},
 		year: {value:userInfo.year, type:'number', required:true},
 		relevantSubjects: {value:userInfo.relevantSubjects, type:'array', required:true},
-		profilePic: {value:userInfo.profilePic, type:'string', required:false},
 		isTutor: {value:userInfo.isTutor, type:'boolean', required:true}
 	},
 	'createUser');
@@ -247,7 +246,7 @@ const createUser = async (userInfo) => {
 		userType: isTutor ? "tutor" : "student",
 		year,
 		relevantSubjects,
-		profilePic,
+		profilePic:'',
 		questionIDs: [],
 		tutorList: [],
 		ratings: isTutor ? {

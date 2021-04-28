@@ -56,7 +56,6 @@ const main = async () => {
 			hashedPassword: genHP("user1sverysecurepassword"),
 			year: 2022,
 			relevantSubjects: [],
-			profilePic: "public/images/jorie.png",
 			isTutor: false
 		});
 		console.log(user1);
@@ -965,26 +964,6 @@ const main = async () => {
 	} catch (e) {
 		console.log(`52: ${e}`);
 	}
-
-	// 53 - invalid profilePic path
-	cuTotalTests++;
-	try {
-		let user = await users.createUser({
-			firstName: "Jorie",
-			lastName: "Sieck",
-			email: "jsieck@stevens.edu",
-			username: "jorie",
-			hashedPassword: genHP("user1sverysecurepassword"),
-			year: 2022,
-			relevantSubjects: [],
-			profilePic: "images/jorie.png",
-			isTutor: false
-		});
-		cuFailedTests.push(user);
-	} catch (e) {
-		console.log(`53: ${e}`);
-	}
-
 
 	/* get user by id */
 	console.log("\ngetUserById:")
