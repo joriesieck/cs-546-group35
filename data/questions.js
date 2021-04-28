@@ -141,12 +141,10 @@ async function deleteQuestion(id) {
     return true;
 }
 
-
-
 module.exports = {
     createQuestion,
     getQuestions,
     getQuestionById,
     updateQuestion,
-    deleteQuesiton
+    deleteQuestion
 };
