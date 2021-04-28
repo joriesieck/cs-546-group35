@@ -148,5 +148,5 @@ module.exports = {
     getQuestions,
     getQuestionById,
     updateQuestion,
-    deleteQuesiton
+    deleteQuestion
 };

@@ -1,4 +1,4 @@
-// import bcrypt - REMOVE IF NO RAW PASSWORDS ALLOWED IN CODE
+// import bcrypt
 const bcrypt = require('bcryptjs');
 // import connection and data
 const dbConnection = require('../config/mongoConnection');
@@ -7,8 +7,8 @@ const users = data.users;
 const { ObjectId } = require('mongodb');
 
 /**
-	 * generate hashedPasswords for seed users - REMOVE IF NO RAW PASSWORDS ALLOWED IN CODE
-	 * also this uses the sync method only bc it's simpler + i'm just testing, but will need to figure out a better way for the actual seed file
+	 * generate hashedPasswords for seed users - 
+	 * this uses the sync method only bc it's simpler + i'm just testing, but will need to figure out a better way for the actual seed file
 	 * also it only uses 1 salt round bc i got tired of waiting
 */
 const genHP = (plainTextPW) => {
@@ -39,6 +39,8 @@ const main = async () => {
 	uuFailedTests = [];
 	grTotalTests = 0;	// get related users
 	grFailedTests = [];
+	ruTotalTests = 0;	// remove user from tutorList
+	ruFailedTests = [];
 
 	/* create user */
 	console.log("createUser:")
@@ -54,6 +56,7 @@ const main = async () => {
 			hashedPassword: genHP("user1sverysecurepassword"),
 			year: 2022,
 			relevantSubjects: [],
+			profilePic: "public/images/jorie.png",
 			isTutor: false
 		});
 		console.log(user1);
@@ -963,6 +966,25 @@ const main = async () => {
 		console.log(`52: ${e}`);
 	}
 
+	// 53 - invalid profilePic path
+	cuTotalTests++;
+	try {
+		let user = await users.createUser({
+			firstName: "Jorie",
+			lastName: "Sieck",
+			email: "jsieck@stevens.edu",
+			username: "jorie",
+			hashedPassword: genHP("user1sverysecurepassword"),
+			year: 2022,
+			relevantSubjects: [],
+			profilePic: "images/jorie.png",
+			isTutor: false
+		});
+		cuFailedTests.push(user);
+	} catch (e) {
+		console.log(`53: ${e}`);
+	}
+
 
 	/* get user by id */
 	console.log("\ngetUserById:")
@@ -1583,6 +1605,46 @@ const main = async () => {
 	} catch (e) {
 		console.log(`41: ${e}`);
 	}
+	// 42 - successfully update a user's profile picture
+	uuTotalTests++;
+	try {
+		const user = await users.updateUser({id:user2._id, profilePic:"public/images/corinne.jpg"});
+		console.log(user);
+	} catch (e) {
+		uuFailedTests.push(`42: ${e}`);
+	}
+	// 43 - profilePic provided but wrong type
+	uuTotalTests++;
+	try {
+		const user = await users.updateUser({id:user1._id,profilePic:["public/images/corinne.jpg"]});
+		uuFailedTests.push(user);
+	} catch (e) {
+		console.log(`43: ${e}`);
+	}
+	// 44 - profilePic provided but undefined
+	uuTotalTests++;
+	try {
+		const user = await users.updateUser({id:user1._id,profilePic:undefined});
+		uuFailedTests.push(user);
+	} catch (e) {
+		console.log(`44: ${e}`);
+	}
+	// 45 - profilePic provided but empty string
+	uuTotalTests++;
+	try {
+		const user = await users.updateUser({id:user1._id,profilePic:"        "});
+		uuFailedTests.push(user);
+	} catch (e) {
+		console.log(`45: ${e}`);
+	}
+	// 46 - profilePic provided but wrong format
+	uuTotalTests++;
+	try {
+		const user = await users.updateUser({id:user1._id,profilePic:"public/images/corinne.gif"});
+		uuFailedTests.push(user);
+	} catch (e) {
+		console.log(`46: ${e}`);
+	}
 
 	/* get related users */
 	console.log("\ngetRelatedUsers:")
@@ -1643,6 +1705,73 @@ const main = async () => {
 		console.log(`6: ${e}`);
 	}
 
+	/* remove user from tutorList */
+	console.log('\nremoveUserFromTutorList:');
+	// 0 - successfully update user's tutorList
+	ruTotalTests++;
+	try {
+		const message = await users.removeUserFromTutorList(user1._id,user2._id);
+		console.log(message);
+	} catch (e) {
+		ruFailedTests.push(`0: ${e}`);
+	}
+	ruTotalTests++;
+	try {
+		const user = await users.removeUserFromTutorList();
+		ruFailedTests.push(user);
+	} catch (e) {
+		console.log(`1: ${e}`);
+	}
+	// 2 - id undefined
+	ruTotalTests++;
+	try {
+		const user = await users.removeUserFromTutorList(undefined,user2._id);
+		ruFailedTests.push(user);
+	} catch (e) {
+		console.log(`2: ${e}`);
+	}
+	// 3 - id null
+	ruTotalTests++;
+	try {
+		const user = await users.removeUserFromTutorList(user2._id,null);
+		ruFailedTests.push(user);
+	} catch (e) {
+		console.log(`3: ${e}`);
+	}
+	// 4 - wrong type
+	ruTotalTests++;
+	try {
+		const user = await users.removeUserFromTutorList('thisisanid',user1._id);
+		ruFailedTests.push(user);
+	} catch (e) {
+		console.log(`4: ${e}`);
+	}
+	// 5 - invalid ObjectId
+	ruTotalTests++;
+	try {
+		const user = await users.removeUserFromTutorList(user1._id,123456789);
+		ruFailedTests.push(user);
+	} catch (e) {
+		console.log(`5: ${e}`);
+	}
+	// 6 - user not found
+	ruTotalTests++;
+	try {
+		const user = await users.removeUserFromTutorList(ObjectId(),user2._id);
+		ruFailedTests.push(user);
+	} catch (e) {
+		console.log(`6: ${e}`);
+	}
+	// 7 - user's tutorList is empty
+	ruTotalTests++;
+	try {
+		const message = await users.removeUserFromTutorList(user2._id, user1._id);
+		ruFailedTests.push(`7: ${message}`);
+	} catch (e) {
+		console.log(`7: ${e}`);
+	}
+
+
 	// display total number of tests + any failed tests
 	console.log('\nResults:')
 	console.log(`createUser tests: ${cuTotalTests}, failed: ${cuFailedTests.length}`);
@@ -1659,6 +1788,8 @@ const main = async () => {
 	uuFailedTests.forEach((test) => console.log(test));
 	console.log(`\ngetRelatedUsers tests: ${grTotalTests}, failed: ${grFailedTests.length}`);
 	grFailedTests.forEach((test) => console.log(test));
+	console.log(`\nremoveUserFromTutorList tests: ${ruTotalTests}, failed: ${ruFailedTests.length}`);
+	ruFailedTests.forEach((test) => console.log(test));
 
 	console.log('\nDone seeding database');
 	await db.serverConfig.close();

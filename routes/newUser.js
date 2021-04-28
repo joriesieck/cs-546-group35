@@ -15,7 +15,7 @@ router.get('/',(req,res) => {
 	if (req.session.user) {
 		return res.redirect('/profile');
 	}
-	res.render('users/new-landing',{title:"Create an Account"});
+	res.render('users/new-landing',{title:"Create an Account", loggedIn: false});
 });
 
 // render the create student user page
@@ -24,7 +24,7 @@ router.get('/student',(req,res) => {
 	if (req.session.user) {
 		return res.redirect('/profile');
 	}
-	res.render('users/new',{title:"Create a Student Account",isTutor:1,subjReq:false});
+	res.render('users/new',{title:"Create a Student Account",isTutor:1,subjReq:false, loggedIn: false});
 });
 
 // render the create tutor user page
@@ -33,7 +33,7 @@ router.get('/tutor',(req,res) => {
 	if (req.session.user) {
 		return res.redirect('/profile');
 	}
-	res.render('users/new',{title:"Create a Tutor Account",isTutor:2,subjReq:true});
+	res.render('users/new',{title:"Create a Tutor Account",isTutor:2,subjReq:true, loggedIn: false});
 });
 
 // post to create user
@@ -215,7 +215,7 @@ router.post('/',async (req,res) => {
 	} catch (e) {
 		// if the error isn't user not found, bubble it
 		if (!`${e}`.includes('not found')) {
-			res.status(400).json({error: e,location:162});
+			res.status(400).json({error: e});
 			return;
 		}
 	}
@@ -228,7 +228,7 @@ router.post('/',async (req,res) => {
 	} catch (e) {
 		// if the error isn't user not found, bubble it
 		if (!`${e}`.includes('not found')) {
-			res.status(400).json({error: e,location:175});
+			res.status(400).json({error: e});
 			return;
 		}
 	}
@@ -237,7 +237,7 @@ router.post('/',async (req,res) => {
 	bcrypt.hash(password,saltRounds, async (err,hash) => {
 		if (err) {
 			// just bubble the error
-			res.status(400).json({error: err,location:184});
+			res.status(400).json({error: err});
 			return;
 		}
 		
@@ -256,12 +256,13 @@ router.post('/',async (req,res) => {
 			// if user was successfully created, log them in and send their username back to the client
 			if (user) {
 				req.session.user = {username};
-				res.status(201).json({message:'success',username});
-				return;
+				res.status(201).json({message:'success'});
+				// redirect to home
+				// res.redirect('/');
 			}
 		} catch (e) {
 			// just bubble the error
-			res.status(400).json({error: e,location:208});
+			res.status(400).json({error: e});
 			return;
 		}
 	});

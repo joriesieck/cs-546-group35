@@ -11,17 +11,21 @@ const constructorMethod = (app) => {
 		// expire the cookie
 		req.session.destroy();
 		// display the logout message
-		res.render('users/logout-message',{title: "Logged Out"});
+		res.render('users/logout-message',{title: "Logged Out", loggedIn: false});
 	});
 
 	/* dummy routes */
 	// dummy profile page
 	app.use('/profile', (req, res) => {
-		res.render('dummy/profile', {title: "Dummy Profile"});
+		res.render('dummy/profile', {title: "Dummy Profile", loggedIn: true});	// render the appropriate nav bar, based on whether the user is logged in
 	});
 	// dummy homepage (which catches all other routes for now)
 	app.use('/',(req,res) => {
-		res.render('dummy/home',{title: "Dummy Home"});
+		res.render('dummy/home',{
+			title: "Dummy Home",
+			loggedIn: !!req.session.user
+			// partial: req.session.user ? 'logged-in' : 'logged-out'	// render the appropriate nav bar, based on whether the user is logged in
+		});
 	});
 }
 

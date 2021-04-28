@@ -124,6 +124,14 @@ const __checkInputs = (inputs, fn) => {
 		});
 	}
 
+	// profilePic
+	if (inputs.profilePic && inputs.profilePic.value) {
+		let profilePic = inputs.profilePic.value;
+		// must start with public/images and end in .jpg or .jpeg or .png
+		const pfpRE = /^public\/images\/.*\.(jpg|jpeg|png)$/;
+		if (!pfpRE.test(profilePic)) throw `Error in function ${fn}: profilePic must be in the public/images directory and must be a png or jpg/jpeg.`;
+	}
+
 	// userType (different from isTutor - this refers to the value that actually gets stored in the database)
 	if (inputs.userType && inputs.userType.value) {
 		let userType = inputs.userType.value;
@@ -194,7 +202,7 @@ const createUser = async (userInfo) => {
 	const numInputs = Object.keys(userInfo).length;
 	if (numInputs < 8) throw `Error in function createUser: ${numInputs} inputs provided, expected 8.`;
 
-	const { firstName, lastName, email, username, hashedPassword, year, relevantSubjects, isTutor } =  __checkInputs({
+	const { firstName, lastName, email, username, hashedPassword, year, relevantSubjects, profilePic, isTutor } =  __checkInputs({
 		firstName: {value:userInfo.firstName, type:'string', required:true},
 		lastName: {value:userInfo.lastName, type:'string', required:true},
 		email: {value:userInfo.email, type:'string', required:true},
@@ -202,6 +210,7 @@ const createUser = async (userInfo) => {
 		hashedPassword: {value:userInfo.hashedPassword, type:'string', required:true},
 		year: {value:userInfo.year, type:'number', required:true},
 		relevantSubjects: {value:userInfo.relevantSubjects, type:'array', required:true},
+		profilePic: {value:userInfo.profilePic, type:'string', required:false},
 		isTutor: {value:userInfo.isTutor, type:'boolean', required:true}
 	},
 	'createUser');
@@ -238,6 +247,7 @@ const createUser = async (userInfo) => {
 		userType: isTutor ? "tutor" : "student",
 		year,
 		relevantSubjects,
+		profilePic,
 		questionIDs: [],
 		tutorList: [],
 		ratings: isTutor ? {
@@ -377,6 +387,7 @@ const getRelatedUsers = async (id) => {
 		hashedPassword: {value:userInfo.hashedPassword, type:'string', required:false},
 		year: {value:userInfo.year, type:'number', required:false},
 		relevantSubjects: {value:userInfo.relevantSubjects, type:'array', required:false},
+		profilePic: {value:userInfo.profilePic, type:'string', required:false},
 		userType: {value:userInfo.userType, type:'string', required:false},
 		tutorList: {value:userInfo.tutorList, type:'array', required:false},
 		questionIDs: {value:userInfo.questionIDs, type:'array', required:false},
@@ -446,7 +457,7 @@ const getRelatedUsers = async (id) => {
  */
  const deleteUser = async (id) => {
 	// check id - existence and type
-	 __checkInputs({id: {value:id, type:'ObjectId', required:true}},
+	__checkInputs({id: {value:id, type:'ObjectId', required:true}},
 	'deleteUser');
 
 	// get the collection
@@ -460,7 +471,29 @@ const getRelatedUsers = async (id) => {
 	return `${deleteInfo.value.username} has been successfully deleted.`;
 }
 
+/**
+ * removeUserFromTutorList
+ * @param userToRemove: the id of the person to be removed
+ * @param userRemoveFrom: the id of the person whose tutorList userToRemove should be removed from
+ * @returns a successfully removed message
+ */
+const removeUserFromTutorList = async (userToRemove, userRemoveFrom) => {
+	// check userToRemove and userRemoveFrom existence and type
+	__checkInputs({userToRemove: {value:userToRemove, type:'ObjectId', required:true}, userRemoveFrom: {value:userRemoveFrom, type:'ObjectId', required:true}},
+	'removeUserFromTutorList');
+
+	// get the collection
+	const userCollection = await users();
+
+	// pull userToRemove from userRemoveFrom's tutorList array
+	const updateInfo = await userCollection.updateOne({_id:userRemoveFrom}, {$pull: {tutorList: userToRemove}});
+	if (updateInfo.modifiedCount<=0) throw `Error in function removeUserFromTutorList: could not update user ${userRemoveFrom}.`;
+
+	// return a success message
+	return `User ${userToRemove} has been successfully removed from ${userRemoveFrom}'s tutorList.`;
+}
+
 
 module.exports = {
-	createUser, getUserById, getUserByEmail, getUserByUsername, getRelatedUsers, updateUser, deleteUser
+	createUser, getUserById, getUserByEmail, getUserByUsername, getRelatedUsers, updateUser, deleteUser, removeUserFromTutorList
 }

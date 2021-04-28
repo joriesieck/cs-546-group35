@@ -13,7 +13,7 @@ router.get('/', async (req,res) => {
 		return res.redirect('/profile');
 	}
 
-	res.render('users/login-landing',{title:"Log In"});
+	res.render('users/login-landing',{title:"Log In", loggedIn: false});
 });
 
 // render the login student page
@@ -23,7 +23,7 @@ router.get('/student', async (req,res) => {
 		return res.redirect('/profile');
 	}
 
-	res.render('users/login',{title:"Login as Student",isTutor:1});
+	res.render('users/login',{title:"Login as Student",isTutor:1, loggedIn: false});
 });
 
 // render the login tutor page
@@ -33,7 +33,7 @@ router.get('/tutor', async (req,res) => {
 		return res.redirect('/profile');
 	}
 
-	res.render('users/login',{title:"Login as Tutor",isTutor:2});
+	res.render('users/login',{title:"Login as Tutor",isTutor:2, loggedIn: false});
 });
 
 // log the user in
@@ -106,6 +106,9 @@ router.post('/', async (req,res) => {
 	if (match) {
 		req.session.user = {username,isTutor};
 		res.status(200).json({message:'success'});
+		// res.render('users/login',{title:"Logged In", loggedIn: true, json: {message: 'success'}});
+		// redirect to home
+		// return res.redirect('/');
 	} else {
 		// we don't want to reveal that it was specifically the password, so error with 'invalid username or password'
 		res.status(400).json({error: 'Invalid username or password.'});

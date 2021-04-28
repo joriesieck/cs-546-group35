@@ -234,13 +234,10 @@
 				}
 			};
 			$.ajax(requestConfig).then(function (res) {
-				// if message = 'success', hide the form and display the success message
-				if (res.message==='success' && res.username) {
-					newUserForm.hide();
-					$('#change-user').hide();
-					var successMsg = $('<p>');
-					successMsg.text(`User ${res.username} created successfully! You are now logged in.`);
-					newUserForm.before(successMsg);
+				// if message = 'success', redirect to home
+				if (res.message==='success') {
+					// redirect to home
+					location.href = '/';
 				}
 			});
 		}

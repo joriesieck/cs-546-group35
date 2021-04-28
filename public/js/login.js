@@ -73,14 +73,10 @@
 				}
 			};
 			$.ajax(requestConfig).then(function (res) {
-				// if message = 'success', hide the form and display the success message
+				// if message = 'success', redirect to home
 				if (res.message==='success') {
-					loginForm.hide();
-					$('#change-user').hide();
-					$('#login-error').hide();
-					var successMsg = $('<p>');
-					successMsg.text(`You are now logged in.`);
-					loginForm.before(successMsg);
+					// redirect to home
+					location.href = '/';
 				}
 			})
 		}
