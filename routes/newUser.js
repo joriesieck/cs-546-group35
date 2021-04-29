@@ -215,7 +215,7 @@ router.post('/',async (req,res) => {
 	} catch (e) {
 		// if the error isn't user not found, bubble it
 		if (!`${e}`.includes('not found')) {
-			res.status(400).json({error: e});
+			res.status(400).json({error: e, location: 218});
 			return;
 		}
 	}
@@ -228,7 +228,7 @@ router.post('/',async (req,res) => {
 	} catch (e) {
 		// if the error isn't user not found, bubble it
 		if (!`${e}`.includes('not found')) {
-			res.status(400).json({error: e});
+			res.status(400).json({error: e, location: 231});
 			return;
 		}
 	}
@@ -237,7 +237,7 @@ router.post('/',async (req,res) => {
 	bcrypt.hash(password,saltRounds, async (err,hash) => {
 		if (err) {
 			// just bubble the error
-			res.status(400).json({error: err});
+			res.status(400).json({error: err, location: 240});
 			return;
 		}
 		
@@ -262,7 +262,7 @@ router.post('/',async (req,res) => {
 			}
 		} catch (e) {
 			// just bubble the error
-			res.status(400).json({error: e});
+			res.status(400).json({error: e, location: 265});
 			return;
 		}
 	});

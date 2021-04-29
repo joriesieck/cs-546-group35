@@ -3,7 +3,7 @@ const users = require('../config/mongoCollections').users;
 const { ObjectId } = require('mongodb');
 
 /**
- * __checkInputs
+ * checkInputs
  * @param inputs: an object of the form {field: {value,type,required}}
  * @param fn: the name of the calling function
  * @returns an object with all the trimmed strings, or an error if there were input errors
@@ -202,7 +202,7 @@ const createUser = async (userInfo) => {
 	const numInputs = Object.keys(userInfo).length;
 	if (numInputs < 8) throw `Error in function createUser: ${numInputs} inputs provided, expected 8.`;
 
-	const { firstName, lastName, email, username, hashedPassword, year, relevantSubjects, isTutor } =  __checkInputs({
+	const { firstName, lastName, email, username, hashedPassword, year, relevantSubjects, isTutor } =  checkInputs({
 		firstName: {value:userInfo.firstName, type:'string', required:true},
 		lastName: {value:userInfo.lastName, type:'string', required:true},
 		email: {value:userInfo.email, type:'string', required:true},
@@ -274,7 +274,7 @@ const createUser = async (userInfo) => {
  */
  const getUserById = async (id) => {
 	// check id - existence and type
-	 __checkInputs({id: {value:id, type:'ObjectId', required:true}},
+	 checkInputs({id: {value:id, type:'ObjectId', required:true}},
 	'getUserById');
 
 	// get the collection
@@ -295,7 +295,7 @@ const createUser = async (userInfo) => {
  */
  const getUserByEmail = async (email) => {
 	// check email - existence, type, and format
-	 __checkInputs({email: {value:email, type:'string', required:true}},
+	 checkInputs({email: {value:email, type:'string', required:true}},
 	'getUserByEmail');
 
 	// get the collection
@@ -316,7 +316,7 @@ const createUser = async (userInfo) => {
  */
 const getUserByUsername = async (username) => {
 	// check username - existence, type, and format
-	 __checkInputs({username: {value:username, type:'string', required:true}},
+	({username} = checkInputs({username: {value:username, type:'string', required:true}}),
 	'getUserByUsername');
 
 	// get the collection
@@ -337,7 +337,7 @@ const getUserByUsername = async (username) => {
  */
 const getRelatedUsers = async (id) => {
 	// check id - existence and type
-	 __checkInputs({id: {value:id, type:'ObjectId', required:true}},
+	 checkInputs({id: {value:id, type:'ObjectId', required:true}},
 	'getRelatedUsers');
 
 	// get the user data - throws if no user exists
@@ -377,7 +377,7 @@ const getRelatedUsers = async (id) => {
 	const numInputs = Object.keys(userInfo).length;
 	if (numInputs < 2) throw `Error in function updateUser: ${numInputs} inputs provided, expected at least 2.`;
 
-	userInfo =  __checkInputs({
+	userInfo =  checkInputs({
 		id: {value:userInfo.id, type:'ObjectId', required:true},
 		firstName: {value:userInfo.firstName, type:'string', required:false},
 		lastName: {value:userInfo.lastName, type:'string', required:false},
@@ -456,7 +456,7 @@ const getRelatedUsers = async (id) => {
  */
  const deleteUser = async (id) => {
 	// check id - existence and type
-	__checkInputs({id: {value:id, type:'ObjectId', required:true}},
+	checkInputs({id: {value:id, type:'ObjectId', required:true}},
 	'deleteUser');
 
 	// get the collection
@@ -478,7 +478,7 @@ const getRelatedUsers = async (id) => {
  */
 const removeUserFromTutorList = async (userToRemove, userRemoveFrom) => {
 	// check userToRemove and userRemoveFrom existence and type
-	__checkInputs({userToRemove: {value:userToRemove, type:'ObjectId', required:true}, userRemoveFrom: {value:userRemoveFrom, type:'ObjectId', required:true}},
+	checkInputs({userToRemove: {value:userToRemove, type:'ObjectId', required:true}, userRemoveFrom: {value:userRemoveFrom, type:'ObjectId', required:true}},
 	'removeUserFromTutorList');
 
 	// get the collection
