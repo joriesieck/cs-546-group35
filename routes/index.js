@@ -3,12 +3,13 @@ const loginRoutes = require('./login');
 const newUserRoutes = require('./newUser');
 const path = require("path");
 const questionsRoutes = require('./questions-forum');
-const profileRoutes = require('/profile');
+const profileRoutes = require('./profile');
 
 const constructorMethod = (app) => {
 	// user routes
 	app.get('/',(req,res) => {
 		res.render('home/home',{title: "Stress-Less Tutoring"});
+	});
 	app.use('/login', loginRoutes);
 	app.use('/new-user', newUserRoutes);
 	// log the user out
