@@ -8,7 +8,7 @@ const { ObjectId } = require('mongodb');
  * @param fn: the name of the calling function
  * @returns an object with all the trimmed strings, or an error if there were input errors
  */
-const __checkInputs = (inputs, fn) => {
+const checkInputs = (inputs, fn) => {
 	// the object to hold the values for each input
 	const inputVals = {};
 
@@ -441,5 +441,5 @@ const getRelatedUsers = async (id) => {
 
 
 module.exports = {
-	createUser, getUserById, getUserByEmail, getUserByUsername, getRelatedUsers, updateUser, deleteUser
+	checkInputs, createUser, getUserById, getUserByEmail, getUserByUsername, getRelatedUsers, updateUser, deleteUser
 }

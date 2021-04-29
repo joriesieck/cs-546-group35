@@ -3,6 +3,7 @@ const loginRoutes = require('./login');
 const newUserRoutes = require('./newUser');
 const path = require("path");
 const questionsRoutes = require('./questions-forum');
+const profileRoutes = require('/profile');
 
 const constructorMethod = (app) => {
 	// user routes
@@ -17,16 +18,16 @@ const constructorMethod = (app) => {
 		// display the logout message
 		res.render('users/logout-message',{title: "Logged Out"});
 	});
+	app.use('/profile', profileRoutes);
+	app.use('/',(req,res) => {
+		res.render('dummy/home',{title: "Dummy Home"});
+	});
 	app.use("/questions-forum", questionsRoutes);
 	/* dummy routes */
 	// dummy profile page
-	app.use('/profile', (req, res) => {
-		res.render('dummy/profile', {title: "Dummy Profile"});
-	});
 	app.use('*', (req, res) => {
         res.status(404).sendFile(path.resolve("static/error.html"));
     });
-
 }
 
 module.exports = constructorMethod;
