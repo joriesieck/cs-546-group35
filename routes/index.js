@@ -6,7 +6,7 @@ const constructorMethod = (app) => {
 		res.render('home/home',{title: "Stress-Less Tutoring"});
 	});
 
-	//app.use('/questions-forum', questionsRoutes);
+	app.use("/questions-forum", questionsRoutes);
 
     app.use('*', (req, res) => {
         res.status(404).sendFile(path.resolve("static/error.html"));
