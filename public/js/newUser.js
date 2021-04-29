@@ -209,6 +209,7 @@
 				// append the child to errors
 				errorEl.appendTo(errors);
 			});
+			errors.show();
 		} else {
 			// no errors, so submit ajax request to POST /new-user
 			var requestConfig = {
@@ -231,6 +232,7 @@
 					var errorMsg = $('<p>');
 					errorMsg.text(e.responseJSON.error);
 					errorMsg.appendTo(errors);
+					errors.show();
 				}
 			};
 			$.ajax(requestConfig).then(function (res) {

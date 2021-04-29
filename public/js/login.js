@@ -70,6 +70,7 @@
 					// TODO - decide what to actually do here
 					var errorMsg = $('#login-error');
 					errorMsg.text(e.responseJSON.error);
+					errorMsg.show();
 				}
 			};
 			$.ajax(requestConfig).then(function (res) {
