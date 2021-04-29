@@ -16,12 +16,20 @@ const constructorMethod = (app) => {
 		// expire the cookie
 		req.session.destroy();
 		// display the logout message
-		res.render('users/logout-message',{title: "Logged Out"});
+		res.render('users/logout-message',{title: "Logged Out", loggedIn: false});
 	});
 	app.use('/profile', profileRoutes);
-	app.use('/',(req,res) => {
-		res.render('dummy/home',{title: "Dummy Home"});
+
+	// dummy top rated tutors
+	app.use('/toptutors',(req,res) => {
+		res.render('users/toptutors',{
+			title: "Dummy Top Rated Tutors Page",
+			loggedIn: !!req.session.user
+			// partial: req.session.user ? 'logged-in' : 'logged-out'	// render the appropriate nav bar, based on whether the user is logged in
+		});
 	});
+	// dummy homepage (which catches all other routes for now)
+
 	app.use("/questions-forum", questionsRoutes);
 	/* dummy routes */
 	// dummy profile page

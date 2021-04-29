@@ -40,9 +40,9 @@ const checkInputs = (inputs, fn) => {
 			// all other cases:
 			if (type!=='array' && type!=='ObjectId' && typeof value !== type) throw `Error in function ${fn}: ${field} is not a ${type}.`;
 
-			// strings must not be all whitespace - except hashedPasswords
+			// strings must not be all whitespace
 			if (type === 'string') {
-				if (field!=='hashedPassword') value = value.trim();	// hashedPasswords can be all whitespace, but they can't be empty
+				if (field!=='hashedPassword') value = value.trim();	// don't trim password
 				if (value === '') throw `Error in function ${fn}: ${field} is all whitespace characters.`;
 				// update trimmed value in inputs
 				inputs[field].value = value;
@@ -54,13 +54,32 @@ const checkInputs = (inputs, fn) => {
 	}
 
 	// check inputs with individual requirements
+	// first/last name
+	if(inputs.firstName && inputs.firstName.value) {
+		const firstName = inputs.firstName.value;
+		// must be less than or equal to 254 characters
+		if (firstName.length > 254) throw `Error in function ${fn}: firstName cannot be longer than 254 characters.`;
+		// must be alphabet characters, ', -, or space
+		const nameRE = /^([a-zA-Z'\- ]+)$/;
+		if (!nameRE.test(firstName)) throw `Error in function ${fn}: firstName can only contain alphabetical characters, ', -, or space.`;
+	}
+	if(inputs.lastName && inputs.lastName.value) {
+		const lastName = inputs.lastName.value;
+		// must be less than or equal to 254 characters
+		if (lastName.length > 254) throw `Error in function ${fn}: lastName cannot be longer than 254 characters.`;
+		// must be alphabet characters, ', -, or space
+		const nameRE = /^([a-zA-Z'\- ]+)$/;
+		if (!nameRE.test(lastName)) throw `Error in function ${fn}: lastName can only contain alphabetical characters, ', -, or space.`;
+	}
+
 	// email
 	if (inputs.email && inputs.email.value) {
 		const email = inputs.email.value;
+		// must be less than or equal to 254 characters
+		if (email.length > 254) throw `Error in function ${fn}: email cannot be longer than 254 characters.`;
 		// must be in correct email format
 		// regex source: https://www.geeksforgeeks.org/write-regular-expressions/
 		const emailRE = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
-
 		if (!emailRE.test(email)) throw `Error in function ${fn}: email is not in correct format.`;
 		// set email to all lowercase
 		inputVals.email = email.toLowerCase();
@@ -69,9 +88,11 @@ const checkInputs = (inputs, fn) => {
 	// username
 	if (inputs.username && inputs.username.value) {
 		const username = inputs.username.value;
-		// must not contain any whitespace characters
-		const usernameRE = /[ 	]/;
-		if (usernameRE.test(username)) throw `Error in function ${fn}: username contains whitespace characters`;
+		// must be less than or equal to 254 characters
+		if (username.length > 254) throw `Error in function ${fn}: username cannot be longer than 254 characters.`;
+		// can only contain alphabet characters, numbers, -, _, and .
+		const usernameRE = /^([a-zA-Z0-9\-\_\.]+)$/;
+		if (!usernameRE.test(username)) throw `Error in function ${fn}: username may only contain alphanumeric characters, -, _, and .`;
 		// set username to all lowercase
 		inputVals.username = username.toLowerCase();
 	}
@@ -101,6 +122,14 @@ const checkInputs = (inputs, fn) => {
 			// set relevantSubjects[i] to trimmed subject
 			inputs.relevantSubjects[i] = subject;
 		});
+	}
+
+	// profilePic
+	if (inputs.profilePic && inputs.profilePic.value) {
+		let profilePic = inputs.profilePic.value;
+		// must start with public/images and end in .jpg or .jpeg or .png
+		const pfpRE = /^public\/images\/.*\.(jpg|jpeg|png)$/;
+		if (!pfpRE.test(profilePic)) throw `Error in function ${fn}: profilePic must be in the public/images directory and must be a png or jpg/jpeg.`;
 	}
 
 	// userType (different from isTutor - this refers to the value that actually gets stored in the database)
@@ -217,6 +246,7 @@ const createUser = async (userInfo) => {
 		userType: isTutor ? "tutor" : "student",
 		year,
 		relevantSubjects,
+		profilePic:'',
 		questionIDs: [],
 		tutorList: [],
 		ratings: isTutor ? {
@@ -356,6 +386,7 @@ const getRelatedUsers = async (id) => {
 		hashedPassword: {value:userInfo.hashedPassword, type:'string', required:false},
 		year: {value:userInfo.year, type:'number', required:false},
 		relevantSubjects: {value:userInfo.relevantSubjects, type:'array', required:false},
+		profilePic: {value:userInfo.profilePic, type:'string', required:false},
 		userType: {value:userInfo.userType, type:'string', required:false},
 		tutorList: {value:userInfo.tutorList, type:'array', required:false},
 		questionIDs: {value:userInfo.questionIDs, type:'array', required:false},
@@ -425,7 +456,7 @@ const getRelatedUsers = async (id) => {
  */
  const deleteUser = async (id) => {
 	// check id - existence and type
-	 __checkInputs({id: {value:id, type:'ObjectId', required:true}},
+	__checkInputs({id: {value:id, type:'ObjectId', required:true}},
 	'deleteUser');
 
 	// get the collection
@@ -439,7 +470,29 @@ const getRelatedUsers = async (id) => {
 	return `${deleteInfo.value.username} has been successfully deleted.`;
 }
 
+/**
+ * removeUserFromTutorList
+ * @param userToRemove: the id of the person to be removed
+ * @param userRemoveFrom: the id of the person whose tutorList userToRemove should be removed from
+ * @returns a successfully removed message
+ */
+const removeUserFromTutorList = async (userToRemove, userRemoveFrom) => {
+	// check userToRemove and userRemoveFrom existence and type
+	__checkInputs({userToRemove: {value:userToRemove, type:'ObjectId', required:true}, userRemoveFrom: {value:userRemoveFrom, type:'ObjectId', required:true}},
+	'removeUserFromTutorList');
+
+	// get the collection
+	const userCollection = await users();
+
+	// pull userToRemove from userRemoveFrom's tutorList array
+	const updateInfo = await userCollection.updateOne({_id:userRemoveFrom}, {$pull: {tutorList: userToRemove}});
+	if (updateInfo.modifiedCount<=0) throw `Error in function removeUserFromTutorList: could not update user ${userRemoveFrom}.`;
+
+	// return a success message
+	return `User ${userToRemove} has been successfully removed from ${userRemoveFrom}'s tutorList.`;
+}
+
 
 module.exports = {
-	checkInputs, createUser, getUserById, getUserByEmail, getUserByUsername, getRelatedUsers, updateUser, deleteUser
+	checkInputs, createUser, getUserById, getUserByEmail, getUserByUsername, getRelatedUsers, updateUser, deleteUser, removeUserFromTutorList
 }

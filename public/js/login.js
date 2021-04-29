@@ -10,8 +10,20 @@
 		// get username and password
 		var username = $('#username').val();
 		var password = $('#password').val();
+		// 1 = false, 2 = true
+		var isTutor = parseInt($('#is-tutor').val());
 
 		var errorList = [];
+
+		// check isTutor - must exist and must be 1 or 2
+		try {
+			if (isTutor===undefined || isTutor===null) throw 'Missing';
+			if (typeof isTutor !== 'number' || isNaN(isTutor)) throw 'Invalid type for';
+			if (isTutor!==1 && isTutor!==2) throw 'Invalid value for';
+		} catch (e) {
+			// TODO how to handle this error, since it's not the user's fault?
+			errorList.push(`${e} isTutor.`);
+		}
 
 		// make sure both username and password exist
 		if (username===undefined || username===null) errorList.push('Please enter your username.');
@@ -44,29 +56,28 @@
 			// append the errors element to main after the form
 			loginForm.after(errors);
 		} else {
-			// no errors, so submit ajax request to POST /login/do-login
+			// no errors, so submit ajax request to POST /login
 			var requestConfig = {
 				method: 'POST',
-				url: '/login/do-login',
+				url: '/login',
 				contentType: 'application/json',
 				data: JSON.stringify({
 					username,
-					password
+					password,
+					isTutor
 				}),
 				error: function (e) {
 					// TODO - decide what to actually do here
-					var errorMsg = $('<p class="error">');
+					var errorMsg = $('#login-error');
 					errorMsg.text(e.responseJSON.error);
-					loginForm.after(errorMsg);
+					errorMsg.show();
 				}
 			};
 			$.ajax(requestConfig).then(function (res) {
-				// if message = 'success', hide the form and display the success message
+				// if message = 'success', redirect to home
 				if (res.message==='success') {
-					loginForm.hide();
-					var successMsg = $('<p>');
-					successMsg.text(`You are now logged in.`);
-					loginForm.before(successMsg);
+					// redirect to home
+					location.href = '/';
 				}
 			})
 		}
