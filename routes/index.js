@@ -8,7 +8,7 @@ const profileRoutes = require('./profile');
 const constructorMethod = (app) => {
 	// user routes
 	app.get('/',(req,res) => {
-		res.render('home/home',{title: "Stress-Less Tutoring"});
+		res.render('home/home',{title: "Stress-Less Tutoring", loggedIn: !!req.session.user});
 	});
 	app.use('/login', loginRoutes);
 	app.use('/new-user', newUserRoutes);

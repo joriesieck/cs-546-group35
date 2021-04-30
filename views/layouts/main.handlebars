@@ -13,11 +13,20 @@
 		<h1>{{title}}</h1>
 		<nav id='main-menu'>
 			<a href='/'>Home</a>
-			<a href='/question-forum'>Question Forum</a>
+			<a href='/questions-forum'>Question Forum</a>
+
+			{{#if loggedIn}}
+			<a href='/questions-forum/post'>Ask a Question</a>
+			{{/if}}
+
 			<a href='/top-rated-tutors'>Top Rated Tutors</a>
+
+			{{#if loggedIn}}
+			<a href='request-tutor' class='logged-in'>Request a Tutor</a>
+			{{/if}}
+
 			{{#if loggedIn}}
 			<a href='/profile' class='logged-in'>Profile</a>
-			<a href='request-tutor' class='logged-in'>Request a Tutor</a>
 			<a href='/logout' class='logged-in'>Log Out</a>
 			{{else}}
 			<a href='/new-user' class='logged-out'>Create Account</a>
