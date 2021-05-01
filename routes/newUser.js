@@ -50,43 +50,43 @@ router.post('/',async (req,res) => {
 	let password = xss(req.body.password);
 	let year = parseInt(xss(req.body.year));
 	let subjects = xss(req.body.subjects);
-	let isTutor = xss(req.body.isTutor);	// '1' means student, '2' means student
+	let isTutor = xss(req.body.isTutor);	// '1' means student, '2' means tutor
 
 	/* error check inputs */
 	// all inputs must exist
 	try {
-		if (firstName===undefined || firstName===null) throw 'firstName';
-		if (lastName===undefined || lastName===null) throw 'lastName';
-		if (email===undefined || email===null) throw 'email';
-		if (username===undefined || username===null) throw 'username';
-		if (password===undefined || password===null) throw 'password';
-		if (year===undefined || year===null) throw 'year';
-		if (subjects===undefined || subjects===null) throw 'subjects';
-		if (isTutor===undefined || isTutor===null) throw 'isTutor';
+		if (firstName===undefined || firstName===null) throw 'First Name';
+		if (lastName===undefined || lastName===null) throw 'Last Name';
+		if (email===undefined || email===null) throw 'Email';
+		if (username===undefined || username===null) throw 'Username';
+		if (password===undefined || password===null) throw 'Password';
+		if (year===undefined || year===null) throw 'Graduation Year';
+		if (subjects===undefined || subjects===null) throw 'Subjects';
+		if (isTutor===undefined || isTutor===null) throw 'Is Tutor';
 	} catch (e) {
-		res.status(400).json({error: `Error in POST /new-user: missing input "${e}"`});
+		res.status(400).json({error: `${e} is required.`});
 		return;
 	}
 
 	// isTutor = '1' means false/student, '2' means true/tutor (because of the way xss parses the data)
 	if (isTutor!=='1' && isTutor!=='2') {
-		res.status(400).json({error: 'Error in POST /new-user: invalid argument for input "isTutor"'});
+		res.status(400).json({error: 'Is Tutor must be 1 (for false) or 2 (for true).'});
 		return;
 	}
 	isTutor = isTutor==='2';	// convert to a boolean
 
 	// all inputs must be of the correct type - all strings at this point except for year (number) and isTutor (boolean)
 	try {
-		if (typeof firstName !== 'string') throw 'firstName';
-		if (typeof lastName !== 'string') throw 'lastName';
-		if (typeof email !== 'string') throw 'email';
-		if (typeof username !== 'string') throw 'username';
-		if (typeof password !== 'string') throw 'password';
-		if (typeof year !== 'number' || isNaN(year)) throw 'year';
-		if (typeof subjects !== 'string') throw 'subjects';
-		if (typeof isTutor !== 'boolean') throw 'isTutor';
+		if (typeof firstName !== 'string') throw {input:'First Name', type:'string'};
+		if (typeof lastName !== 'string') throw {input:'Last Name', type:'string'};
+		if (typeof email !== 'string') throw {input:'Email', type:'string'};
+		if (typeof username !== 'string') throw {input:'Username', type:'string'};
+		if (typeof password !== 'string') throw {input:'Password', type:'string'};
+		if (typeof year !== 'number' || isNaN(year)) throw {input:'Graduation Year', type:'number'};
+		if (typeof subjects !== 'string') throw {input:'Subjects', type:'string'};
+		if (typeof isTutor !== 'boolean') throw {input:'Is Tutor', type:'boolean'};
 	} catch (e) {
-		res.status(400).json({error: `Error in POST /new-user: invalid type for input "${e}"`});
+		res.status(400).json({error: `${e.input} must be of type ${e.type}`});
 		return;
 	}
 
@@ -94,92 +94,92 @@ router.post('/',async (req,res) => {
 	// make email and username all lowercase
 	try {
 		firstName = firstName.trim();
-		if (firstName==='') throw 'firstName';
+		if (firstName==='') throw 'First Name';
 		lastName = lastName.trim();
-		if (lastName==='') throw 'lastName';
+		if (lastName==='') throw 'Last Name';
 		email = email.trim().toLowerCase();
-		if (email==='') throw 'email';
+		if (email==='') throw 'Email';
 		username = username.trim().toLowerCase();
-		if (username==='') throw 'username';
+		if (username==='') throw 'Username';
 		password = password.trim();
-		if (password==='') throw 'password';
+		if (password==='') throw 'Password';
 		subjects = subjects.trim();
-		if (isTutor && subjects==='') throw 'subjects';
+		if (isTutor && subjects==='') throw 'Subjects';
 	} catch (e) {
-		res.status(400).json({error: `Error in POST /new-user: empty (whitespace) input "${e}"`});
+		res.status(400).json({error: `${e} must contain at least one non-whitespace character.`});
 		return;
 	}
 
 	// first and last name
 	try {
 		// must be <= 254 characters
-		if (firstName.length > 254) throw 'more than 254 characters';
+		if (firstName.length > 254) throw 'may not contain more than 254 characters.';
 		// must be alphabet characters, ', -, or space
 		const nameRE = /^([a-zA-Z'\- ]+)$/;
-		if (!nameRE.test(firstName)) throw 'invalid characters'
+		if (!nameRE.test(firstName)) throw 'may only contain alphabet characters, \' , -, or space.'
 	} catch (e) {
-		res.status(400).json({error: `Error in POST /new-user: ${e} for input "firstName"`});
+		res.status(400).json({error: `First Name ${e}`});
 		return;
 	}
 	try {
 		// must be <= 254 characters
-		if (lastName.length > 254) throw 'more than 254 characters';
+		if (lastName.length > 254) throw 'may not contain more than 254 characters.';
 		// must be alphabet characters, ', -, or space
 		const nameRE = /^([a-zA-Z'\- ]+)$/;
-		if (!nameRE.test(lastName)) throw 'invalid characters'
+		if (!nameRE.test(lastName)) throw 'may only contain alphabet characters, \' , -, or space.'
 	} catch (e) {
-		res.status(400).json({error: `Error in POST /new-user: ${e} for input "lastName"`});
+		res.status(400).json({error: `Last Name ${e}`});
 		return;
 	}
 	
 	// email
 	try {
 		// must be less than or equal to 254 characters
-		if (email.length > 254) throw 'more than 254 characters';
+		if (email.length > 254) throw 'may not contain more than 254 characters.';
 		// must be in correct email format
 		// regex source: https://www.geeksforgeeks.org/write-regular-expressions/
 		const emailRE = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
-		if (!emailRE.test(email)) throw 'invalid format';	
+		if (!emailRE.test(email)) throw 'must be of the format example@domain.suffix.';
 	} catch (e) {
-		res.status(400).json({error: `Error in POST /new-user: ${e} for input "email"`});
+		res.status(400).json({error: `Email ${e}`});
 		return;
 	}
 	
 	// username
 	try {
 		// must be less than or equal to 254 characters
-		if (username.length > 254) throw 'more than 254 characters';
+		if (username.length > 254) throw 'may not contain more than 254 characters.';
 		// can only contain alphabet characters, numbers, -, _, and .
 		const usernameRE = /^([a-zA-Z0-9\-\_\.]+)$/;
-		if (!usernameRE.test(username)) throw 'invalid characters';
+		if (!usernameRE.test(username)) throw 'may only contain alphanumeric characters, ., _, or -.';
 	} catch (e) {
-		res.status(400).json({error: `Error in POST /new-user: ${e} for input "username"`});
+		res.status(400).json({error: `Username ${e}`});
 		return;
 	}
 	
 	// password
 	try {
 		// must be at least 8 characters
-		if (password.length < 8) throw 'less than 8 characters';
+		if (password.length < 8) throw 'may not contain less than 8 characters';
 		// must be less than or equal to 254 characters
-		if (password.length > 254) throw 'more than 254 characters';
+		if (password.length > 254) throw 'may not contain more than 254 characters.';
 		// must contain at least one letter and one number
 		const passwordNumRE = /[0-9]+/;
 		const passwordAlphRE = /[a-zA-Z]+/;
-		if (!passwordNumRE.test(password) || !passwordAlphRE.test(password)) throw 'missing required characters';
+		if (!passwordNumRE.test(password) || !passwordAlphRE.test(password)) throw 'must contain at least one letter and one number.';
 	} catch (e) {
-		res.status(400).json({error: `Error in POST /new-user: ${e} for input "password"`});
+		res.status(400).json({error: `Password ${e}`});
 		return;
 	}
 
 	// year
 	try {
 		// year must be >= 0 and of the form YYYY
-		if (year < 0) throw 'invalid year';
+		if (year < 0) throw 'greater than or equal to 0.';
 		const yearRE = /^\d\d\d\d$/;
-		if (!yearRE.test(year)) throw 'invalid format';
+		if (!yearRE.test(year)) throw 'of the form YYYY.';
 	} catch (e) {
-		res.status(400).json({error: `Error in POST /new-user: ${e} for input "year"`});
+		res.status(400).json({error: `Graduation Year ${e}`});
 		return;
 	}
 
@@ -190,14 +190,14 @@ router.post('/',async (req,res) => {
 			// convert to an array deliminated by ','
 			subjects = subjects.split(',');
 			// must contain at least one element
-			if (subjects.length<=0) throw 'empty input';
+			if (subjects.length<=0) throw 'Subjects must contain at least one subject.';
 			// must contain only strings
-			if (!subjects.every((subj) => typeof subj === 'string')) throw 'invalid element type';
+			if (!subjects.every((subj) => typeof subj === 'string')) throw 'Subjects may only contain strings.';
 			// must contain only non-whitespace strings
 			subjects = subjects.map((subj) => subj.trim());	// trim strings
-			if (!subjects.every((subj) => subj!=='')) throw 'empty elements';
+			if (!subjects.every((subj) => subj!=='')) throw 'Each subject must contain at least one non-whitespace character.';
 		} catch (e) {
-			res.status(400).json({error: `Error in POST /new-user: ${e} for "subjects"`});
+			res.status(400).json({error: `${e}`});
 			return;
 		}
 	} else {
@@ -209,26 +209,26 @@ router.post('/',async (req,res) => {
 	try {
 		const userByUsername = await userData.getUserByUsername(username);
 		if (userByUsername) {
-			res.status(400).json({error: 'Error in POST /new-user: username exists'});
+			res.status(400).json({error: `There is already an account associated with ${username}. Please log in instead.`});
 			return;
 		}
 	} catch (e) {
 		// if the error isn't user not found, bubble it
 		if (!`${e}`.includes('not found')) {
-			res.status(400).json({error: e, location: 218});
+			res.status(400).json({error: e});
 			return;
 		}
 	}
 	try {
 		const userByEmail = await userData.getUserByEmail(email);
 		if (userByEmail) {
-			res.status(400).json({error: 'Error in POST /new-user: email exists'});
+			res.status(400).json({error: `There is already an account associated with ${email}. Please log in instead.`});
 			return;
 		}
 	} catch (e) {
 		// if the error isn't user not found, bubble it
 		if (!`${e}`.includes('not found')) {
-			res.status(400).json({error: e, location: 231});
+			res.status(400).json({error: e});
 			return;
 		}
 	}
@@ -237,7 +237,7 @@ router.post('/',async (req,res) => {
 	bcrypt.hash(password,saltRounds, async (err,hash) => {
 		if (err) {
 			// just bubble the error
-			res.status(400).json({error: err, location: 240});
+			res.status(400).json({error: err});
 			return;
 		}
 		
@@ -262,7 +262,7 @@ router.post('/',async (req,res) => {
 			}
 		} catch (e) {
 			// just bubble the error
-			res.status(400).json({error: e, location: 265});
+			res.status(400).json({error: e});
 			return;
 		}
 	});

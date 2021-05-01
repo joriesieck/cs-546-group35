@@ -56,6 +56,10 @@
 			// append the errors element to main after the form
 			loginForm.after(errors);
 		} else {
+			// render a paragraph to let the user know that they are being logged in
+			var loadingMsg = $('<p>');
+			loadingMsg.text('Please wait, we are logging you in...');
+			loginForm.after(loadingMsg);
 			// no errors, so submit ajax request to POST /login
 			var requestConfig = {
 				method: 'POST',
@@ -67,6 +71,8 @@
 					isTutor
 				}),
 				error: function (e) {
+					// hide the loading message
+					loadingMsg.hide()
 					// TODO - decide what to actually do here
 					var errorMsg = $('#login-error');
 					errorMsg.text(e.responseJSON.error);
@@ -74,7 +80,9 @@
 				}
 			};
 			$.ajax(requestConfig).then(function (res) {
-				// if message = 'success', redirect to home
+				// hide the loading message
+				loadingMsg.hide()
+					// if message = 'success', redirect to home
 				if (res.message==='success') {
 					// redirect to home
 					location.href = '/';
