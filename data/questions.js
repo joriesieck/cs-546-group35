@@ -46,13 +46,13 @@ async function createQuestion(userId, title, question, tags) {
     if(createHelper(title) === false) throw 'Error: Title must be supplied and must be a string/non all empty space string';
     if(createHelper(question) === false) throw 'Error: Question must be supplied and must be a string/non all empty space string';
 
-    // tags = removeDuplicates(tags);
-    // if(tags === undefined) throw 'Error: A tag must be provided';
-    // if(Array.isArray(tags) === false) throw 'Error: Tags must be in an array';
-    // if(tags.length === 0) throw 'Error: At least one tag must be provided';
-    // for(let i = 0; i < tags.length; i++) {
-    //     if(createHelper(tags[i]) === false) throw 'Error: All tags must be strings/non all empty space string';
-    // }
+    tags = removeDuplicates(tags);
+    if(tags === undefined) throw 'Error: A tag must be provided';
+    if(Array.isArray(tags) === false) throw 'Error: Tags must be in an array';
+    if(tags.length === 0) throw 'Error: At least one tag must be provided';
+    for(let i = 0; i < tags.length; i++) {
+        if(createHelper(tags[i]) === false) throw 'Error: All tags must be strings/non all empty space string';
+    }
 
     let visible = true;
     let currentDate = new Date();

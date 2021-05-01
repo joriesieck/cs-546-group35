@@ -52,16 +52,20 @@ router.post('/post', async (req,res) => {
 		return;
 	}
 
-	// if(tags === undefined || Array.isArray(tags) === false || tags === 0) {
-	// 	res.status(400).json({ error: "Error: Tag(s) must be provided and proper type" });
-	// 	return;
-	// }
-	// for(let i = 0; i < tags.length; i++) {
-    //     if(createHelper(tags[i]) === false) {
-	// 		res.status(400).json({ error: "Error: All tags must be strings/non all empty space string" });
-	// 		return;
-	// 	}
-	// }
+	if(createHelper(tags) === false) {
+		res.status(400).json({ error: "Error: Tag(s) must be provided and proper type" });
+		return;
+	}
+	
+	if(createHelper(tags) === true) {
+		tags = tags.split(',');
+		for(let i = 0; i < tags.length; i++) {
+			tags[i] = tags[i].trim();
+            if(createHelper(tags[i]) === false) {
+				res.status(400).json({ error: "Error: Each tag must be a string and non all empty space string" });
+			}
+		}
+	}
 
 	if (!title) {
 		res.status(400).json({ error: "You must provide a title" });
