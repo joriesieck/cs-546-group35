@@ -22,7 +22,7 @@ router.get('/post',async (req,res) => {
 	if (req.session.user) {
 		return res.render('questions/ask-question',{title:"Ask a Question", loggedIn: true});
  	}
-	res.render('users/new-landing',{title:"Create an Account", loggedIn: false});
+	 res.redirect('/login');
 });
 
 // Route for posting a new question
@@ -31,11 +31,6 @@ router.post('/post', async (req,res) => {
 	let title = xss(req.body.questionTitle);
     let questionBody = xss(req.body.questionBody);
     let tags = xss(req.body.questionTags);
-
-	console.log(questionInfo)
-	console.log(title)
-	console.log(questionBody)
-	console.log(tags)
 
 	if (!questionInfo) {
 		res.status(400).json({error: "You must provide data to ask a question"});
@@ -80,6 +75,13 @@ router.post('/post', async (req,res) => {
 	if (!tags) {
 		res.status(400).json({ error: "You must provide atleast one tag" });
 		return;
+	}
+
+	var regex = /(<([^>]+)>)/ig;
+    title = title.replace(regex, "");
+	questionBody = questionBody.replace(regex, "");
+	for(let i = 0; i < tags.length; i++) {
+		tags[i] = tags[i].replace(regex, "");
 	}
 
 	let currentUser = await userData.getUserByUsername(req.session.user.username);
