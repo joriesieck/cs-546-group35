@@ -1,20 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+	<title>{{title}}</title>
+	<meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/public/css/main.css">
-    <title>{{Title}}</title>
+	<link rel="stylesheet" href="/public/css/main.css">
 </head>
+
 <body>
-    <header>
+	<header>
 		<h1>{{title}}</h1>
 		<nav id='main-menu'>
 			<a href='/'>Home</a>
-			<a href='/' class='public'>Log In</a>
-			<a href='/' class='private'>Log Out</a>
-			<a href='/' class='public'>Create Account</a>
+			<a href='/questions-forum'>Question Forum</a>
+
+			{{#if loggedIn}}
+			<a href='/questions-forum/post'>Ask a Question</a>
+			{{/if}}
+
+			<a href='/top-rated-tutors'>Top Rated Tutors</a>
+
+			{{#if loggedIn}}
+			<a href='request-tutor' class='logged-in'>Request a Tutor</a>
+			{{/if}}
+
+			{{#if loggedIn}}
+			<a href='/profile' class='logged-in'>Profile</a>
+			<a href='/logout' class='logged-in'>Log Out</a>
+			{{else}}
+			<a href='/new-user' class='logged-out'>Create Account</a>
+			<a href='/login' class='logged-out'>Log In</a>
+			{{/if}}
 		</nav>
 	</header>
 	

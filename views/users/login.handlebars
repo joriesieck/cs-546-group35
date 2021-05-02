@@ -1,0 +1,22 @@
+<main>
+	<form id='login'>
+		<label for="username">Username</label>
+		<input type="text" id="username" name="username" placeholder="johndoe" required>
+
+		<label for="password">Password</label>
+		<input type="password" id="password" name=="password" placeholder="12345" required>
+
+		<!-- send whether the user is a tutor as a hidden input -->
+		<input type="hidden" id="is-tutor" name="is-tutor" value={{isTutor}}>
+
+		<button type="submit">Login</button>
+	</form>
+
+	<p class="error" id="login-error" hidden></p>
+
+	<a href="/login" id="change-user">Change User Type</a>
+
+</main>
+
+<script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+<script src="/public/js/login.js"></script>

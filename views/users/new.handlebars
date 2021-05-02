@@ -1,0 +1,45 @@
+<main>
+	<form id="new-user-form">
+		<label for="first-name">First Name</label>
+		<input type="text" id="first-name" name="first-name" placeholder="John" required>
+
+		<label for="last-name">Last Name</label>
+		<input type="text" id="last-name" name="last-name" placeholder="Doe" required>
+
+		<label for="email">Email</label>
+		<input type="email" id="email" name="email" placeholder="jdoe@gmail.com" required>
+
+		<label for="username">Username</label>
+		<input type="text" id="username" name="username" placeholder="johndoe" required>
+
+		<label for="password">Password</label>
+		<input type="password" id="password" name=="password" placeholder="12345" required>
+
+		<label for="confirm-password">Confirm Password</label>
+		<input type="password" id="confirm-password" name="confirm-password" placeholder="12345" required>
+
+		<label for="grad-year">Graduation Year</label>
+		<input type="number" id="grad-year" name="grad-year" placeholder="2021" required>
+
+		<!-- the subject field is required for tutors, but not for students -->
+		{{#if subjReq}}
+		<label for="subjects">Subjects <p class="input-description">Enter the subjects you are able to tutor, separated by a comma.</p></label>
+		<input type="textarea" id="subjects" name="subjects" placeholder="web programming, web programming II" required>
+		{{else}}
+		<label for="subjects">Subjects <p class="input-description">Enter any subjects you are interested in receiving help with, separated by a comma.</p></label>
+		<input type="textarea" id="subjects" name="subjects" placeholder="web programming, web programming II">
+		{{/if}}
+
+		<!-- send whether the user is a tutor as a hidden input -->
+		<input type="hidden" id="is-tutor" name="is-tutor" value={{isTutor}}>
+
+		<button type="submit">Create Account</button>
+	</form>
+
+	<ul id="new-user-input-errors" class="error" hidden></ul>
+
+	<a href="/new-user" id="change-user">Change User Type</a>
+</main>
+
+<script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+<script src="/public/js/newUser.js"></script>

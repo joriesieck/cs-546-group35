@@ -28,7 +28,7 @@ app.use(async (req, res, next) => {
 
 	// call next middleware
 	next();
-})
+});
 
 app.engine('handlebars', exphbs({defaultLayout: 'main'}));
 app.set('view engine','handlebars');
@@ -38,4 +38,4 @@ configRoutes(app);
 // start routes
 app.listen(3000, () => {
 	console.log('routes running on http://localhost:3000');
-})
+});
