@@ -1,0 +1,16 @@
+<div>
+    <h1>Questions Forum</h1>
+
+    {{#if questions.length}}
+    <ul id-'question-list'>
+        {{#each questions}}
+        <li>
+            <a href='questions-forum/{{this._id}}'>{{this.title}}</a>
+        </li>
+        {{/each}}
+    </ul>
+    {{else}}
+    <p class="not-questions">We're sorry, no questions have been asked yet.</p>
+    <a href='questions-forum/post'>Click here to ask a question.</a>
+    {{/if}}
+</div>
