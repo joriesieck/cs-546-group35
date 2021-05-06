@@ -79,7 +79,7 @@ async function createQuestion(userId, title, question, tags) {
 
 async function getQuestions() {
     const questionCollection = await questions();
-    let questionList = await questionCollection.find({}, {projection: {title:1, questionBody:1, answer:1}}).toArray();
+    let questionList = await questionCollection.find({}, {projection: {title:1, questionBody:1, answer:1}}).sort({"datePosted":-1}).toArray();
     return questionList;
 }
 
