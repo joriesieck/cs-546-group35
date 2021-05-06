@@ -1,6 +1,6 @@
 const mongoCollections = require('../config/mongoCollections');
 const answers = mongoCollections.answers;
-let { ObjectId } = require('mongodb');
+const { ObjectId } = require('mongodb');
 
 function createHelper(string) {
     if (string === undefined || typeof string !== 'string' || string.trim().length === 0) {
@@ -40,16 +40,16 @@ module.exports = {
         const answerCollection = await answers();
         let answerId = await answerCollection.findOne({ _id: parseId });
         if (answerId === null) throw `Error: No answer with ID ${id} found.`;
-        answerId._id = answer._id.toString();
+        answerId._id = answerId._id.toString();
 
         return answerId;
     },
 
     async updateAnswer(answerId, updatedAnswer) {
         if (answerId === undefined) throw "Error: No id parameter provided.";
-        if (ObjectID.isValid(id) === false) throw "Error: Invalid ID provided.";
+        if (ObjectID.isValid(answerId) === false) throw "Error: Invalid answer ID provided.";
     
-        const updatedAnswerData = {}
+        const updatedAnswerData = {};
         if (updatedAnswer === undefined) throw "Error: Must provide updated book information.";
     
         if (updatedAnswer.answer) {
