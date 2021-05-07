@@ -105,7 +105,9 @@ router.post('/', async (req,res) => {
 		// TODO should i include more stuff like name here?
 	if (match) {
 		req.session.user = {username,isTutor};
-		res.status(200).json({message:'success'});
+		res.status(200).json({
+			message:'success',
+		});
 		// res.render('users/login',{title:"Logged In", loggedIn: true, json: {message: 'success'}});
 		// redirect to home
 		// return res.redirect('/');

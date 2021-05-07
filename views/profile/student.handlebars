@@ -1,0 +1,58 @@
+<main id="studentProfile" class="profiles">
+    <div class="shownInfo">
+        <h2>{{user.user.username}}</h2>
+        {{#if self}}
+        <h3>{{user.user.name.firstName}} {{user.user.name.lastName}}</h3>
+        <p>Graduation Year: {{year}}</p>
+        <label for="tutorList">Tutors</label>
+        <ul id="tutorList">
+            {{#each tutors}}
+            <li></li>
+            {{/each}}
+        </ul>
+        <ul id="relevantSubjects">
+            {{#each subjects}}
+            <li></li>
+            {{/each}}
+        </ul>
+        <div id="questionLinks">
+            {{#each questionsAsked}}
+            <a></a>
+            {{/each}}
+        </div>
+        <button id="userInfoChange">Change User Information</button>
+        <button id="passwordChange">Change Password</button>
+        {{else}}
+            {{#if tutor}}
+                <h3>{{user.name.firstName user.name.lastName}}</h3>
+                <ul id="relevantSubjects">
+                    {{#each subjects}}
+                    <li></li>
+                    {{/each}}
+                </ul>
+                <div id="questionLinks">
+                    {{#each questionsAsked}}
+                    <a></a>
+                    {{/each}}
+                </div>
+            {{/if}}
+        {{/if}}
+    </div>
+
+    <div class="passwordChangeForm">
+        <form id="passChange">
+            <label for="currentPassword">Current Password:</label>
+            <input name="currentPassword" id="currentPassword" type="password">
+            <label for="newPassword" id="newPassword" type="password"></label>
+            <input>
+            <button></button>
+        </form>
+    </div>
+
+    <div class="userInfoChangeForm">
+        <form id="infoChange">
+
+        </form>
+    </div>
+    
+</main>
