@@ -41,6 +41,7 @@
                     throw 'Each question tags must be a string and must be non all empty space string. Please do not have any extra/trailing commas.';
                 }
             }
+            if(questionTagsArr.length > 3) throw "Please limit the number of tags to three."
         } catch (e) {
 			errorList.push(e);
 		}
@@ -69,6 +70,7 @@
             };
             $.ajax(requestConfig).then(function (res) {
                 if (res.message==='success') {
+                    // TODO: Redirect to single question page
                     location.href = '/';
                 }
             });

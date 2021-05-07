@@ -15,10 +15,23 @@ function createHelper(string) {
 // Route to display all questions asked
 router.get("/", async (req, res) => {
 	let questionList = await questionData.getQuestions();
+	let monthPosted;
+	let dayPosted;
+	let yearPosted;
+	let fullDatePosted;
+
+	for(let i = 0; i < questionList.length; i++) {
+		monthPosted = questionList[i].datePosted.getMonth() + 1;
+		dayPosted = questionList[i].datePosted.getDate() ;
+		yearPosted = questionList[i].datePosted.getFullYear();
+		fullDatePosted = `${monthPosted}/${dayPosted}/${yearPosted}`;
+		questionList[i].datePosted = fullDatePosted;
+	}
+
 	return res.render("questions/questions-forum", {
 		title: "Question Forum",
 		loggedIn: !!req.session.user,
-		questions: questionList,
+		questions: questionList
 	});
 });
 
@@ -84,6 +97,11 @@ router.post("/post", async (req, res) => {
 							"Error: Each tag must be a string and non all empty space string",
 					});
 				}
+			}
+			if(tags.length > 3) {
+				res.status(400).json({
+					error: "Error: Please provide a maximum of three tags",
+				});
 			}
 		}
 

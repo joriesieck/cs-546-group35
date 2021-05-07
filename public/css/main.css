@@ -167,3 +167,20 @@ button.login-landing, button.new-user-landing {
 	font-style: italic;
 	margin: 0;
 }
+
+/* Question forum - Redirect to asking question */
+#forum-ask-new-question {
+	display: inline-block;
+}
+
+/* Table Styling */
+table, td, th {
+	border: 1px solid black;
+}
+
+table {
+	width: 90%;
+	border-collapse: collapse;
+	margin-left: auto;
+  	margin-right: auto;
+}
