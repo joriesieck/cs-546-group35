@@ -1,14 +1,18 @@
 <main>
     <h1>Questions Forum</h1>
 
-    <label for="search-bar-input"></label>
-    <input id="search-bar-input" type="text" name="search-bar-input" onkeyup="searchFilter()" placeholder="Search for a question">
+    <div class='forum-input-container'>
+        <label for="search-bar-input"></label>
+        <input id="search-bar-input" type="text" name="search-bar-input" onkeyup="searchFilter()"
+            placeholder="Search for a question">
 
-    <label for="search-tag-filter"></label>
-    <input id="search-tag-filter" type="text" name="search-tag-filter" onkeyup="tagFilter()" placeholder="Filter by tag">
+        <label for="search-tag-filter"></label>
+        <input id="search-tag-filter" type="text" name="search-tag-filter" onkeyup="tagFilter()"
+            placeholder="Filter by tag">
+    </div>
 
     <div id='forum-ask-new-question'>
-        <a href='questions-forum/post'>Click here to ask a new question.</a>
+            <a href='questions-forum/post'>Click here to ask a new question.</a>
     </div>
 
     {{#if questions.length}}
