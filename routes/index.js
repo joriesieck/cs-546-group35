@@ -26,7 +26,6 @@ const constructorMethod = (app) => {
 		res.render('users/toptutors',{
 			title: "Dummy Top Rated Tutors Page",
 			loggedIn: !!req.session.user
-			// partial: req.session.user ? 'logged-in' : 'logged-out'	// render the appropriate nav bar, based on whether the user is logged in
 		});
 	});
 	// dummy homepage (which catches all other routes for now)

@@ -33,7 +33,6 @@
 			if (typeof isTutor !== 'number' || isNaN(isTutor)) throw 'Invalid type for';
 			if (isTutor!==1 && isTutor!==2) throw 'Invalid value for';
 		} catch (e) {
-			// TODO how to handle this error, since it's not the user's fault?
 			errorList.push(`${e} isTutor.`);
 		}
 
@@ -233,8 +232,6 @@
 				error: function(e) {
 					// hide the loading message
 					loadingMsg.hide()
-					// TODO - decide what to actually do here
-					console.log(e);
 					var errorMsg = $('<p>');
 					errorMsg.text(e.responseJSON.error);
 					errorMsg.appendTo(errors);
