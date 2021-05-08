@@ -167,3 +167,12 @@ button.login-landing, button.new-user-landing {
 	font-style: italic;
 	margin: 0;
 }
+
+/* profile styles */
+#passwordChangeForm, #userInfoChangeForm {
+	display: none;
+}
+
+#shownInfo {
+	display: block;
+}

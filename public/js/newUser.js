@@ -161,6 +161,8 @@
 			// must be of the form YYYY
 			const yearRE = /^\d\d\d\d$/;
 			if (!yearRE.test(year)) throw 'Graduation Year must be of the form YYYY.';
+			//can't be an unreasonable year (<1900 or 2100< I guess?)
+			if (year < 1900 || year > 2100) throw 'Graduation Year needs to make sense :)';
 		} catch (e) {
 			errorList.push(e);
 		}

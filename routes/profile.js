@@ -1,11 +1,14 @@
 const express = require('express');
 const router = express.Router();
+const xss = require('xss');
+const bcrypt = require('bcryptjs');
 const userData = require('../data/users');
 
+const saltRounds = 16;
 
+//Always user's own profile
 router.get('/', async (req, res) => {
-    //if getting the root route, user should always be logged in.
-    //if not redirect to login
+    //if no logged in user redirect to login
     try{
         if (!req.session.user){
             res.redirect('/login');
@@ -35,16 +38,16 @@ router.get('/', async (req, res) => {
     } catch(e) {
         res.status(400).json({error: e});
     }
-    
 });
 
+//Making a change to the profile 
 router.post('/', (req, res) => {
-    //middleware, must be 
-    //if posting to root route, user is editing their profile
+    //if posting to root route, user can only be editing their own profile
     try{
         if (!req.session.user){
             res.redirect('/login');
         }
+
         const updatedUser = userData.updateUser();
     } catch(e){
 
@@ -65,10 +68,10 @@ router.get('/:username', (req,res) =>{
         if (!req.params.username || typeof req.params.username !== 'string' || req.params.username === ""){
             throw "Username is incorrect";
         }
-        //middleware, only tutors can access this route as others cant see profiles
+        //only tutors can access this route as others cant see profiles
         const user = userData.getUserByUsername(req.session.user.username); //get the user requesting the route
         //check if they're a tutor
-        if (!user.userType){
+        if (user.userType !== "tutor"){
             //they're a student and can't access this route
             res.redirect('/');
         } else {
@@ -83,7 +86,7 @@ router.get('/:username', (req,res) =>{
                 if (req.session.user.username === retrievedUser.username){
                     res.redirect('/profile'); //they're requesting their own profile for some reason?
                 }
-                if (retrievedUser.userType){
+                if (retrievedUser.userType === "tutor"){
                     //tutor type
                     res.status(200).render('profile/tutor', {
                         user: retrievedUser,
@@ -104,6 +107,10 @@ router.get('/:username', (req,res) =>{
     } catch (e) {
         res.status(400).json({error: e});
     }   
+});
+
+router.use('*', (req, res) => {
+    res.redirect('/profile');
 });
 
 module.exports = router;

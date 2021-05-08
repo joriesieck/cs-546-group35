@@ -1,9 +1,9 @@
 <main id="studentProfile" class="profiles">
-    <div class="shownInfo">
-        <h2>{{user.user.username}}</h2>
+    <div id="shownInfo">
+        <h2>{{user.username}}</h2>
         {{#if self}}
-        <h3>{{user.user.name.firstName}} {{user.user.name.lastName}}</h3>
-        <p>Graduation Year: {{year}}</p>
+        <h3>{{user.name.firstName}} {{user.name.lastName}}</h3>
+        <p>Graduation Year: {{user.year}}</p>
         <label for="tutorList">Tutors</label>
         <ul id="tutorList">
             {{#each tutors}}
@@ -27,7 +27,7 @@
                 <h3>{{user.name.firstName user.name.lastName}}</h3>
                 <ul id="relevantSubjects">
                     {{#each subjects}}
-                    <li></li>
+                    <li>{{this}}</li>
                     {{/each}}
                 </ul>
                 <div id="questionLinks">
@@ -39,20 +39,48 @@
         {{/if}}
     </div>
 
-    <div class="passwordChangeForm">
+    <div id="passwordChangeForm">
         <form id="passChange">
             <label for="currentPassword">Current Password:</label>
             <input name="currentPassword" id="currentPassword" type="password">
-            <label for="newPassword" id="newPassword" type="password"></label>
-            <input>
-            <button></button>
+            <label for="newPassword">New Password</label>
+            <input name="newPassword" id="newPassword" type="password">
+            <label for="confirmPassword">Confirm Password</label>
+            <input name="confirmPassword" id="confirmPassword" type="password">
+            <button type="submit">Submit</button>
+            <button class="return">Return to Profile</button>
         </form>
     </div>
 
-    <div class="userInfoChangeForm">
+    <div id="userInfoChangeForm">
         <form id="infoChange">
+            <label for="username">Username:</label>
+            <input name="username" id="username" type="text">
 
+            <label for="profilePicture">Profile Picture:</label>
+            <input name="profilePicture" id="profillePicture" type="image">
+
+            <label for="firstName">First Name:</label>
+            <input name="firstName" id="firstName" type="text">
+
+            <label for="lastName">Last Name:</label>
+            <input name="lastName" id="lastName" type="text">
+
+            <label for="email">Email:</label>
+            <input name="email" id="email" type="email">
+
+            <label for="relevantSubjects">Subjects:</label>
+            <input>
+
+            <label for="year">Graduation Year:</label>
+            <input name="year" id="year" type="number">
+
+            <button type="submit">Submit</button>
+            <button class="return">Return to Profile</button>
         </form>
     </div>
     
 </main>
+
+<script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+<script src="/public/js/profileEdit.js"></script>
