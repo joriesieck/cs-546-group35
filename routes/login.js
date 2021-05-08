@@ -84,7 +84,7 @@ router.post('/', async (req,res) => {
 	let hashedPassword, userType;
 	try {
 		({hashedPassword, userType} = await userData.getUserByUsername(username));
-		if (!hashedPassword) throw `No password found for user ${username}.`;	// TODO is this a good message?
+		if (!hashedPassword) throw `No password found for user ${username}.`;
 		// if userType doesn't match with isTutor, error
 		if ((isTutor && userType!=='tutor') || (!isTutor && userType!=='student')) throw `No ${isTutor ? 'tutor' : 'student'} found for this username and password. Try logging in as a ${userType} instead.`;
 	} catch (e) {
@@ -102,15 +102,9 @@ router.post('/', async (req,res) => {
 	const match = await bcrypt.compare(password,hashedPassword);
 
 	// if the passwords match, set cookie and return success
-		// TODO should i include more stuff like name here?
 	if (match) {
 		req.session.user = {username,isTutor};
-		res.status(200).json({
-			message:'success',
-		});
-		// res.render('users/login',{title:"Logged In", loggedIn: true, json: {message: 'success'}});
-		// redirect to home
-		// return res.redirect('/');
+		res.status(200).json({message:'success'});
 	} else {
 		// we don't want to reveal that it was specifically the password, so error with 'invalid username or password'
 		res.status(400).json({error: 'Invalid username or password.'});
