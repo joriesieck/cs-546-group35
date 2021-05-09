@@ -20,8 +20,7 @@ app.use(session({
 }));
 
 // set up middleware
-// TODO
-// logging middleware - JUST FOR TESTING
+// TODO do we want to keep this?
 app.use(async (req, res, next) => {
 	// log information to the console
 	console.log(`[${new Date().toUTCString()}]: ${req.method} ${req.originalUrl} (${!req.session.user ? 'Non-' : ''}Authenticated User)`);

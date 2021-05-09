@@ -257,8 +257,6 @@ router.post('/',async (req,res) => {
 			if (user) {
 				req.session.user = {username};
 				res.status(201).json({message:'success'});
-				// redirect to home
-				// res.redirect('/');
 			}
 		} catch (e) {
 			// just bubble the error
@@ -267,13 +265,5 @@ router.post('/',async (req,res) => {
 		}
 	});
 })
-
-// just for testing purposes - render the testing creation page
-router.get('/student-test',(req,res) => {
-	res.render('dummy/test-new',{title: "Create an Account", isTutor:1});
-});
-router.get('/tutor-test',(req,res) => {
-	res.render('dummy/test-new',{title: "Create an Account", isTutor:2});
-});
 
 module.exports = router;
