@@ -75,6 +75,13 @@ async function createQuestion(userId, title, question, tags) {
 
     const questionId = insertInfo.insertedId;
 	const newQuestion = await getQuestionById(questionId);
+    
+    //when a question is asked, it needs to be added to someones array of questions
+    //so get the user (require the user data)
+    //isolate the user's id
+    //and the user's current questions
+    //then update the user by sending back the id and the questions plus this new one's id
+
 	return newQuestion;
 }
 

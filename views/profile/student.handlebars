@@ -1,37 +1,38 @@
 <main id="studentProfile" class="profiles">
     <div id="shownInfo">
         <h2>{{user.username}}</h2>
-        {{#if self}}
         <h3>{{user.name.firstName}} {{user.name.lastName}}</h3>
-        <p>Graduation Year: {{user.year}}</p>
+        <h5>Email: {{user.email}}</h5>
+        {{#if self}}
+        <h5>Graduation Year: {{user.year}}</h5>
         <label for="tutorList">Tutors</label>
         <ul id="tutorList">
             {{#each tutors}}
             <li></li>
             {{/each}}
         </ul>
+        <label for="relevantSubjects">I need help in:</label>
         <ul id="relevantSubjects">
-            {{#each subjects}}
-            <li></li>
+            {{#each user.relevantSubjects}}
+            <li>{{this}}</li>
             {{/each}}
         </ul>
         <div id="questionLinks">
-            {{#each questionsAsked}}
-            <a></a>
+            {{#each user.questionIDs}}
+            <a>{{this}}</a>
             {{/each}}
         </div>
         <button id="userInfoChange">Change User Information</button>
         <button id="passwordChange">Change Password</button>
         {{else}}
-            {{#if tutor}}
-                <h3>{{user.name.firstName user.name.lastName}}</h3>
+            {{#if tutor}}        
                 <ul id="relevantSubjects">
-                    {{#each subjects}}
+                    {{#each user.relevantSubjects}}
                     <li>{{this}}</li>
                     {{/each}}
                 </ul>
                 <div id="questionLinks">
-                    {{#each questionsAsked}}
+                    {{#each user.questionIDs}}
                     <a></a>
                     {{/each}}
                 </div>
@@ -58,10 +59,10 @@
             <input name="username" id="username" type="text">
 
             <label for="profilePicture">Profile Picture:</label>
-            <input name="profilePicture" id="profillePicture" type="image">
+            <input name="profilePicture" id="profilePicture" type="file" accept="image/.*">
 
             <label for="firstName">First Name:</label>
-            <input name="firstName" id="firstName" type="text">
+            <input name="firstName" id="firstName" type="text" value={{firstName}}>
 
             <label for="lastName">Last Name:</label>
             <input name="lastName" id="lastName" type="text">

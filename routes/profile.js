@@ -24,13 +24,15 @@ router.get('/', async (req, res) => {
                 res.status(200).render('profile/student',{
                     user: user,
                     self: true,
-                    title: `${user.username}'s Profile`
+                    title: `${user.username}'s Profile`,
+                    loggedIn: true
                 });
             } else{ //is a tutor
                 res.status(200).render('profile/tutor',{
                     user: user,
                     self: true,
-                    title: `${user.username}'s Profile`
+                    title: `${user.username}'s Profile`,
+                    loggedIn: true
                 });
             }
            
@@ -40,13 +42,21 @@ router.get('/', async (req, res) => {
     }
 });
 
-//Making a change to the profile 
+//Making a change to the profile/user information
+//all fields optional
 router.post('/', (req, res) => {
     //if posting to root route, user can only be editing their own profile
+    if (!req.session.user){
+        res.redirect('/login');
+    }
+    let firstName = xss(req.body.firstName);
+    let lastName = xss(req.body.lastName);
+    let email = xss(req.body.email);
+    let username = xss(req.body.username);
+    let year = parseInt(xss(req.body.year));
+    let subjects = xss(req.body.subjects);
+    
     try{
-        if (!req.session.user){
-            res.redirect('/login');
-        }
 
         const updatedUser = userData.updateUser();
     } catch(e){
