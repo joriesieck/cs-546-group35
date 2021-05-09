@@ -12,6 +12,15 @@ function createHelper(string) {
 	}
 }
 
+function tagsChecker(newArr, oldArr) {
+	for (let i = 0; i < newArr.length; i++) {
+		if(oldArr.includes(newArr[i]) === false) {
+			return false;
+		}
+	}
+	return true;
+}
+
 // Route to display all questions asked
 router.get("/", async (req, res) => {
 	let questionList = await questionData.getQuestions();
@@ -28,11 +37,23 @@ router.get("/", async (req, res) => {
 		questionList[i].datePosted = fullDatePosted;
 	}
 
-	return res.render("questions/questions-forum", {
-		title: "Question Forum",
-		loggedIn: !!req.session.user,
-		questions: questionList
-	});
+	if(!!req.session.user === false) {
+		return res.render("questions/questions-forum", {
+			title: "Question Forum",
+			loggedIn: !!req.session.user,
+			questions: questionList
+		});
+	}
+
+	if(!!req.session.user === true) {
+		return res.render("questions/questions-forum", {
+			title: "Question Forum",
+			loggedIn: !!req.session.user,
+			questions: questionList,
+			isTutor: req.session.user.isTutor
+		});
+	}
+
 });
 
 // TODO: Route to display single question asked
@@ -139,7 +160,7 @@ router.post("/post", async (req, res) => {
 				questionBody,
 				tags
 			);
-			if (newQuestion) {
+			if(newQuestion) {
 				res.status(201).json({ message: "success" });
 			}
 		} catch (e) {
@@ -147,6 +168,98 @@ router.post("/post", async (req, res) => {
 		}
 	} else {
 		res.sendStatus(403);
+	}
+});
+
+// Route to edit a question page
+router.get("/:id/edit", async (req, res) => {
+	if (req.session.user && req.session.user.isTutor === true) {
+		return res.render("questions/edit-question", {
+			title: "Edit a Question",
+			loggedIn: true,
+		});
+	} 
+	if (req.session.user && req.session.user.isTutor === false) {
+		res.status(401).json({error: "Unathorized access!"});
+	} 
+	if(!req.session.user) {
+		res.redirect("/login");
+	}
+});
+
+router.patch("/:id/edit", async (req, res) => {
+	if (req.session.user && req.session.user.isTutor === true) {
+		let questionInfo = xss(req.body);
+		let title = xss(req.body.questionTitle);
+		let questionBody = xss(req.body.questionBody);
+		let tags = xss(req.body.questionTags);
+		let updatedQuestion = {};
+
+		if (Object.keys(questionInfo).length === 0) {
+			res.status(400).json({error: "Error: At least one field should be supplied"});
+		}
+
+		try {
+			const oldQuestion = await questionData.getQuestionById(req.params.id);
+
+			if(title && title !== oldQuestion.title) {
+				if(createHelper(title) === false) {
+					res.status(400).json({ error: "Error: Title must be provided and proper type" });
+					return;
+				}
+				updatedQuestion.title = title;
+			}
+
+			if(questionBody && questionBody !== oldQuestion.questionBody) {
+				if(createHelper(questionBody) === false) {
+					res.status(400).json({ error: "Error: Question body must be provided and proper type" });
+					return;
+				}
+				updatedQuestion.questionBody = questionBody;
+			}
+
+			if(tags && tagsChecker(tags, oldQuestion.tags) === false) {
+				if(tags === undefined || Array.isArray(tags) === false || tags.length === 0) {
+					res.status(400).json({ error: "Error: Tags must be provided and proper type" });
+					return;
+				}
+
+				for(let i = 0; i < tags.length; i++) {
+					if(createHelper(tags[i]) === false) {
+						res.status(400).json({ error: "Error: All elements in tags array must be strings/non all empty space string" });
+						return;
+					}
+				}
+				updatedQuestion.tags = tags;
+			}
+		} catch (e) {
+			res.status(404).json({ error: "Question not found" });
+			return;
+		}
+
+		if (Object.keys(updatedQuestion).length !== 0) {
+			try {
+				let currentUser = await userData.getUserByUsername(req.session.user.username);
+				let currentUserId = currentUser._id;
+
+				const updatedQuestionInfo = await questionData.updateQuestion(
+					currentUserId,
+					updatedQuestion.title,
+					updatedQuestion.questionBody,
+					updatedQuestion.tags
+				);
+				if(updatedQuestionInfo) {
+					res.status(201).json({ message: "success" });
+				}
+			} catch (e) {
+				res.status(500).json({ error: e });
+			}
+		} else {
+			res.status(400).json({
+				error:
+					"No fields have been changed from their inital values, so no update has occurred",
+			});
+		}
 	}
 });
 
