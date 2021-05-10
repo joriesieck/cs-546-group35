@@ -1,7 +1,6 @@
 const mongoCollections = require('../config/mongoCollections');
 const questions = mongoCollections.questions;
 const { ObjectID } = require('mongodb');
-const { ObjectId } = require('mongodb');
 
 /**
  * {
@@ -89,16 +88,16 @@ async function getQuestionById(id) {
     if(ObjectID.isValid(id) === false) throw "Error: Invalid ID provided";
 
     const questionCollection = await questions();
-    const question = await questionCollection.findOne({_id: id});
+    const question = await questionCollection.findOne({_id: ObjectID(id)});
 	if(question===null) throw `Error in function getQuestionById: ${id} not found.`;
 	return question;
 }
 
 async function updateQuestion(questionId, updatedQuestion) {
-    if(id === undefined) throw "Error: No id parameter provided to rename function";
-    if(ObjectID.isValid(id) === false) throw "Error: Invalid ID provided";
+    if(questionId === undefined) throw "Error: No id parameter provided to rename function";
+    if(ObjectID.isValid(questionId) === false) throw "Error: Invalid ID provided";
 
-    const updatedQuestionData = {}
+    let updatedQuestionData = {}
     if(updatedQuestion === undefined) throw 'Error: Must provide updated book information';
 
     if(updatedQuestion.title) {
@@ -113,10 +112,10 @@ async function updateQuestion(questionId, updatedQuestion) {
 
     if(updatedQuestion.tags) {
         updatedQuestion.tags = removeDuplicates(updatedQuestion.tags);
-        if(Array.isArray(tags) === false) throw 'Error: Updated tags must be in an array';
-        if(tags.length === 0) throw 'Error: At least one updated tag must be provided';
-        for(let i = 0; i < tags.length; i++) {
-            if(createHelper(tags[i]) === false) throw 'Error: All updated tags must be strings/non all empty space string';
+        if(Array.isArray(updatedQuestion.tags) === false) throw 'Error: Updated tags must be in an array';
+        if(updatedQuestion.tags.length === 0) throw 'Error: At least one updated tag must be provided';
+        for(let i = 0; i < updatedQuestion.tags.length; i++) {
+            if(createHelper(updatedQuestion.tags[i]) === false) throw 'Error: All updated tags must be strings/non all empty space string';
         }
         updatedQuestionData.tags = updatedQuestion.tags;
         updatedQuestionData.tags = removeDuplicates(updatedQuestionData.tags);        
@@ -126,14 +125,15 @@ async function updateQuestion(questionId, updatedQuestion) {
         if(typeof updatedQuestion.visible !== 'boolean') throw 'Error: Updated visiblity must be a boolean value';
         updatedQuestionData.visible = updatedQuestion.visible;
     }
+    updatedQuestionData = updatedQuestion
 
     const questionCollection = await questions();
     const updatedInfo = await questionCollection.updateOne(
-        {_id: questionId},
+        {_id: ObjectID(questionId)},
         {$set: updatedQuestionData}
     );
     if(!updatedInfo.matchedCount && !updatedInfo.modifiedCount) throw 'Error: Could not update book successfully';
-    return await this.getBookById(id);
+    return await this.getQuestionById(questionId);
 }
 
 async function deleteQuestion(id) {
