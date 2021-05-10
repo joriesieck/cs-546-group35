@@ -14,7 +14,6 @@ inputTitles = {
 	hashedPassword: "Password",
 	year: "Graduation Year",
 	relevantSubjects: "Subjects",
-	profilePic: "Profile Picture",
 	userType: "User Type",
 	tutorList: "Tutor List",
 	questionIDs: "Question IDs",
@@ -143,14 +142,6 @@ const checkInputs = (inputs, fn) => {
 		});
 	}
 
-	// profilePic
-	if (inputs.profilePic && inputs.profilePic.value) {
-		let profilePic = inputs.profilePic.value;
-		// must start with public/images and end in .jpg or .jpeg or .png
-		const pfpRE = /^public\/images\/.*\.(jpg|jpeg|png)$/;
-		if (!pfpRE.test(profilePic)) throw `Profile Picture must be in the public/images directory and must be a png or jpg/jpeg.`;
-	}
-
 	// userType (different from isTutor - this refers to the value that actually gets stored in the database)
 	if (inputs.userType && inputs.userType.value) {
 		let userType = inputs.userType.value;
@@ -194,6 +185,8 @@ const checkInputs = (inputs, fn) => {
 			const value = ratings[key];
 			if (key=='avgRating') {
 				if (typeof value !== 'number') throw 'Value for ratings.avgRating must be a number.';
+				// must be between 1 and 10
+				if (value<1 || value>10) throw 'Value for ratings.avgValue must be between 1 and 10 inclusive.';
 			} else {
 				if (!Array.isArray(value)) throw `Each value for ratings.${key} must be an array.`;
 				value.forEach((rid) => {
@@ -269,7 +262,6 @@ const createUser = async (userInfo) => {
 		userType: isTutor ? "tutor" : "student",
 		year,
 		relevantSubjects,
-		profilePic:'',
 		questionIDs: [],
 		tutorList: [],
 		ratings: isTutor ? {
@@ -411,7 +403,6 @@ const getRelatedUsers = async (id) => {
 		hashedPassword: {value:userInfo.hashedPassword, type:'string', required:false},
 		year: {value:userInfo.year, type:'number', required:false},
 		relevantSubjects: {value:userInfo.relevantSubjects, type:'array', required:false},
-		profilePic: {value:userInfo.profilePic, type:'string', required:false},
 		userType: {value:userInfo.userType, type:'string', required:false},
 		tutorList: {value:userInfo.tutorList, type:'array', required:false},
 		questionIDs: {value:userInfo.questionIDs, type:'array', required:false},
@@ -429,8 +420,8 @@ const getRelatedUsers = async (id) => {
 		if (value===undefined || value===null) {
 			delete userInfo[field];
 		}
-		// if value is an array, add to the old value
-		if (Array.isArray(value)) {
+		// if value is an array, add to the old value, except for subjects which should just be overwritten
+		if (Array.isArray(value) && field!=='relevantSubjects') {
 			const oldValue = currentUser[field];
 			userInfo[field] = oldValue ? oldValue.concat(value) : value;
 		}

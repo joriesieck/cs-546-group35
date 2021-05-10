@@ -1585,69 +1585,45 @@ const main = async () => {
 	} catch (e) {
 		console.log(`41: ${e}`);
 	}
-	// 42 - successfully update a user's profile picture
+	// 42 - successfully overwrite subjects
 	uuTotalTests++;
 	try {
-		const user = await users.updateUser({id:user2._id, profilePic:"public/images/corinne.jpg"});
+		const user = await users.updateUser({id:user2._id, relevantSubjects:['new subject1','new subject2']});
 		console.log(user);
 	} catch (e) {
 		uuFailedTests.push(`42: ${e}`);
 	}
-	// 43 - profilePic provided but wrong type
-	uuTotalTests++;
-	try {
-		const user = await users.updateUser({id:user1._id,profilePic:["public/images/corinne.jpg"]});
-		uuFailedTests.push(user);
-	} catch (e) {
-		console.log(`43: ${e}`);
-	}
-	// 44 - profilePic provided but undefined
-	uuTotalTests++;
-	try {
-		const user = await users.updateUser({id:user1._id,profilePic:undefined});
-		uuFailedTests.push(user);
-	} catch (e) {
-		console.log(`44: ${e}`);
-	}
-	// 45 - profilePic provided but empty string
-	uuTotalTests++;
-	try {
-		const user = await users.updateUser({id:user1._id,profilePic:"        "});
-		uuFailedTests.push(user);
-	} catch (e) {
-		console.log(`45: ${e}`);
-	}
-	// 46 - profilePic provided but wrong format
-	uuTotalTests++;
-	try {
-		const user = await users.updateUser({id:user1._id,profilePic:"public/images/corinne.gif"});
-		uuFailedTests.push(user);
-	} catch (e) {
-		console.log(`46: ${e}`);
-	}
-	// 47 - ratings.avgRating provided but wrong format
+	// 43 - ratings.avgRating provided but wrong format
 	uuTotalTests++;
 	try {
 		const user = await users.updateUser({id:user1._id,ratings: {avgRating: "rating"}});
 		uuFailedTests.push(user);
 	} catch (e) {
-		console.log(`47: ${e}`);
+		console.log(`43: ${e}`);
 	}
-	// 48 - ratings.avgRating provided but wrong format
+	// 44 - ratings.avgRating provided but wrong format
 	uuTotalTests++;
 	try {
 		const user = await users.updateUser({id:user1._id,ratings: {avgRating: [user1._id]}});
 		uuFailedTests.push(user);
 	} catch (e) {
-		console.log(`48: ${e}`);
+		console.log(`44: ${e}`);
 	}
-	// 49 - successfully update ratings.avgRating
+	// 45 - successfully update ratings.avgRating
 	uuTotalTests++;
 	try {
 		const user = await users.updateUser({id:user1._id, ratings:{avgRating: 3}});
 		console.log(user);
 	} catch (e) {
-		uuFailedTests.push(`49: ${e}`);
+		uuFailedTests.push(`45: ${e}`);
+	}
+	// 46 - ratings.avgRating provided but out of range
+	uuTotalTests++;
+	try {
+		const user = await users.updateUser({id:user1._id,ratings: {avgRating: 0}});
+		uuFailedTests.push(user);
+	} catch (e) {
+		console.log(`46: ${e}`);
 	}
 
 	/* get related users */
