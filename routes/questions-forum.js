@@ -3,6 +3,7 @@ const router = express.Router();
 const xss = require("xss");
 const questionData = require("../data/questions");
 const userData = require("../data/users");
+const { ObjectID } = require('mongodb');
 
 function createHelper(string) {
 	if (string === undefined || typeof string !== "string" || string.trim().length === 0) {
@@ -10,15 +11,6 @@ function createHelper(string) {
 	} else {
 		return true;
 	}
-}
-
-function tagsChecker(newArr, oldArr) {
-	for (let i = 0; i < newArr.length; i++) {
-		if(oldArr.includes(newArr[i]) === false) {
-			return false;
-		}
-	}
-	return true;
 }
 
 // Route to display all questions asked
@@ -174,9 +166,18 @@ router.post("/post", async (req, res) => {
 // Route to edit a question page
 router.get("/:id/edit", async (req, res) => {
 	if (req.session.user && req.session.user.isTutor === true) {
+		let questionID = req.params.id
+		questionID = ObjectID(questionID);
+		const oldQuestion = await questionData.getQuestionById(questionID);
+		let oldTitle = oldQuestion.title;
+		let oldQuestionBody = oldQuestion.questionBody;
+		let oldQuestionTags = oldQuestion.tags;
 		return res.render("questions/edit-question", {
 			title: "Edit a Question",
 			loggedIn: true,
+			oldTitle: oldTitle,
+			oldBody: oldQuestionBody,
+			oldTags: oldQuestionTags
 		});
 	} 
 	if (req.session.user && req.session.user.isTutor === false) {
@@ -187,78 +188,81 @@ router.get("/:id/edit", async (req, res) => {
 	}
 });
 
-router.patch("/:id/edit", async (req, res) => {
+router.put("/:id/edit", async (req, res) => {
 	if (req.session.user && req.session.user.isTutor === true) {
+		let updatedQuestionData = req.body;
 		let questionInfo = xss(req.body);
 		let title = xss(req.body.questionTitle);
 		let questionBody = xss(req.body.questionBody);
 		let tags = xss(req.body.questionTags);
-		let updatedQuestion = {};
+		let updatedQuestionObj = {};
 
-		if (Object.keys(questionInfo).length === 0) {
-			res.status(400).json({error: "Error: At least one field should be supplied"});
+		if(!questionInfo) {
+			res.status(400).json({error: "You must provide data to update a question"});
+			return;
 		}
-
-		try {
-			const oldQuestion = await questionData.getQuestionById(req.params.id);
-
-			if(title && title !== oldQuestion.title) {
-				if(createHelper(title) === false) {
-					res.status(400).json({ error: "Error: Title must be provided and proper type" });
-					return;
-				}
-				updatedQuestion.title = title;
+		if(createHelper(title) === false) {
+			res.status(400).json({ error: "Error: Title must be provided and proper type" });
+			return;
+		}
+		if(createHelper(questionBody) === false) {
+			res.status(400).json({ error: "Error: Title must be provided and proper type" });
+			return;
+		}
+		if(createHelper(tags) === false) {
+			res.status(400).json({ error: "Error: Tags must be provided and proper type" });
+			return;
+		}
+		let tagsArray = tags.split(",");
+		if(tagsArray === undefined || Array.isArray(tagsArray) === false || tagsArray.length === 0) {
+			res.status(400).json({ error: "Error: Failed to put tags into an array" });
+			return;
+		}
+		for(let i = 0; i < tagsArray.length; i++) {
+			if(createHelper(tagsArray[i]) === false) {
+				res.status(400).json({ error: "Error: All elements in tags array must be strings/non all empty space string" });
+				return;
 			}
-
-			if(questionBody && questionBody !== oldQuestion.questionBody) {
-				if(createHelper(questionBody) === false) {
-					res.status(400).json({ error: "Error: Question body must be provided and proper type" });
-					return;
-				}
-				updatedQuestion.questionBody = questionBody;
-			}
-
-			if(tags && tagsChecker(tags, oldQuestion.tags) === false) {
-				if(tags === undefined || Array.isArray(tags) === false || tags.length === 0) {
-					res.status(400).json({ error: "Error: Tags must be provided and proper type" });
-					return;
-				}
-
-				for(let i = 0; i < tags.length; i++) {
-					if(createHelper(tags[i]) === false) {
-						res.status(400).json({ error: "Error: All elements in tags array must be strings/non all empty space string" });
-						return;
-					}
-				}
-				updatedQuestion.tags = tags;
-			}
-		} catch (e) {
-			res.status(404).json({ error: "Question not found" });
+		}
+		tags = tagsArray;
+		
+		if(
+			!title ||
+			!questionBody ||
+			!tags
+		) {
+			res.status(400).json({ error: "You must supply all fields" });
 			return;
 		}
 
-		if (Object.keys(updatedQuestion).length !== 0) {
-			try {
-				let currentUser = await userData.getUserByUsername(req.session.user.username);
-				let currentUserId = currentUser._id;
+		try {
+			let questionID = req.params.id
+			questionID = ObjectID(questionID);
+			const oldQuestion = await questionData.getQuestionById(questionID);
+			updatedQuestionObj.userId = oldQuestion.userId;
+			updatedQuestionObj.title = title;
+			updatedQuestionObj.questionBody = questionBody;
+			updatedQuestionObj.tags = tags;
+			updatedQuestionObj.visible = oldQuestion.visible;
+			updatedQuestionObj.datePosted = oldQuestion.datePosted;
+			updatedQuestionObj.answers = oldQuestion.answers;
+		} catch (e) {
+			res.status(404).json({ error: "Book not found" });
+			return;
+		}
 
-				const updatedQuestionInfo = await questionData.updateQuestion(
-					currentUserId,
-					updatedQuestion.title,
-					updatedQuestion.questionBody,
-					updatedQuestion.tags
-				);
-				if(updatedQuestionInfo) {
-					res.status(201).json({ message: "success" });
-				}
-			} catch (e) {
-				res.status(500).json({ error: e });
+		try {
+			let questionID = req.params.id
+			//questionID = ObjectID(questionID);
+			const updatedQuestion = await questionData.updateQuestion(
+				questionID,
+				updatedQuestionObj
+			);
+			if(updatedQuestion) {
+				res.status(201).json({ message: "success" });
 			}
-		} else {
-			res.status(400).json({
-				error:
-					"No fields have been changed from their inital values, so no update has occurred",
-			});
+		} catch (e) {
+			res.status(500).json({ error: e });
 		}
 	}
 });

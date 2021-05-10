@@ -17,37 +17,31 @@
 
 
         try {
-            if(questionTitle) {
-                if(questionTitle.trim().length === 0) throw 'Question title must be non all empty space string';
-                if(typeof questionTitle !== 'string') throw 'Question title must be a string.';
-                if(questionTitle.length > 100) throw 'Question title may not contain more than 100 characters.';
-            }
+            if(questionTitle.trim().length === 0) throw 'Question title must be non all empty space string';
+            if(typeof questionTitle !== 'string') throw 'Question title must be a string.';
+            if(questionTitle.length > 100) throw 'Question title may not contain more than 100 characters.';
         } catch (e) {
 			errorList.push(e);
 		}
 
         try {
-            if(questionBody) {
             if(questionTitle.trim().length === 0) throw 'Question body must be non all empty space string';
             if(typeof questionBody !== 'string') throw 'Question body must be a string.';
-            }
         } catch (e) {
 			errorList.push(e);
 		}
 
         try {
-            if(questionTags) {
-                if(questionTags.trim().length === 0) throw 'Question tag must be non all empty space string';
-                if(typeof questionTags !== 'string') throw 'Question tags must be a string.';
-                questionTagsArr = questionTags.split(',');
-                for(let i = 0; i < questionTagsArr.length; i++) {
-                    questionTagsArr[i] = questionTagsArr[i].trim();
-                    if(questionTagsArr[i] === undefined || typeof questionTagsArr[i] !== 'string' || questionTagsArr[i].trim().length === 0) {
-                        throw 'Each question tags must be a string and must be non all empty space string. Please do not have any extra/trailing commas.';
-                    }
+            if(questionTags.trim().length === 0) throw 'Question tag must be non all empty space string';
+            if(typeof questionTags !== 'string') throw 'Question tags must be a string.';
+            questionTagsArr = questionTags.split(',');
+            for(let i = 0; i < questionTagsArr.length; i++) {
+                questionTagsArr[i] = questionTagsArr[i].trim();
+                if(questionTagsArr[i] === undefined || typeof questionTagsArr[i] !== 'string' || questionTagsArr[i].trim().length === 0) {
+                    throw 'Each question tags must be a string and must be non all empty space string. Please do not have any extra/trailing commas.';
                 }
-                if(questionTagsArr.length > 3) throw "Please limit the number of tags to three."
             }
+            if(questionTagsArr.length > 3) throw "Please limit the number of tags to three."
         } catch (e) {
 			errorList.push(e);
 		}
@@ -61,7 +55,7 @@
 			errors.show();
         } else {
             var requestConfig = {
-                method: 'PATCH',
+                method: 'PUT',
                 url: window.location.pathname,
                 contentType: 'application/json',
                 data: JSON.stringify({
