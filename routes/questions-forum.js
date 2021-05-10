@@ -152,6 +152,12 @@ router.post("/post", async (req, res) => {
 				questionBody,
 				tags
 			);
+			let questionId = [newQuestion._id];
+			const userQuestionObj = {
+				id: currentUserId,
+				questionIDs: questionId
+			};
+			await userData.updateUser(userQuestionObj);
 			if(newQuestion) {
 				res.status(201).json({ message: "success" });
 			}
