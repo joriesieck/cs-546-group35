@@ -5,6 +5,7 @@ const dbConnection = require('../config/mongoConnection');
 const data = require('../data');
 const users = data.users;
 const { ObjectId } = require('mongodb');
+const { getUserById } = require('../data/users');
 
 /**
 	 * generate hashedPasswords for seed users - 
@@ -1648,6 +1649,7 @@ const main = async () => {
 	} catch (e) {
 		uuFailedTests.push(`49: ${e}`);
 	}
+
 	/* get related users */
 	console.log("\ngetRelatedUsers:")
 	// 0 - successfully get users
@@ -1711,6 +1713,7 @@ const main = async () => {
 	console.log('\nremoveUserFromTutorList:');
 	// 0 - successfully update user's tutorList
 	ruTotalTests++;
+	console.log(await getUserById(user2._id))
 	try {
 		const message = await users.removeUserFromTutorList(user1._id,user2._id);
 		console.log(message);

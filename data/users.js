@@ -438,11 +438,18 @@ const getRelatedUsers = async (id) => {
 
 	// deal with ratings and name separately since they're special cases
 	for (key in userInfo.ratings) {
-		if (key==='avgRating') {
-			userInfo.ratings.avgRating = currentUser.ratings.avgRating;
-		} else {
+		if (key!=='avgRating') {
 			const oldValue = currentUser.ratings[key];
 			userInfo.ratings[key] = oldValue ? oldValue.concat(userInfo.ratings[key]) : userInfo.ratings[key];
+		}
+	}
+	// make sure old fields are not overwritten in ratings
+	if (userInfo.ratings) {
+		for (key in currentUser.ratings) {
+			// if key is not in userInfo, add key and value from currentUser
+			if (!userInfo.ratings[key]) {
+				userInfo.ratings[key] = currentUser.ratings[key];
+			}
 		}
 	}
 
@@ -457,10 +464,22 @@ const getRelatedUsers = async (id) => {
 		delete userInfo.firstName;
 		delete userInfo.lastName;
 	}
-	// if user is changing to a tutor, update ratings to be [] instead of null, and vice versa
+	// if user is changing to a tutor, update ratings to be
+	// 	{
+	// 		answerRatingByStudents: [],
+	// 		answerRatingByTutors: [],
+	// 		tutorRating: [],
+	// 		avgRating:null
+	// 	}
+	// instead of null, and vice versa
 	// but if ratings were also passed in, just leave them
 	if (userInfo.userType && !userInfo.ratings) {
-		userInfo.ratings = userInfo.userType==='student' ? null : [];
+		userInfo.ratings = userInfo.userType==='student' ? null : {
+			answerRatingByStudents: [],
+			answerRatingByTutors: [],
+			tutorRating: [],
+			avgRating:null
+		};
 	}
 
 	// if userInfo is empty at this point, throw an error
