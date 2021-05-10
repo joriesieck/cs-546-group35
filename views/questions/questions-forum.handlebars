@@ -30,6 +30,7 @@
             <th>Link</th>
         </tr>
         {{#each questions}}
+        {{#if this.visible}}
         <tr class="table-question-row">
             <td class="table-date-posted">{{this.datePosted}}</td>
             <td class="table-question-title">{{this.title}}</td>
@@ -38,6 +39,7 @@
                 <a href='questions-forum/{{this._id}}'>Link</a>
             </td>
         </tr>
+        {{/if}}
         {{/each}}
         {{/if}}
     </table>

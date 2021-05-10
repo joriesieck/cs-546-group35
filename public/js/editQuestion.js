@@ -10,6 +10,7 @@
         var questionTitle = $('#update-title').val().trim();
         var questionBody = $('#update-body').val().trim();
         var questionTags = $('#update-tags').val().trim();
+        var questionVisibility = $('#visible').val().trim();
         var errorList = [];
 
         errors.empty();
@@ -25,7 +26,7 @@
 		}
 
         try {
-            if(questionTitle.trim().length === 0) throw 'Question body must be non all empty space string';
+            if(questionBody.trim().length === 0) throw 'Question body must be non all empty space string';
             if(typeof questionBody !== 'string') throw 'Question body must be a string.';
         } catch (e) {
 			errorList.push(e);
@@ -46,6 +47,13 @@
 			errorList.push(e);
 		}
 
+        try {
+            if(questionVisibility === undefined || questionVisibility === null) throw 'Question visibility option must be chosen';
+            if(typeof questionVisibility !== 'string') throw 'Question visibility must be a string.';
+        } catch (e) {
+			errorList.push(e);
+		}
+
         if (errorList.length > 0) {
 			errorList.forEach((errorStr) => {
 				var errorLi = $('<li>');
@@ -61,7 +69,8 @@
                 data: JSON.stringify({
                     questionTitle,
                     questionBody,
-                    questionTags
+                    questionTags,
+                    questionVisibility
                 }),
                 error: function(e) {
                     console.log(e);

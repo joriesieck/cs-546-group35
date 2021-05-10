@@ -196,11 +196,11 @@ router.get("/:id/edit", async (req, res) => {
 
 router.put("/:id/edit", async (req, res) => {
 	if (req.session.user && req.session.user.isTutor === true) {
-		let updatedQuestionData = req.body;
 		let questionInfo = xss(req.body);
 		let title = xss(req.body.questionTitle);
 		let questionBody = xss(req.body.questionBody);
 		let tags = xss(req.body.questionTags);
+		let visibility = xss(req.body.questionVisibility);
 		let updatedQuestionObj = {};
 
 		if(!questionInfo) {
@@ -231,11 +231,25 @@ router.put("/:id/edit", async (req, res) => {
 			}
 		}
 		tags = tagsArray;
+
+		let boolVisiblility;
+		if(createHelper(visibility) === false) {
+			res.status(400).json({ error: "Error: Question visbility option must be provided and proper type" });
+			return;
+		} else {
+			if(visibility === 'visible') {
+				boolVisiblility = true;
+			} 
+			if(visibility === 'not-visible') {
+				boolVisiblility = false;
+			} 
+		}
 		
 		if(
 			!title ||
 			!questionBody ||
-			!tags
+			!tags ||
+			!visibility
 		) {
 			res.status(400).json({ error: "You must supply all fields" });
 			return;
@@ -249,7 +263,7 @@ router.put("/:id/edit", async (req, res) => {
 			updatedQuestionObj.title = title;
 			updatedQuestionObj.questionBody = questionBody;
 			updatedQuestionObj.tags = tags;
-			updatedQuestionObj.visible = oldQuestion.visible;
+			updatedQuestionObj.visible = boolVisiblility;
 			updatedQuestionObj.datePosted = oldQuestion.datePosted;
 			updatedQuestionObj.answers = oldQuestion.answers;
 		} catch (e) {
@@ -275,7 +289,7 @@ router.put("/:id/edit", async (req, res) => {
 				questionIDs: questionIdArr
 			};
 			await userData.updateUser(userQuestionObj);
-			
+
 			if(updatedQuestion) {
 				res.status(201).json({ message: "success" });
 			}

@@ -9,6 +9,12 @@
         <label for="update-tags">Enter at most 3 new tag(s) for the question, separated by a comma:</label>
         <input type="text" id="update-tags" value={{oldTags}}>
 
+        <label for="visible">Choose question Visibility:</label>
+        <select id="visible" name="visible">
+            <option value="visible" selected>Visible</option>
+            <option value="not-visible">Not visible</option>
+        </select>
+
         <button type="submit" id='submit-edit-question'>Submit</button>
     </form>
 
