@@ -4,6 +4,7 @@ const newUserRoutes = require('./newUser');
 const path = require("path");
 const questionsRoutes = require('./questions-forum');
 const profileRoutes = require('./profile');
+const toptutorsRoutes = require('./toptutors');
 
 const constructorMethod = (app) => {
 	// user routes
@@ -28,6 +29,7 @@ const constructorMethod = (app) => {
 			loggedIn: !!req.session.user
 		});
 	});
+	//app.use('/toptutors',toptutorsRoutes);
 	// dummy homepage (which catches all other routes for now)
 
 	app.use("/questions-forum", questionsRoutes);

@@ -45,6 +45,21 @@ module.exports = {
         return ratingId;
     },
 
+    async getAllRatings(){
+        const ratingCollection = await ratings();
+        let selectedFields = await ratingCollection.find({},{ratedId, ratingType, ratingValue}).sort({ratedId: 1});
+        return selectedFields; //can do more work in routes
+    },
+
+    async getAllUsersRatings(userId){
+        if (!userId || userId === undefined || userId === null || userId === '') throw "Error: id is required";
+        if (!ObjectId.isValid(userId)) throw "UserId is not a valid ObjectID";
+        const ratingCollection = await ratings();
+        let usersRatings = await ratingCollection.find({ratedId: userId},{ratingType, ratingValue});
+        //we just need the type and the value I think
+        return usersRatings; //can do more work with them in the routes
+    },
+
     async updateRating(ratingId, updatedRating) {
         if (ratingId === undefined) throw "Error: No id parameter provided.";
         if (ObjectID.isValid(ratingId) === false) throw "Error: Invalid rating ID provided.";

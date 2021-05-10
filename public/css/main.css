@@ -226,3 +226,8 @@ td{
 	height:20px;
     font-size:14pt;
 }
+
+/**top rated tutors **/
+.displayedTutor{
+	border: 2px solid #003dac;
+}

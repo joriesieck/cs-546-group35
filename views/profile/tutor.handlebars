@@ -2,11 +2,26 @@
     <div>
         <h2>{{user.username}} - Tutor</h2>
         <h3>{{user.name.firstName}} {{user.name.lastName}}</h3>
+        {{#if isBeingTutored}}
+        <h5>Email: {{email}}</h5>
+        {{/if}}
         <h5>Graduation Year: {{user.year}}</h5>
+        <label for="relevantSubjects">I'm happy to help you with:</label>
+        <ul id="relevantSubjects">
+            {{#each user.relevantSubjects}}\
+            <li>{{this}}</li>
+            {{/each}}
+        </ul>
+        <div id="questionLinks">
+            {{#each user.questionIDs}}
+            <a></a>
+            {{/each}}
+        </div>
         {{#if self}}
         <button id="userInfoChange">Change User Information</button>
         <button id="passwordChange">Change Password</button>
         {{/if}}
+
     </div>
 
     <div id="passwordChangeForm">
