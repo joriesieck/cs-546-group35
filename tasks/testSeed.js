@@ -1624,7 +1624,30 @@ const main = async () => {
 	} catch (e) {
 		console.log(`46: ${e}`);
 	}
-
+	// 47 - ratings.avgRating provided but wrong format
+	uuTotalTests++;
+	try {
+		const user = await users.updateUser({id:user1._id,ratings: {avgRating: "rating"}});
+		uuFailedTests.push(user);
+	} catch (e) {
+		console.log(`47: ${e}`);
+	}
+	// 48 - ratings.avgRating provided but wrong format
+	uuTotalTests++;
+	try {
+		const user = await users.updateUser({id:user1._id,ratings: {avgRating: [user1._id]}});
+		uuFailedTests.push(user);
+	} catch (e) {
+		console.log(`48: ${e}`);
+	}
+	// 49 - successfully update ratings.avgRating
+	uuTotalTests++;
+	try {
+		const user = await users.updateUser({id:user1._id, ratings:{avgRating: 3}});
+		console.log(user);
+	} catch (e) {
+		uuFailedTests.push(`49: ${e}`);
+	}
 	/* get related users */
 	console.log("\ngetRelatedUsers:")
 	// 0 - successfully get users

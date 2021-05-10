@@ -186,20 +186,24 @@ const checkInputs = (inputs, fn) => {
 	// ratings
 	if (inputs.ratings && inputs.ratings.value) {
 		const ratings = inputs.ratings.value;
-		// must contain at least one of answerRatingByStudents, answerRatingByTutors, tutorRating
-		if (!ratings.answerRatingByStudents && !ratings.answerRatingByTutors && !ratings.tutorRating) throw `Ratings must have at least one valid key.`;
+		// must contain at least one of answerRatingByStudents, answerRatingByTutors, tutorRating, avgRating
+		if (!ratings.answerRatingByStudents && !ratings.answerRatingByTutors && !ratings.tutorRating && !ratings.avgRating) throw `Ratings must have at least one valid key.`;
 
-		// each value for each key must be an array of ObjectIds
+		// each value for each key must be an array of ObjectIds, except for avgRating which must be a number
 		for (key in ratings) {
 			const value = ratings[key];
-			if (!Array.isArray(value)) throw `Each value for ratings.${key} must be an array.`;
-			value.forEach((rid) => {
-				try {
-					if (rid !== ObjectId(rid)) throw `${rid} must be an ObjectId.`;
-				} catch {
-					throw `${rid} must be an ObjectId.`;
-				}
-			});
+			if (key=='avgRating') {
+				if (typeof value !== 'number') throw 'Value for ratings.avgRating must be a number.';
+			} else {
+				if (!Array.isArray(value)) throw `Each value for ratings.${key} must be an array.`;
+				value.forEach((rid) => {
+					try {
+						if (rid !== ObjectId(rid)) throw `${rid} must be an ObjectId.`;
+					} catch {
+						throw `${rid} must be an ObjectId.`;
+					}
+				});
+			}
 		}
 	}
 
@@ -271,7 +275,8 @@ const createUser = async (userInfo) => {
 		ratings: isTutor ? {
 			answerRatingByStudents: [],
 			answerRatingByTutors: [],
-			tutorRating: []
+			tutorRating: [],
+			avgRating:null
 		} : null
 	}
 
@@ -433,8 +438,12 @@ const getRelatedUsers = async (id) => {
 
 	// deal with ratings and name separately since they're special cases
 	for (key in userInfo.ratings) {
-		const oldValue = currentUser.ratings[key];
-		userInfo.ratings[key] = oldValue ? oldValue.concat(userInfo.ratings[key]) : userInfo.ratings[key];
+		if (key==='avgRating') {
+			userInfo.ratings.avgRating = currentUser.ratings.avgRating;
+		} else {
+			const oldValue = currentUser.ratings[key];
+			userInfo.ratings[key] = oldValue ? oldValue.concat(userInfo.ratings[key]) : userInfo.ratings[key];
+		}
 	}
 
 	if (userInfo.firstName || userInfo.lastName) {
