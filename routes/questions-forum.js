@@ -264,6 +264,18 @@ router.put("/:id/edit", async (req, res) => {
 				questionID,
 				updatedQuestionObj
 			);
+
+			let currentUser = await userData.getUserByUsername(
+				req.session.user.username
+			);
+			let currentUserId = currentUser._id;
+			let questionIdArr = [ObjectID(req.params.id)];
+			const userQuestionObj = {
+				id: currentUserId,
+				questionIDs: questionIdArr
+			};
+			await userData.updateUser(userQuestionObj);
+			
 			if(updatedQuestion) {
 				res.status(201).json({ message: "success" });
 			}
