@@ -1,4 +1,6 @@
-{{#if questions.length}}
+<main>
+    <a href="/questions-forum/post">Click here to ask a new question</a>
+    {{#if questions.length}}
     <table id='question-list-table'>
 
         {{#if isTutor}}
@@ -43,6 +45,7 @@
         {{/each}}
         {{/if}}
     </table>
-{{else}}
+    {{else}}
     <p class="not-questions">We're sorry, no questions have been asked yet.</p>
-{{/if}}
+    {{/if}}
+</main>
