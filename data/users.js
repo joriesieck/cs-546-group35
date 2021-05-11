@@ -415,25 +415,74 @@ const getRelatedUsers = async (id) => {
 	// make sure only provided fields get updated and data doesn't get removed from arrays or objects
 	const currentUser = await getUserById(id);
 	for (field in userInfo) {
-		const value = userInfo[field];
-		// if field wasn't provided, delete it
-		if (value===undefined || value===null) {
-			delete userInfo[field];
-		}
+		let value = userInfo[field];
+
 		// if value is an array, add to the old value, except for subjects which should just be overwritten
 		if (Array.isArray(value) && field!=='relevantSubjects') {
-			const oldValue = currentUser[field];
-			userInfo[field] = oldValue ? oldValue.concat(value) : value;
+			let oldValue = currentUser[field];
+			// make sure values aren't already in the array
+			if (oldValue) {
+				let fieldUpdated = false;
+				// loop over given values
+				value.forEach((singleVal) => {
+					// loop over old values and compare singleVal with each old value
+					let dup = false;
+					for (let i=0;i<oldValue.length;i++) {
+						if (oldValue[i].equals(singleVal)) {
+							dup = true;
+							break;
+						}
+					}
+					// if singleVal is not a duplicate, add it to oldValue and set fieldUpdated to true
+					if (!dup) {
+						oldValue.push(singleVal);
+						fieldUpdated = true;
+					}
+				})
+				userInfo[field] = oldValue;
+				if (!fieldUpdated) delete userInfo[field];
+			}
+			// if there are no old values, userInfo[field] will just stay the same
+		}
+
+		// if field wasn't provided, delete it
+		if (value===undefined || value===null || value===[]) {
+			delete userInfo[field];
 		}
 	}
 
 	// deal with ratings and name separately since they're special cases
+	let ratingsUpdated = false;
 	for (key in userInfo.ratings) {
 		if (key!=='avgRating') {
 			const oldValue = currentUser.ratings[key];
-			userInfo.ratings[key] = oldValue ? oldValue.concat(userInfo.ratings[key]) : userInfo.ratings[key];
+			let value = userInfo.ratings[key];
+			// make sure values aren't already in the array
+			if (oldValue) {
+				// loop over given values
+				value.forEach((singleVal) => {
+					// loop over old values and compare singleVal with each old value
+					let dup = false;
+					for (let i=0;i<oldValue.length;i++) {
+						if (oldValue[i].equals(singleVal)) {
+							dup = true;
+							break;
+						}
+					}
+					// if singleVal is not a duplicate, add it to oldValue and set ratingsUpdated to true
+					if (!dup) {
+						oldValue.push(singleVal);
+						ratingsUpdated = true;
+					}
+				});
+
+				userInfo.ratings[key] = oldValue;
+			}
+			// if there are no old values, userInfo.ratings[key] will just stay the same
 		}
 	}
+	// if nothing was updated in ratings, remove it
+	if (!ratingsUpdated && (userInfo.ratings && !userInfo.ratings.avgRating)) delete userInfo.ratings;
 	// make sure old fields are not overwritten in ratings
 	if (userInfo.ratings) {
 		for (key in currentUser.ratings) {
@@ -442,6 +491,9 @@ const getRelatedUsers = async (id) => {
 				userInfo.ratings[key] = currentUser.ratings[key];
 			}
 		}
+	} else {
+		// ratings is empty, so delete it
+		delete userInfo.ratings;
 	}
 
 	if (userInfo.firstName || userInfo.lastName) {
@@ -481,7 +533,7 @@ const getRelatedUsers = async (id) => {
 
 	// update user and throw if unsuccessful
 	const updateInfo = await userCollection.updateOne({_id:id}, {$set: userInfo});
-	if (updateInfo.modifiedCount<=0) throw `Sorry, something went wrong. User ${userInfo.username} could not updated.`;
+	if (updateInfo.modifiedCount<=0) throw `Sorry, something went wrong. User ${id} could not updated.`;
 
 	// get and return the updated user
 	const updatedUser = getUserById(id);

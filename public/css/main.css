@@ -9,7 +9,8 @@
  * 		- Landing
  * 		- Tutor
  * 		- Student
- * 4) Mobile (TODO)
+ * 4) Question Forum Page
+ * 5) Request Tutor Page
  */
 
 /* Overall Site Styles */
@@ -37,7 +38,6 @@ header h1 {
 
 /* nav menu */
 #main-menu {
-	/* margin-top: 3%; */
 	margin-bottom: 0;
 	padding-bottom: 0;
 	display: flex;
@@ -86,7 +86,6 @@ a {
 	color: #003dac;
 }
 a:hover {
-	/* color: #4055be; */
 	text-decoration: none;
 	cursor: pointer;
 }
@@ -110,19 +109,15 @@ form button {
 	margin-top: 10px;
 }
 
-/* buttons - bevel? */
+/* buttons */
 button {
 	background-color: #003dac;
-	/* background-color: #0078d8; */
 	color: #fff;
 	border-radius: 5px;
 	border: 2px solid #fff;
 	padding: 5px;
 }
 button:hover {
-	/* background-color: #0062b1; */
-	/* color: #000;
-	border-color: #000; */
 	background-color: #49d8af;
 	color: #003dac;
 	border-color: #003dac;
@@ -217,4 +212,51 @@ td{
 	border-color: black;
 	height:20px;
     font-size:14pt;
+}
+
+/* Request Tutor Page */
+/* make the form wider */
+form#tutor-request {
+	max-width: 50%;
+}
+/* but keep the button small and centered */
+form#tutor-request button {
+	max-width: 30%;
+	margin-left: auto;
+	margin-right: auto;
+}
+/* make horizontal and add a background color */
+.tutor-input-label {
+	background-color: #003dac;
+	color: #fff;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	border: 2px solid #fff;
+}
+/* change color on hover */
+.tutor-input-label:hover {
+	background-color: #49d8af;
+	color: #003dac;
+	border-color: #003dac;
+}
+/* increase width of label */
+.tutor-input-label label {
+	width: 100%;
+	margin: 0;
+}
+/* label styling */
+ul.tutor-label {
+	list-style-type: none;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	padding: 10px;
+	margin: 0;
+	cursor: pointer;
+}
+/* instructions styling */
+#tutor-req-instr {
+	text-align: center;
 }
