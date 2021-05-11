@@ -108,7 +108,7 @@ const main = async () => {
 			username: "corinne",
 			hashedPassword: genHP("corinne1"),
 			year: 2022,
-			relevantSubjects: ['CS 146'],
+			relevantSubjects: ['CS 146', 'CS 492'],
 			isTutor: true
 		});
 	} catch (e) {

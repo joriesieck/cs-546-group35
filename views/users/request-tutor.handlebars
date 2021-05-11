@@ -6,8 +6,9 @@
 		<form id='tutor-request'>
 			<div id='tutor-req-options'>
 			{{#each tutorList}}
+				<div class='tutor-input-label' id='tutor-input-label-{{username}}'>
 				<input type='radio' id='{{username}}' name='requestedTutor' value='{{username}}'>
-				<label for='{{username}}'><ul>
+				<label for='{{username}}'><ul class='tutor-label'>
 					<li>{{name}}</li>
 					<li><ul>
 					{{#each subjects}}
@@ -15,6 +16,7 @@
 						{{/each}}
 					</ul></li>
 				</ul></label>
+				</div>
 			{{/each}}
 			</div>
 			<button type='submit'>Request</button>
