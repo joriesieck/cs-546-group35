@@ -22,8 +22,9 @@ const main = async () => {
 	await db.dropDatabase();
 	
 	/* create 5 student users */
+	let user1;
 	try {
-		const user1 = await users.createUser({
+		user1 = await users.createUser({
 			firstName: "Jorie",
 			lastName: "Sieck",
 			email: "jsieck@stevens.edu",
@@ -36,8 +37,9 @@ const main = async () => {
 	} catch (e) {
 		console.log(`Error in creation of user 1: ${e}`)
 	}
+	let user2;
 	try {
-		const user2 = await users.createUser({
+		user2 = await users.createUser({
 			firstName: "Brandon",
 			lastName: "Cao",
 			email: "bcao4@stevens.edu",
@@ -50,8 +52,9 @@ const main = async () => {
 	} catch (e) {
 		console.log(`Error in creation of user 2: ${e}`)
 	}
+	let user3;
 	try {
-		const user3 = await users.createUser({
+		user3 = await users.createUser({
 			firstName: "Ferris",
 			lastName: "Bueller",
 			email: "fbueller@glenbrook.edu",
@@ -64,8 +67,9 @@ const main = async () => {
 	} catch (e) {
 		console.log(`Error in creation of user 3: ${e}`)
 	}
+	let user4;
 	try {
-		const user4 = await users.createUser({
+		user4 = await users.createUser({
 			firstName: "Marty",
 			lastName: "McFly",
 			email: "mmcfly@hillvalley.edu",
@@ -78,8 +82,9 @@ const main = async () => {
 	} catch (e) {
 		console.log(`Error in creation of user 4: ${e}`)
 	}
+	let user5;
 	try {
-		const user5 = await users.createUser({
+		user5 = await users.createUser({
 			firstName: "Scott",
 			lastName: "Howard",
 			email: "showard@beacontown.edu",
@@ -94,8 +99,9 @@ const main = async () => {
 	}
 
 	/* create 5 tutor users */
+	let user6;
 	try {
-		const user6 = await users.createUser({
+		user6 = await users.createUser({
 			firstName: "Corinne",
 			lastName: "Wisniewski",
 			email: "cwisnie1@stevens.edu",
@@ -108,8 +114,9 @@ const main = async () => {
 	} catch (e) {
 		console.log(`Error in creation of user 6: ${e}`);
 	}
+	let user7;
 	try {
-		const user7 = await users.createUser({
+		user7 = await users.createUser({
 			firstName: "Sebastian",
 			lastName: "Muriel",
 			email: "smuriel@stevens.edu",
@@ -122,8 +129,9 @@ const main = async () => {
 	} catch (e) {
 		console.log(`Error in creation of user 7: ${e}`)
 	}
+	let user8;
 	try {
-		const user8 = await users.createUser({
+		user8 = await users.createUser({
 			firstName: "Patrick",
 			lastName: "Hill",
 			email: "phill@stevens.edu",
@@ -136,8 +144,9 @@ const main = async () => {
 	} catch (e) {
 		console.log(`Error in creation of user 8: ${e}`)
 	}
+	let user9;
 	try {
-		const user9 = await users.createUser({
+		user9 = await users.createUser({
 			firstName: "Allison",
 			lastName: "Reynolds",
 			email: "areynolds@shermer.edu",
@@ -150,8 +159,9 @@ const main = async () => {
 	} catch (e) {
 		console.log(`Error in creation of user 9: ${e}`)
 	}
+	let user10;
 	try {
-		const user10 = await users.createUser({
+		user10 = await users.createUser({
 			firstName: "Carrie",
 			lastName: "White",
 			email: "cwhite@bates.edu",
@@ -163,6 +173,23 @@ const main = async () => {
 		});
 	} catch (e) {
 		console.log(`Error in creation of user 10: ${e}`)
+	}
+
+	/* add tutors to 3 users */
+	try {
+		user1 = await users.updateUser({id:user1._id, tutorList: [user6._id, user7._id]});
+	} catch (e) {
+		console.log(`Error updating user 1: ${e}`);
+	}
+	try {
+		user2 = await users.updateUser({id:user2._id, tutorList: [user8._id, user9._id, user10._id]});
+	} catch (e) {
+		console.log(`Error updating user 2: ${e}`);
+	}
+	try {
+		user3 = await users.updateUser({id:user3._id, tutorList: [user6._id, user7._id,user8._id, user9._id, user10._id]});
+	} catch (e) {
+		console.log(`Error updating user 3: ${e}`);
 	}
 
 

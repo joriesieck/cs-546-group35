@@ -1292,7 +1292,7 @@ const main = async () => {
 	// 5 - successfully add to a user's ratings
 	uuTotalTests++;
 	try {
-		const user = await users.updateUser({id:user1._id, ratings:{answerRatingByStudents: [ObjectId()]}});
+		const user = await users.updateUser({id:user1._id, ratings:{answerRatingByStudents: [user2._id]}});
 		console.log(user);
 	} catch (e) {
 		uuFailedTests.push(`5: ${e}`);
@@ -1316,7 +1316,7 @@ const main = async () => {
 	// 8 - successfully add to a user's questionIDs
 	uuTotalTests++;
 	try {
-		const user = await users.updateUser({id:user2._id, questionIDs:[ObjectId(), ObjectId()]});
+		const user = await users.updateUser({id:user2._id, questionIDs:[user1._id, ObjectId()]});
 		console.log(user);
 	} catch (e) {
 		uuFailedTests.push(`8: ${e}`);
@@ -1624,6 +1624,30 @@ const main = async () => {
 		uuFailedTests.push(user);
 	} catch (e) {
 		console.log(`46: ${e}`);
+	}
+	// 47 - ratings.avgRating provided but out of range
+	uuTotalTests++;
+	try {
+		const user = await users.updateUser({id:user1._id,ratings: {avgRating: 11}});
+		uuFailedTests.push(user);
+	} catch (e) {
+		console.log(`47: ${e}`);
+	}
+	// 48 - ratings.answerRatingByStudents provided but duplicate (should error because no valid inputs)
+	uuTotalTests++;
+	try {
+		const user = await users.updateUser({id:user1._id, ratings:{answerRatingByStudents: [user2._id]}});
+		uuFailedTests.push(user);
+	} catch (e) {
+		console.log(`48: ${e}`);
+	}
+	// 49 - questionIDs provided but duplicate (should error because no valid inputs)
+	uuTotalTests++;
+	try {
+		const user = await users.updateUser({id:user2._id, questionIDs:[user1._id]});
+		uuFailedTests.push(user);
+	} catch (e) {
+		console.log(`49: ${e}`);
 	}
 
 	/* get related users */
