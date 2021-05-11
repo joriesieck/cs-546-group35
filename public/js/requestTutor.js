@@ -35,11 +35,11 @@
 			};
 			$.ajax(requestConfig).then(function (res) {
 				// hide the loading message
-				loadingMsg.hide()
+				loadingMsg.hide();
 					// if message = 'success', display a success message and the tutor's email
 				if (res.message==='success' && res.tutorEmail) {
 					var successMsg = $('#success-msg');
-					successMsg.text(`Your request has been accepted! You can contact your tutor at ${res.tutorEmail}.`);
+					successMsg.text(`Your request has been accepted! You can contact your tutor at ${res.tutorEmail}. If you would like to request another tutor, simply make a new selection.`);
 					successMsg.show();
 				} else {
 					var errorMsg = $('<p class="error">');

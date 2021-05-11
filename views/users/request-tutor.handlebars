@@ -1,8 +1,9 @@
 <main>
 	{{#if error}}
-	<p>{{errorMessage}}</p>
+		<p>{{{errorMessage}}}</p>
 	{{else}}
 	{{#if hasTutors}}
+		<h2 id='tutor-req-instr'>Please select the tutor you would like to request.</h2>
 		<form id='tutor-request'>
 			<div id='tutor-req-options'>
 			{{#each tutorList}}

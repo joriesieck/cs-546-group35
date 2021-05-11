@@ -256,3 +256,7 @@ ul.tutor-label {
 	margin: 0;
 	cursor: pointer;
 }
+/* instructions styling */
+#tutor-req-instr {
+	text-align: center;
+}

@@ -11,6 +11,8 @@ router.get('/', async (req, res) => {
 	if (!req.session.user) {
 		return res.redirect('/login');
 	}
+	// if user is a tutor, display an error
+	if (req.session.user.isTutor) return res.render('users/request-tutor', {title: "Something Went Wrong", error: true, errorMessage: `Sorry, tutors may not request other tutors. Please create a Student Account if you would like private tutoring.`, loggedIn:true});
 
 	// get the user object from the database
 	let user;
@@ -37,7 +39,7 @@ router.get('/', async (req, res) => {
 	possibleTutors.forEach((tutor) => tutorList.push({name: `${tutor.name.firstName} ${tutor.name.lastName}`, username: tutor.username, subjects: tutor.relevantSubjects}));
 
 	// render the page with the tutorList
-	res.render('users/request-tutor', {title: "Request a Tutor", tutorList, hasTutors:!!tutorList, loggedIn:true});
+	res.render('users/request-tutor', {title: "Request a Tutor", tutorList, hasTutors:tutorList.length>0, loggedIn:true});
 });
 
 // handle tutor request
@@ -46,6 +48,8 @@ router.post('/', async (req, res) => {
 	if (!req.session.user) {
 		return res.redirect('/login');
 	}
+	// if user is a tutor, display an error
+	if (req.session.isTutor) return res.render('users/request-tutor', {title: "Something Went Wrong", error: true, errorMessage: `Sorry, tutors may not request other tutors. <a href="/new-user/student"><button class="new-user-landing">Create a Student Account</button></a> if you would like private tutoring.`, loggedIn:true});
 
 	// get the username of the requested tutor from the request body
 	const requestedTutor = xss(req.body.requestedTutor);

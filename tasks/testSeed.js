@@ -1649,6 +1649,15 @@ const main = async () => {
 	} catch (e) {
 		console.log(`49: ${e}`);
 	}
+	// 50 - successfully updated questionIDs
+	uuTotalTests++;
+	try {
+		const user = await users.updateUser({id:user2._id, questionIDs:[ObjectId(), ObjectId(), ObjectId()]});
+		console.log(user);
+	} catch (e) {
+		uuFailedTests.push(`45: ${e}`);
+	}
+
 
 	/* get related users */
 	console.log("\ngetRelatedUsers:")
