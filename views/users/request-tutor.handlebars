@@ -1,0 +1,58 @@
+<main>
+	{{#if error}}
+		<p>{{{errorMessage}}}</p>
+	{{else}}
+	{{#if hasTutors}}
+		<h2 id='tutor-req-instr'>Please select the tutor you would like to request.</h2>
+		<form id='tutor-request'>
+			<div id='tutor-req-options'>
+			{{#each tutorList}}
+				<div class='tutor-input-label' id='tutor-input-label-{{username}}'>
+				<input type='radio' id='{{username}}' name='requestedTutor' value='{{username}}'>
+				<label for='{{username}}'><ul class='tutor-label'>
+					<li>{{name}}</li>
+					<li><ul>
+					{{#each subjects}}
+						<li>{{this}}</li>
+						{{/each}}
+					</ul></li>
+				</ul></label>
+				</div>
+			{{/each}}
+			</div>
+			<button type='submit'>Request</button>
+		</form>
+		<p id='success-msg' hidden></p>
+	{{else}}
+		<p>Sorry, there are no tutors available at this time. <a href='questions-forum/post'>Ask a question</a> instead.</p>
+	{{/if}}
+	{{/if}}
+</main>
+
+<script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+<script src="/public/js/requestTutor.js"></script>
+{{!-- <main>
+	{{#if error}}
+	<p>{{errorMessage}}</p>
+	{{else}}
+	{{#if hasTutors}}
+		{{#each tutorList}}
+			<ul>
+				<li>{{name}}</li>
+				<li>{{username}}</li>
+				<li><ul>
+					{{#each subjects}}
+					<li>{{this}}</li>
+					{{/each}}
+				</ul></li>
+				<li><form method='/POST' action='/request-tutor'>
+					<button type='submit'>Request</button>
+					<input type='hidden' name='requestedTutor' value='{{username}}'>
+				</form></li>
+			</ul>
+		{{/each}}
+	{{else}}
+		<p>Sorry, there are no tutors available at this time. <a href='questions-forum/post'>Ask a question</a> instead.</p>
+	{{/if}}
+	{{/if}}
+</main> --}}

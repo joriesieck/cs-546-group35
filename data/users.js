@@ -14,7 +14,6 @@ inputTitles = {
 	hashedPassword: "Password",
 	year: "Graduation Year",
 	relevantSubjects: "Subjects",
-	profilePic: "Profile Picture",
 	userType: "User Type",
 	tutorList: "Tutor List",
 	questionIDs: "Question IDs",
@@ -143,14 +142,6 @@ const checkInputs = (inputs, fn) => {
 		});
 	}
 
-	// profilePic
-	if (inputs.profilePic && inputs.profilePic.value) {
-		let profilePic = inputs.profilePic.value;
-		// must start with public/images and end in .jpg or .jpeg or .png
-		const pfpRE = /^public\/images\/.*\.(jpg|jpeg|png)$/;
-		if (!pfpRE.test(profilePic)) throw `Profile Picture must be in the public/images directory and must be a png or jpg/jpeg.`;
-	}
-
 	// userType (different from isTutor - this refers to the value that actually gets stored in the database)
 	if (inputs.userType && inputs.userType.value) {
 		let userType = inputs.userType.value;
@@ -186,20 +177,26 @@ const checkInputs = (inputs, fn) => {
 	// ratings
 	if (inputs.ratings && inputs.ratings.value) {
 		const ratings = inputs.ratings.value;
-		// must contain at least one of answerRatingByStudents, answerRatingByTutors, tutorRating
-		if (!ratings.answerRatingByStudents && !ratings.answerRatingByTutors && !ratings.tutorRating) throw `Ratings must have at least one valid key.`;
+		// must contain at least one of answerRatingByStudents, answerRatingByTutors, tutorRating, avgRating
+		if (!ratings.answerRatingByStudents && !ratings.answerRatingByTutors && !ratings.tutorRating && !ratings.avgRating) throw `Ratings must have at least one valid key.`;
 
-		// each value for each key must be an array of ObjectIds
+		// each value for each key must be an array of ObjectIds, except for avgRating which must be a number
 		for (key in ratings) {
 			const value = ratings[key];
-			if (!Array.isArray(value)) throw `Each value for ratings.${key} must be an array.`;
-			value.forEach((rid) => {
-				try {
-					if (rid !== ObjectId(rid)) throw `${rid} must be an ObjectId.`;
-				} catch {
-					throw `${rid} must be an ObjectId.`;
-				}
-			});
+			if (key=='avgRating') {
+				if (typeof value !== 'number') throw 'Value for ratings.avgRating must be a number.';
+				// must be between 1 and 10
+				if (value<1 || value>10) throw 'Value for ratings.avgValue must be between 1 and 10 inclusive.';
+			} else {
+				if (!Array.isArray(value)) throw `Each value for ratings.${key} must be an array.`;
+				value.forEach((rid) => {
+					try {
+						if (rid !== ObjectId(rid)) throw `${rid} must be an ObjectId.`;
+					} catch {
+						throw `${rid} must be an ObjectId.`;
+					}
+				});
+			}
 		}
 	}
 
@@ -265,13 +262,13 @@ const createUser = async (userInfo) => {
 		userType: isTutor ? "tutor" : "student",
 		year,
 		relevantSubjects,
-		profilePic:'',
 		questionIDs: [],
 		tutorList: [],
 		ratings: isTutor ? {
 			answerRatingByStudents: [],
 			answerRatingByTutors: [],
-			tutorRating: []
+			tutorRating: [],
+			avgRating:null
 		} : null
 	}
 
@@ -406,7 +403,6 @@ const getRelatedUsers = async (id) => {
 		hashedPassword: {value:userInfo.hashedPassword, type:'string', required:false},
 		year: {value:userInfo.year, type:'number', required:false},
 		relevantSubjects: {value:userInfo.relevantSubjects, type:'array', required:false},
-		profilePic: {value:userInfo.profilePic, type:'string', required:false},
 		userType: {value:userInfo.userType, type:'string', required:false},
 		tutorList: {value:userInfo.tutorList, type:'array', required:false},
 		questionIDs: {value:userInfo.questionIDs, type:'array', required:false},
@@ -419,22 +415,85 @@ const getRelatedUsers = async (id) => {
 	// make sure only provided fields get updated and data doesn't get removed from arrays or objects
 	const currentUser = await getUserById(id);
 	for (field in userInfo) {
-		const value = userInfo[field];
-		// if field wasn't provided, delete it
-		if (value===undefined || value===null) {
-			delete userInfo[field];
+		let value = userInfo[field];
+
+		// if value is an array, add to the old value, except for subjects which should just be overwritten
+		if (Array.isArray(value) && field!=='relevantSubjects') {
+			let oldValue = currentUser[field];
+			// make sure values aren't already in the array
+			if (oldValue) {
+				let fieldUpdated = false;
+				// loop over given values
+				value.forEach((singleVal) => {
+					// loop over old values and compare singleVal with each old value
+					let dup = false;
+					for (let i=0;i<oldValue.length;i++) {
+						if (oldValue[i].equals(singleVal)) {
+							dup = true;
+							break;
+						}
+					}
+					// if singleVal is not a duplicate, add it to oldValue and set fieldUpdated to true
+					if (!dup) {
+						oldValue.push(singleVal);
+						fieldUpdated = true;
+					}
+				})
+				userInfo[field] = oldValue;
+				if (!fieldUpdated) delete userInfo[field];
+			}
+			// if there are no old values, userInfo[field] will just stay the same
 		}
-		// if value is an array, add to the old value
-		if (Array.isArray(value)) {
-			const oldValue = currentUser[field];
-			userInfo[field] = oldValue ? oldValue.concat(value) : value;
+
+		// if field wasn't provided, delete it
+		if (value===undefined || value===null || value===[]) {
+			delete userInfo[field];
 		}
 	}
 
 	// deal with ratings and name separately since they're special cases
+	let ratingsUpdated = false;
 	for (key in userInfo.ratings) {
-		const oldValue = currentUser.ratings[key];
-		userInfo.ratings[key] = oldValue ? oldValue.concat(userInfo.ratings[key]) : userInfo.ratings[key];
+		if (key!=='avgRating') {
+			const oldValue = currentUser.ratings[key];
+			let value = userInfo.ratings[key];
+			// make sure values aren't already in the array
+			if (oldValue) {
+				// loop over given values
+				value.forEach((singleVal) => {
+					// loop over old values and compare singleVal with each old value
+					let dup = false;
+					for (let i=0;i<oldValue.length;i++) {
+						if (oldValue[i].equals(singleVal)) {
+							dup = true;
+							break;
+						}
+					}
+					// if singleVal is not a duplicate, add it to oldValue and set ratingsUpdated to true
+					if (!dup) {
+						oldValue.push(singleVal);
+						ratingsUpdated = true;
+					}
+				});
+
+				userInfo.ratings[key] = oldValue;
+			}
+			// if there are no old values, userInfo.ratings[key] will just stay the same
+		}
+	}
+	// if nothing was updated in ratings, remove it
+	if (!ratingsUpdated && (userInfo.ratings && !userInfo.ratings.avgRating)) delete userInfo.ratings;
+	// make sure old fields are not overwritten in ratings
+	if (userInfo.ratings) {
+		for (key in currentUser.ratings) {
+			// if key is not in userInfo, add key and value from currentUser
+			if (!userInfo.ratings[key]) {
+				userInfo.ratings[key] = currentUser.ratings[key];
+			}
+		}
+	} else {
+		// ratings is empty, so delete it
+		delete userInfo.ratings;
 	}
 
 	if (userInfo.firstName || userInfo.lastName) {
@@ -448,10 +507,22 @@ const getRelatedUsers = async (id) => {
 		delete userInfo.firstName;
 		delete userInfo.lastName;
 	}
-	// if user is changing to a tutor, update ratings to be [] instead of null, and vice versa
+	// if user is changing to a tutor, update ratings to be
+	// 	{
+	// 		answerRatingByStudents: [],
+	// 		answerRatingByTutors: [],
+	// 		tutorRating: [],
+	// 		avgRating:null
+	// 	}
+	// instead of null, and vice versa
 	// but if ratings were also passed in, just leave them
 	if (userInfo.userType && !userInfo.ratings) {
-		userInfo.ratings = userInfo.userType==='student' ? null : [];
+		userInfo.ratings = userInfo.userType==='student' ? null : {
+			answerRatingByStudents: [],
+			answerRatingByTutors: [],
+			tutorRating: [],
+			avgRating:null
+		};
 	}
 
 	// if userInfo is empty at this point, throw an error
@@ -462,7 +533,7 @@ const getRelatedUsers = async (id) => {
 
 	// update user and throw if unsuccessful
 	const updateInfo = await userCollection.updateOne({_id:id}, {$set: userInfo});
-	if (updateInfo.modifiedCount<=0) throw `Sorry, something went wrong. User ${userInfo.username} could not updated.`;
+	if (updateInfo.modifiedCount<=0) throw `Sorry, something went wrong. User ${id} could not updated.`;
 
 	// get and return the updated user
 	const updatedUser = getUserById(id);
