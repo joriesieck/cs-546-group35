@@ -27,6 +27,13 @@ router.get("/", async (req, res) => {
 		yearPosted = questionList[i].datePosted.getFullYear();
 		fullDatePosted = `${monthPosted}/${dayPosted}/${yearPosted}`;
 		questionList[i].datePosted = fullDatePosted;
+
+		if(questionList[i].answers.length == 0) {
+			questionList[i].answered = "No";
+		} 
+		if(questionList[i].answers.length > 0) {
+			questionList[i].answered = "Yes";
+		} 
 	}
 
 	if(!!req.session.user === false) {
