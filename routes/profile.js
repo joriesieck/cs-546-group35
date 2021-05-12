@@ -44,7 +44,7 @@ router.get('/', async (req, res) => {
 
 //Making a change to the profile/user information
 //all fields optional
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
     //if posting to root route, user can only be editing their own profile
     if (!req.session.user){
         res.redirect('/login');
@@ -52,8 +52,8 @@ router.post('/', (req, res) => {
     let firstName = xss(req.body.firstName);
     let lastName = xss(req.body.lastName);
     let email = xss(req.body.email);
-    let username = xss(req.body.username);
-    let year = parseInt(xss(req.body.year));
+    let newUsername = xss(req.body.username);
+    let year = xss(req.body.year);
     let subjects = xss(req.body.subjects);
 
     let username = req.session.user.username;
@@ -73,15 +73,15 @@ router.post('/', (req, res) => {
         changeFields['email'] = email;
         numChanged++;
     }
-    if (username!==undefined && username!==null && username.trim()!==''){
-        changeFields['username'] = username;
+    if (newUsername!==undefined && newUsername!==null && newUsername.trim()!==''){
+        changeFields['username'] = newUsername;
         numChanged++;
     }
-    if (year!==undefined && year!==null && year.trim()!==''){
-        changeFields['year'] = year;
+    if (year!==undefined && year!==null && year!==''){
+        changeFields['year'] = parseInt(year);
         numChanged++;
     }
-    if (subjects!==undefined && subjects!==null && subjects!==[]){
+    if (subjects!==undefined && subjects!==null && subjects!=='' && subjects!==[]){
         changeFields['relevantSubjects'] = subjects;
         numChanged++;
     }
@@ -105,25 +105,10 @@ router.post('/', (req, res) => {
     changeFields['id'] = userId;
 
     try{
-        const updatedUser = userData.updateUser(changeFields);
+        const updatedUser = await userData.updateUser(changeFields);
         if (updatedUser){
-            if (updatedUser.userType === 'student'){
-                res.status(200).render('profile/student',{
-                    user: updatedUser,
-                    self: true,
-                    title: `${updatedUser.username}'s Profile`,
-                    loggedIn: true,
-                    message: 'Successfully changed user information!'
-                });
-            } else { //tutor
-                res.status(200).render('profile/tutor',{
-                    user: updatedUser,
-                    self: true,
-                    title: `${updatedUser.username}'s Profile`,
-                    loggedIn: true,
-                    message: 'Successfully changed user information!'
-                });
-            }
+            req.session.user.username = updatedUser.username;
+            res.status(200).json({message: "success"});
         }
     } catch(e){
         res.status(400).json({error: `Error in POST /profile while updating the user in db: ${e}`});
@@ -131,7 +116,7 @@ router.post('/', (req, res) => {
     }
 });
 
-router.post('/password', (req, res) => {
+router.post('/password', async (req, res) => {
     //as all fields here are required, I felt a separate function made sense
     if (!req.session.user){
         res.redirect('/login');
@@ -167,7 +152,12 @@ router.post('/password', (req, res) => {
             throw 'New password must contain at least one letter and one number';
         }
 
-        ({userId, hashedPassword} = await userData.getUserByUsername(username));
+        const user = await userData.getUserByUsername(username);
+        if (!user){
+            throw `Could not get user with username ${username}`;
+        }
+        hashedPassword = user.hashedPassword;
+        userId = user._id;
         if (!hashedPassword) throw `No password found for user ${username}.`;
 
         const match = await bcrypt.compare(currentPassword, hashedPassword);
@@ -175,7 +165,7 @@ router.post('/password', (req, res) => {
         if (!match) throw "Cannot change password - current password is incorrect";
 
     }catch(e){
-        res.status(400).json({error: `Error in /password POST: {e}`});
+        res.status(400).json({error: `Error in /password POST: ${e}`});
         return;
     }
 
@@ -193,24 +183,7 @@ router.post('/password', (req, res) => {
                 hashedPassword: hash
             });
             if (user){
-                if (user.userType === 'student'){
-                    res.status(200).render('profile/student',{
-                        user: user,
-                        self: true,
-                        title: `${user.username}'s Profile`,
-                        loggedIn: true,
-                        message: 'Successfully changed password!'
-                    });
-                } else {
-                    //tutor
-                    res.status(200).render('profile/tutor',{
-                        user: user,
-                        self: true,
-                        title: `${user.username}'s Profile`,
-                        loggedIn: true,
-                        message: 'Successfully changed password!'
-                    });
-                }
+                res.status(200).json({message: "success"});
             } else {
                 throw 'Your password could not be changed';
             }
