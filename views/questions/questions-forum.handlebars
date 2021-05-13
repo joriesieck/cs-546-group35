@@ -1,51 +1,83 @@
 <main>
-    <a href="/questions-forum/post">Click here to ask a new question</a>
+
+    <div class='forum-input-container'>
+        <label for="search-bar-input"></label>
+        <input id="search-bar-input" type="text" name="search-bar-input" onkeyup="searchFilter()"
+            placeholder="Search for a question">
+
+        <label for="search-tag-filter"></label>
+        <input id="search-tag-filter" type="text" name="search-tag-filter" onkeyup="tagFilter()"
+            placeholder="Filter by tag">
+    </div>
+
+    <div class='forum-input-container'>
+        <label for="answered-selection">Choose to show answered or unanswered questions:</label>
+        <select id="answered-selection" name="answered-selection" onchange="answeredFilter()">
+            <option value="both" selected>Show answered and unanswered questions</option>
+            <option value="answered">Show only answered questions</option>
+            <option value="unanswered">Show only unanswered questions</option>
+        </select>
+    </div>
+
+    <div id='forum-ask-new-question'>
+            <a href='questions-forum/post'>Click here to ask a new question</a>
+
+    </div>
+
     {{#if questions.length}}
     <table id='question-list-table'>
 
         {{#if isTutor}}
-        <tr class="table-header">
-            <th>Date</th>
-            <th>Question Title</th>
-            <th>Tags</th>
-            <th>Link</th>
-            <th>Edit</th>
-        </tr>
-        {{#each questions}}
-        <tr class="table-question-row">
-            <td class="table-date-posted">{{this.datePosted}}</td>
-            <td class="table-question-title">{{this.title}}</td>
-            <td class="table-question-tags">{{this.tags}}</td>
-            <td class="table-question-link">
-                <a href='questions-forum/{{this._id}}'>Link</a>
-            </td>
-            <td class="table-question-edit">
-                <a href='/questions-forum/{{this._id}}/edit'>Edit</a>
-            </td>
-        </tr>
-        {{/each}}
+            <tr class="table-header">
+                <th>Date</th>
+                <th>Question Title</th>
+                <th>Tags</th>
+                <th>Link</th>
+                <th>Answered?</th>
+                <th>Edit</th>
+            </tr>
+            {{#each questions}}
+                <tr class="table-question-row">
+                    <td class="table-date-posted">{{this.datePosted}}</td>
+                    <td class="table-question-title">{{this.title}}</td>
+                    <td class="table-question-tags">{{this.tags}}</td>
+                    <td class="table-question-link">
+                        <a href='questions-forum/{{this._id}}'>Link</a>
+                    </td>
+                    <td class="table-question-answered">{{this.answered}}</td>
+                    <td class="table-question-edit">
+                        <a href='/questions-forum/{{this._id}}/edit'>Edit</a>
+                    </td>
+                </tr>
+            {{/each}}
         {{else}}
-        <tr class="table-header">
-            <th>Date</th>
-            <th>Question Title</th>
-            <th>Tags</th>
-            <th>Link</th>
-        </tr>
-        {{#each questions}}
-        {{#if this.visible}}
-        <tr class="table-question-row">
-            <td class="table-date-posted">{{this.datePosted}}</td>
-            <td class="table-question-title">{{this.title}}</td>
-            <td class="table-question-tags">{{this.tags}}</td>
-            <td class="table-question-link">
-                <a href='questions-forum/{{this._id}}'>Link</a>
-            </td>
-        </tr>
-        {{/if}}
-        {{/each}}
+            <tr class="table-header">
+                <th>Date</th>
+                <th>Question Title</th>
+                <th>Tags</th>
+                <th>Link</th>
+                <th>Answered?</th>
+            </tr>
+            {{#each questions}}
+                {{#if this.visible}}
+                <tr class="table-question-row">
+                    <td class="table-date-posted">{{this.datePosted}}</td>
+                    <td class="table-question-title">{{this.title}}</td>
+                    <td class="table-question-tags">{{this.tags}}</td>
+                    <td class="table-question-link">
+                        <a href='questions-forum/{{this._id}}'>Link</a>
+                    </td>
+                    <td class="table-question-answered">{{this.answered}}</td>
+                </tr>
+                {{/if}}
+            {{/each}}
         {{/if}}
     </table>
     {{else}}
     <p class="not-questions">We're sorry, no questions have been asked yet.</p>
     {{/if}}
 </main>
+
+<script src="https://code.jquery.com/jquery-2.2.4.min.js"
+    integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+<script src="/public/js/question-search.js"></script> 

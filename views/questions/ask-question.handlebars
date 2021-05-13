@@ -1,4 +1,7 @@
 <main>
+    {{#if error}}
+		<p>{{{errorMessage}}}</p>
+	{{else}}
     <form id="new-question-form">
         <label for="question-title">Enter a title: </label>
         <input type="text" id="question-title" name="question-title" placeholder="Title" required>
@@ -14,6 +17,7 @@
     </form>
 
     <ul id="new-question-errors-list" class="error" hidden></ul>
+    {{/if}}
 </main>
 
 <script src="https://code.jquery.com/jquery-2.2.4.min.js"

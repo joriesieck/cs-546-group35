@@ -6,11 +6,37 @@ const path = require("path");
 const questionsRoutes = require('./questions-forum');
 const profileRoutes = require('./profile');
 const toptutorsRoutes = require('./toptutors');
+const questionData = require("../data/questions");
 
 const constructorMethod = (app) => {
 	// user routes
-	app.get('/',(req,res) => {
-		res.render('home/home',{title: "Stress-Less Tutoring", loggedIn: !!req.session.user});
+	app.get('/',async(req,res) => {
+		let questionList = await questionData.getQuestions();
+		let monthPosted;
+		let dayPosted;
+		let yearPosted;
+		let fullDatePosted;
+
+		questionList = questionList.slice(1,4);
+		for(let i = 0; i < questionList.length; i++) {
+			monthPosted = questionList[i].datePosted.getMonth() + 1;
+			dayPosted = questionList[i].datePosted.getDate() ;
+			yearPosted = questionList[i].datePosted.getFullYear();
+			fullDatePosted = `${monthPosted}/${dayPosted}/${yearPosted}`;
+			questionList[i].datePosted = fullDatePosted;
+
+			if(questionList[i].answers.length == 0) {
+				questionList[i].answered = "No";
+			} 
+			if(questionList[i].answers.length > 0) {
+				questionList[i].answered = "Yes";
+			} 
+		}
+		if(req.session.user) {
+			return res.render('home/home',{title: "Stress-Less Tutoring", loggedIn: !!req.session.user, questions: questionList, isTutor: req.session.user.isTutor});
+		} else {
+			return res.render('home/home',{title: "Stress-Less Tutoring", loggedIn: !!req.session.user, questions: questionList});
+		}
 	});
 	app.use('/login', loginRoutes);
 	app.use('/new-user', newUserRoutes);
