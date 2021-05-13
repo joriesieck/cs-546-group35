@@ -3,6 +3,24 @@ const users = require('../config/mongoCollections').users;
 const { ObjectId } = require('mongodb');
 
 /**
+ * An object that maps each input name to its user-friendly title
+ */
+inputTitles = {
+	id: "ID",
+	firstName: "First Name",
+	lastName: "Last Name",
+	email: "Email",
+	username: "Username",
+	hashedPassword: "Password",
+	year: "Graduation Year",
+	relevantSubjects: "Subjects",
+	userType: "User Type",
+	tutorList: "Tutor List",
+	questionIDs: "Question IDs",
+	ratings: "Ratings"
+}
+
+/**
  * checkInputs
  * @param inputs: an object of the form {field: {value,type,required}}
  * @param fn: the name of the calling function
@@ -19,31 +37,31 @@ const checkInputs = (inputs, fn) => {
 		let required = inputs[field].required;
 
 		// input must exist
-		if (required && (value===undefined || value===null)) throw `Error in function ${fn}: ${field} not provided.`;
+		if (required && (value===undefined || value===null)) throw `${inputTitles[field]} is required.`;
 
 		// if it's not required, only do checks if it exists
 		if (value!==undefined && value!==null) {
 			// special case: array
-			if (type==='array' && !Array.isArray(value)) throw `Error in function ${fn}: ${field} is not an array.`;
+			if (type==='array' && !Array.isArray(value)) throw `${inputTitles[field]} must be an array.`;
 			// special case: number
-			if (type==='number' && isNaN(value)) throw `Error in function ${fn}: ${field} is not a number.`;
+			if (type==='number' && isNaN(value)) throw `${inputTitles[field]} must be a number.`;
 			// special case: ObjectId
 			if (type==='ObjectId') {
 				try {
-					if (value !== ObjectId(value)) throw `Error in function ${fn}: ${value} is not an ObjectId.`;
+					if (value !== ObjectId(value)) throw `${inputTitles[field]} must be an ObjectId.`;
 				} catch {
-					throw `Error in function ${fn}: ${value} is not an ObjectId.`;
+					throw `${inputTitles[field]} must be an ObjectId.`;
 				}
 			}
 			// special case: object
-			if (type==='object' && Array.isArray(value)) throw `Error in function ${fn}: ${value} is not an object.`;
+			if (type==='object' && Array.isArray(value)) throw `${inputTitles[field]} must be an object.`;
 			// all other cases:
-			if (type!=='array' && type!=='ObjectId' && typeof value !== type) throw `Error in function ${fn}: ${field} is not a ${type}.`;
+			if (type!=='array' && type!=='ObjectId' && typeof value !== type) throw `${inputTitles[field]} must be a ${type}.`;
 
 			// strings must not be all whitespace
 			if (type === 'string') {
 				if (field!=='hashedPassword') value = value.trim();	// don't trim password
-				if (value === '') throw `Error in function ${fn}: ${field} is all whitespace characters.`;
+				if (value === '') throw `${inputTitles[field]} must contain at least one non-whitespace character.`;
 				// update trimmed value in inputs
 				inputs[field].value = value;
 			}
@@ -58,29 +76,29 @@ const checkInputs = (inputs, fn) => {
 	if(inputs.firstName && inputs.firstName.value) {
 		const firstName = inputs.firstName.value;
 		// must be less than or equal to 254 characters
-		if (firstName.length > 254) throw `Error in function ${fn}: firstName cannot be longer than 254 characters.`;
+		if (firstName.length > 254) throw `First Name may not contain more than 254 characters.`;
 		// must be alphabet characters, ', -, or space
 		const nameRE = /^([a-zA-Z'\- ]+)$/;
-		if (!nameRE.test(firstName)) throw `Error in function ${fn}: firstName can only contain alphabetical characters, ', -, or space.`;
+		if (!nameRE.test(firstName)) throw `First Name may only contain alphabetical characters, ', -, or space.`;
 	}
 	if(inputs.lastName && inputs.lastName.value) {
 		const lastName = inputs.lastName.value;
 		// must be less than or equal to 254 characters
-		if (lastName.length > 254) throw `Error in function ${fn}: lastName cannot be longer than 254 characters.`;
+		if (lastName.length > 254) throw `Last Name cannot be longer than 254 characters.`;
 		// must be alphabet characters, ', -, or space
 		const nameRE = /^([a-zA-Z'\- ]+)$/;
-		if (!nameRE.test(lastName)) throw `Error in function ${fn}: lastName can only contain alphabetical characters, ', -, or space.`;
+		if (!nameRE.test(lastName)) throw `Last Name may only contain alphabetical characters, ', -, or space.`;
 	}
 
 	// email
 	if (inputs.email && inputs.email.value) {
 		const email = inputs.email.value;
 		// must be less than or equal to 254 characters
-		if (email.length > 254) throw `Error in function ${fn}: email cannot be longer than 254 characters.`;
+		if (email.length > 254) throw `Email may not contain more than 254 characters.`;
 		// must be in correct email format
 		// regex source: https://www.geeksforgeeks.org/write-regular-expressions/
 		const emailRE = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
-		if (!emailRE.test(email)) throw `Error in function ${fn}: email is not in correct format.`;
+		if (!emailRE.test(email)) throw `Email must be of the format example@domain.suffix.`;
 		// set email to all lowercase
 		inputVals.email = email.toLowerCase();
 	}
@@ -89,10 +107,10 @@ const checkInputs = (inputs, fn) => {
 	if (inputs.username && inputs.username.value) {
 		const username = inputs.username.value;
 		// must be less than or equal to 254 characters
-		if (username.length > 254) throw `Error in function ${fn}: username cannot be longer than 254 characters.`;
+		if (username.length > 254) throw `Username may not contain more than 254 characters.`;
 		// can only contain alphabet characters, numbers, -, _, and .
 		const usernameRE = /^([a-zA-Z0-9\-\_\.]+)$/;
-		if (!usernameRE.test(username)) throw `Error in function ${fn}: username may only contain alphanumeric characters, -, _, and .`;
+		if (!usernameRE.test(username)) throw `Username may only contain alphanumeric characters, -, _, and .`;
 		// set username to all lowercase
 		inputVals.username = username.toLowerCase();
 	}
@@ -101,35 +119,27 @@ const checkInputs = (inputs, fn) => {
 	if (inputs.year && inputs.year.value) {
 		const year = inputs.year.value;
 		// must be greater than or equal to 0
-		if (year < 0) throw `Error in function ${fn}: year is less than 0.`;
+		if (year < 0) throw `Graduation Year must be greater than or equal to 0.`;
 		// must be of the form YYYY
 		const yearRE = /^\d\d\d\d$/;
-		if (!yearRE.test(year)) throw `Error in function ${fn}: year is not of the form YYYY.`;
+		if (!yearRE.test(year)) throw `Graduation Year must be of the form YYYY.`;
 	}
 
 	// relevantSubjects
 	if ((inputs.isTutor && inputs.isTutor.value) || (inputs.relevantSubjects && inputs.relevantSubjects.value)) {
 		const relevantSubjects = inputs.relevantSubjects.value;
 		// if isTutor, must not be empty
-		if ((inputs.isTutor && inputs.isTutor.value) && relevantSubjects.length <= 0) throw `Error in function ${fn}: user is tutor but relevantSubjects is empty.`;
+		if ((inputs.isTutor && inputs.isTutor.value) && relevantSubjects.length <= 0) throw `Subjects must contain at least one subject.`;
 		// if nonempty, all inputs must be strings and contain at least one non-whitespace character
 		relevantSubjects.forEach((subject,i) => {
 			// must be strings
-			if (typeof subject !== 'string') throw `Error in function ${fn}: relevantSubjects contains nonstrings.`;
+			if (typeof subject !== 'string') throw `Subjects may only contain strings.`;
 			// must contain at least one non-whitespace character
 			subject = subject.trim();
-			if (subject==='') throw `Error in function ${fn}: relevantSubjects contains whitespace strings.`;
+			if (subject==='') throw `Each subject must contain at least one non-whitespace character.`;
 			// set relevantSubjects[i] to trimmed subject
 			inputs.relevantSubjects[i] = subject;
 		});
-	}
-
-	// profilePic
-	if (inputs.profilePic && inputs.profilePic.value) {
-		let profilePic = inputs.profilePic.value;
-		// must start with public/images and end in .jpg or .jpeg or .png
-		const pfpRE = /^public\/images\/.*\.(jpg|jpeg|png)$/;
-		if (!pfpRE.test(profilePic)) throw `Error in function ${fn}: profilePic must be in the public/images directory and must be a png or jpg/jpeg.`;
 	}
 
 	// userType (different from isTutor - this refers to the value that actually gets stored in the database)
@@ -137,7 +147,7 @@ const checkInputs = (inputs, fn) => {
 		let userType = inputs.userType.value;
 		// can only be 'student' or 'tutor'
 		userType = userType.toLowerCase();
-		if (userType!=='student' && userType!=='tutor') throw `Error in function ${fn}: invalid userType '${userType}', expected 'student' or 'tutor'.`;
+		if (userType!=='student' && userType!=='tutor') throw `Invalid User Type '${userType}', expected 'student' or 'tutor'.`;
 	}
 
 	// questionIDs and tutorList
@@ -146,9 +156,9 @@ const checkInputs = (inputs, fn) => {
 		// can only contain ObjectIds
 		questionIDs.forEach((qid) => {
 			try {
-				if (qid !== ObjectId(qid)) throw `Error in function ${fn}: ${qid} is not an ObjectId.`;
+				if (qid !== ObjectId(qid)) throw `${qid} must be an ObjectId.`;
 			} catch {
-				throw `Error in function ${fn}: ${qid} is not an ObjectId.`;
+				throw `${qid} must be an ObjectId.`;
 			}
 		});
 	}
@@ -157,9 +167,9 @@ const checkInputs = (inputs, fn) => {
 		// can only contain ObjectIds
 		tutorList.forEach((uid) => {
 			try {
-				if (uid !== ObjectId(uid)) throw `Error in function ${fn}: ${uid} is not an ObjectId.`;
+				if (uid !== ObjectId(uid)) throw `${uid} must be an ObjectId.`;
 			} catch {
-				throw `Error in function ${fn}: ${uid} is not an ObjectId.`;
+				throw `${uid} must be an ObjectId.`;
 			}
 		});
 	}
@@ -167,20 +177,26 @@ const checkInputs = (inputs, fn) => {
 	// ratings
 	if (inputs.ratings && inputs.ratings.value) {
 		const ratings = inputs.ratings.value;
-		// must contain at least one of answerRatingByStudents, answerRatingByTutors, tutorRating
-		if (!ratings.answerRatingByStudents && !ratings.answerRatingByTutors && !ratings.tutorRating) throw `Error in function ${fn}: 'ratings' must have at least one valid key.`;
+		// must contain at least one of answerRatingByStudents, answerRatingByTutors, tutorRating, avgRating
+		if (!ratings.answerRatingByStudents && !ratings.answerRatingByTutors && !ratings.tutorRating && !ratings.avgRating) throw `Ratings must have at least one valid key.`;
 
-		// each value for each key must be an array of ObjectIds
+		// each value for each key must be an array of ObjectIds, except for avgRating which must be a number
 		for (key in ratings) {
 			const value = ratings[key];
-			if (!Array.isArray(value)) throw `Error in function ${fn}: value for ratings.${key} is not an array.`;
-			value.forEach((rid) => {
-				try {
-					if (rid !== ObjectId(rid)) throw `Error in function ${fn}: ${rid} is not an ObjectId.`;
-				} catch {
-					throw `Error in function ${fn}: ${rid} is not an ObjectId.`;
-				}
-			});
+			if (key=='avgRating') {
+				if (typeof value !== 'number') throw 'Value for ratings.avgRating must be a number.';
+				// must be between 1 and 10
+				if (value<1 || value>10) throw 'Value for ratings.avgValue must be between 1 and 10 inclusive.';
+			} else {
+				if (!Array.isArray(value)) throw `Each value for ratings.${key} must be an array.`;
+				value.forEach((rid) => {
+					try {
+						if (rid !== ObjectId(rid)) throw `${rid} must be an ObjectId.`;
+					} catch {
+						throw `${rid} must be an ObjectId.`;
+					}
+				});
+			}
 		}
 	}
 
@@ -195,12 +211,12 @@ const checkInputs = (inputs, fn) => {
  */
 const createUser = async (userInfo) => {
 	// make sure an object was passed in
-	if (userInfo===undefined || userInfo===null) throw 'Error in function createUser: missing input object.';
-	if (typeof userInfo !== 'object' || Array.isArray(userInfo)) throw `Error in function createUser: userInfo is not an object.`;
+	if (userInfo===undefined || userInfo===null) throw 'User Information is required.';
+	if (typeof userInfo !== 'object' || Array.isArray(userInfo)) throw 'User Information must be an object.';
 	
 	// check inputs - firstName, lastName, email, username, hashedPassword, year, relevantSubjects, and isTutor existence and type
 	const numInputs = Object.keys(userInfo).length;
-	if (numInputs < 8) throw `Error in function createUser: ${numInputs} inputs provided, expected 8.`;
+	if (numInputs < 8) throw `User Information may not contain less than 8 inputs.`;
 
 	const { firstName, lastName, email, username, hashedPassword, year, relevantSubjects, isTutor } =  checkInputs({
 		firstName: {value:userInfo.firstName, type:'string', required:true},
@@ -219,7 +235,7 @@ const createUser = async (userInfo) => {
 	try {
 		await getUserByEmail(email);
 		// user is already in the database, so error
-		throw `Error in function createUser: email exists.`;
+		throw `There is already an account associated with ${email}. Please log in instead.`;
 	} catch (e) {
 		// if the error isn't user not found, bubble it
 		if (!`${e}`.includes('not found')) throw e;
@@ -228,7 +244,7 @@ const createUser = async (userInfo) => {
 	try {
 		await getUserByUsername(username);
 		// user is already in the database, so error
-		throw `Error in function createUser: username exists.`;
+		throw `There is already an account associated with ${username}. Please log in instead.`;
 	} catch (e) {
 		// if the error isn't user not found, bubble it
 		if (!`${e}`.includes('not found')) throw e;
@@ -246,20 +262,20 @@ const createUser = async (userInfo) => {
 		userType: isTutor ? "tutor" : "student",
 		year,
 		relevantSubjects,
-		profilePic:'',
 		questionIDs: [],
 		tutorList: [],
 		ratings: isTutor ? {
 			answerRatingByStudents: [],
 			answerRatingByTutors: [],
-			tutorRating: []
+			tutorRating: [],
+			avgRating:null
 		} : null
 	}
 
 	// insert the user into the collection
 	const insertInfo = await userCollection.insertOne(user);
 	// throw error if user could not be inserted
-	if (insertInfo.insertedCount <= 0) throw `Error in function createUser: user ${username} could not be created.`;
+	if (insertInfo.insertedCount <= 0) throw `Sorry, something went wrong. User ${username} could not be created.`;
 
 	// get and return the newly inserted user
 	const id = insertInfo.insertedId;
@@ -282,7 +298,7 @@ const createUser = async (userInfo) => {
 
 	// search for the given user and throw if not found
 	const user = await userCollection.findOne({_id: id});
-	if (user===null) throw `Error in function getUserById: ${id} not found.`;
+	if (user===null) throw `User ${id} not found.`;
 
 	// return user
 	return user;
@@ -303,7 +319,7 @@ const createUser = async (userInfo) => {
 
 	// search for the given user and throw if not found
 	const user = await userCollection.findOne({email});
-	if (user===null) throw `Error in function getUserByEmail: ${email} not found.`;
+	if (user===null) throw `User with email ${email} not found.`;
 
 	// return user
 	return user;
@@ -324,7 +340,7 @@ const getUserByUsername = async (username) => {
 
 	// search for the given user and throw if not found
 	const user = await userCollection.findOne({username});
-	if (user===null) throw `Error in function getUserByUsername: ${username} not found.`;
+	if (user===null) throw `User with username ${username} not found.`;
 
 	// return user
 	return user;
@@ -372,10 +388,11 @@ const getRelatedUsers = async (id) => {
  */
  const updateUser = async (userInfo) => {
 	// check inputs - id must exist, all others are optional but there must be at least one updateable field
-	if (userInfo===undefined || userInfo===null) throw 'Error in function updateUser: missing input object.';
+	if (userInfo===undefined || userInfo===null) throw 'User Information is required.'
+	if (typeof userInfo !== 'object' || Array.isArray(userInfo)) throw 'User Information must be an object.';
 
 	const numInputs = Object.keys(userInfo).length;
-	if (numInputs < 2) throw `Error in function updateUser: ${numInputs} inputs provided, expected at least 2.`;
+	if (numInputs < 2) throw `User Information must contain at least 2 inputs.`;
 
 	userInfo =  checkInputs({
 		id: {value:userInfo.id, type:'ObjectId', required:true},
@@ -386,7 +403,6 @@ const getRelatedUsers = async (id) => {
 		hashedPassword: {value:userInfo.hashedPassword, type:'string', required:false},
 		year: {value:userInfo.year, type:'number', required:false},
 		relevantSubjects: {value:userInfo.relevantSubjects, type:'array', required:false},
-		profilePic: {value:userInfo.profilePic, type:'string', required:false},
 		userType: {value:userInfo.userType, type:'string', required:false},
 		tutorList: {value:userInfo.tutorList, type:'array', required:false},
 		questionIDs: {value:userInfo.questionIDs, type:'array', required:false},
@@ -399,22 +415,85 @@ const getRelatedUsers = async (id) => {
 	// make sure only provided fields get updated and data doesn't get removed from arrays or objects
 	const currentUser = await getUserById(id);
 	for (field in userInfo) {
-		const value = userInfo[field];
-		// if field wasn't provided, delete it
-		if (value===undefined || value===null) {
-			delete userInfo[field];
+		let value = userInfo[field];
+
+		// if value is an array, add to the old value, except for subjects which should just be overwritten
+		if (Array.isArray(value) && field!=='relevantSubjects') {
+			let oldValue = currentUser[field];
+			// make sure values aren't already in the array
+			if (oldValue) {
+				let fieldUpdated = false;
+				// loop over given values
+				value.forEach((singleVal) => {
+					// loop over old values and compare singleVal with each old value
+					let dup = false;
+					for (let i=0;i<oldValue.length;i++) {
+						if (oldValue[i].equals(singleVal)) {
+							dup = true;
+							break;
+						}
+					}
+					// if singleVal is not a duplicate, add it to oldValue and set fieldUpdated to true
+					if (!dup) {
+						oldValue.push(singleVal);
+						fieldUpdated = true;
+					}
+				})
+				userInfo[field] = oldValue;
+				if (!fieldUpdated) delete userInfo[field];
+			}
+			// if there are no old values, userInfo[field] will just stay the same
 		}
-		// if value is an array, add to the old value
-		if (Array.isArray(value)) {
-			const oldValue = currentUser[field];
-			userInfo[field] = oldValue ? oldValue.concat(value) : value;
+
+		// if field wasn't provided, delete it
+		if (value===undefined || value===null || value===[]) {
+			delete userInfo[field];
 		}
 	}
 
 	// deal with ratings and name separately since they're special cases
+	let ratingsUpdated = false;
 	for (key in userInfo.ratings) {
-		const oldValue = currentUser.ratings[key];
-		userInfo.ratings[key] = oldValue ? oldValue.concat(userInfo.ratings[key]) : userInfo.ratings[key];
+		if (key!=='avgRating') {
+			const oldValue = currentUser.ratings[key];
+			let value = userInfo.ratings[key];
+			// make sure values aren't already in the array
+			if (oldValue) {
+				// loop over given values
+				value.forEach((singleVal) => {
+					// loop over old values and compare singleVal with each old value
+					let dup = false;
+					for (let i=0;i<oldValue.length;i++) {
+						if (oldValue[i].equals(singleVal)) {
+							dup = true;
+							break;
+						}
+					}
+					// if singleVal is not a duplicate, add it to oldValue and set ratingsUpdated to true
+					if (!dup) {
+						oldValue.push(singleVal);
+						ratingsUpdated = true;
+					}
+				});
+
+				userInfo.ratings[key] = oldValue;
+			}
+			// if there are no old values, userInfo.ratings[key] will just stay the same
+		}
+	}
+	// if nothing was updated in ratings, remove it
+	if (!ratingsUpdated && (userInfo.ratings && !userInfo.ratings.avgRating)) delete userInfo.ratings;
+	// make sure old fields are not overwritten in ratings
+	if (userInfo.ratings) {
+		for (key in currentUser.ratings) {
+			// if key is not in userInfo, add key and value from currentUser
+			if (!userInfo.ratings[key]) {
+				userInfo.ratings[key] = currentUser.ratings[key];
+			}
+		}
+	} else {
+		// ratings is empty, so delete it
+		delete userInfo.ratings;
 	}
 
 	if (userInfo.firstName || userInfo.lastName) {
@@ -428,21 +507,33 @@ const getRelatedUsers = async (id) => {
 		delete userInfo.firstName;
 		delete userInfo.lastName;
 	}
-	// if user is changing to a tutor, update ratings to be [] instead of null, and vice versa
+	// if user is changing to a tutor, update ratings to be
+	// 	{
+	// 		answerRatingByStudents: [],
+	// 		answerRatingByTutors: [],
+	// 		tutorRating: [],
+	// 		avgRating:null
+	// 	}
+	// instead of null, and vice versa
 	// but if ratings were also passed in, just leave them
 	if (userInfo.userType && !userInfo.ratings) {
-		userInfo.ratings = userInfo.userType==='student' ? null : [];
+		userInfo.ratings = userInfo.userType==='student' ? null : {
+			answerRatingByStudents: [],
+			answerRatingByTutors: [],
+			tutorRating: [],
+			avgRating:null
+		};
 	}
 
 	// if userInfo is empty at this point, throw an error
-	if (Object.keys(userInfo).length<=0) throw 'Error in updateUser: no valid inputs provided.';
+	if (Object.keys(userInfo).length<=0) throw 'User Information does not contain any valid inputs, so no update was performed.';
 
 	// get the collection
 	const userCollection = await users();
 
 	// update user and throw if unsuccessful
 	const updateInfo = await userCollection.updateOne({_id:id}, {$set: userInfo});
-	if (updateInfo.modifiedCount<=0) throw `Error in function updateUser: could not update user ${userInfo.username}.`;
+	if (updateInfo.modifiedCount<=0) throw `Sorry, something went wrong. User ${id} could not updated.`;
 
 	// get and return the updated user
 	const updatedUser = getUserById(id);
@@ -464,7 +555,7 @@ const getRelatedUsers = async (id) => {
 
 	// remove the given user, getting their username in the process, and throw if not found
 	const deleteInfo = await userCollection.findOneAndDelete({_id:id}, {projection: {username:1}});
-	if (!deleteInfo.value) throw `Error in function deleteUser: could not delete user with id ${id}.`;
+	if (!deleteInfo.value) throw `Sorry, something went wrong. User ${id} could not be deleted.`;
 
 	// return delete message
 	return `${deleteInfo.value.username} has been successfully deleted.`;
@@ -486,7 +577,7 @@ const removeUserFromTutorList = async (userToRemove, userRemoveFrom) => {
 
 	// pull userToRemove from userRemoveFrom's tutorList array
 	const updateInfo = await userCollection.updateOne({_id:userRemoveFrom}, {$pull: {tutorList: userToRemove}});
-	if (updateInfo.modifiedCount<=0) throw `Error in function removeUserFromTutorList: could not update user ${userRemoveFrom}.`;
+	if (updateInfo.modifiedCount<=0) throw `Sorry, something went wrong. User ${userRemoveFrom} could not be updated.`;
 
 	// return a success message
 	return `User ${userToRemove} has been successfully removed from ${userRemoveFrom}'s tutorList.`;

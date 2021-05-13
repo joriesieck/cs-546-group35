@@ -1,4 +1,4 @@
-<div>
+<main>
     <p class="bold">
         Tutoring, Simplified!
     </p>
@@ -7,7 +7,9 @@
         students need to assist them with their education. We connect students seeking 
         study aid with tutors that are knowledgeable in the subjects they need help with. 
     </p>
+    {{#unless loggedIn}}
     <a href='/login' class="btn-login">Get Started</a>
+    {{/unless}}
 </div>
 
 <div>
@@ -62,3 +64,4 @@
             {{/each}}
     </table>
 </div>
+</main>

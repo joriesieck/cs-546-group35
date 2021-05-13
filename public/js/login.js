@@ -21,7 +21,6 @@
 			if (typeof isTutor !== 'number' || isNaN(isTutor)) throw 'Invalid type for';
 			if (isTutor!==1 && isTutor!==2) throw 'Invalid value for';
 		} catch (e) {
-			// TODO how to handle this error, since it's not the user's fault?
 			errorList.push(`${e} isTutor.`);
 		}
 
@@ -56,6 +55,10 @@
 			// append the errors element to main after the form
 			loginForm.after(errors);
 		} else {
+			// render a paragraph to let the user know that they are being logged in
+			var loadingMsg = $('<p>');
+			loadingMsg.text('Please wait, we are logging you in...');
+			loginForm.after(loadingMsg);
 			// no errors, so submit ajax request to POST /login
 			var requestConfig = {
 				method: 'POST',
@@ -67,14 +70,17 @@
 					isTutor
 				}),
 				error: function (e) {
-					// TODO - decide what to actually do here
+					// hide the loading message
+					loadingMsg.hide();
 					var errorMsg = $('#login-error');
 					errorMsg.text(e.responseJSON.error);
 					errorMsg.show();
 				}
 			};
 			$.ajax(requestConfig).then(function (res) {
-				// if message = 'success', redirect to home
+				// hide the loading message
+				loadingMsg.hide()
+					// if message = 'success', redirect to home
 				if (res.message==='success') {
 					// redirect to home
 					location.href = '/';

@@ -5,6 +5,7 @@ const dbConnection = require('../config/mongoConnection');
 const data = require('../data');
 const users = data.users;
 const { ObjectId } = require('mongodb');
+const { getUserById } = require('../data/users');
 
 /**
 	 * generate hashedPasswords for seed users - 
@@ -1291,7 +1292,7 @@ const main = async () => {
 	// 5 - successfully add to a user's ratings
 	uuTotalTests++;
 	try {
-		const user = await users.updateUser({id:user1._id, ratings:{answerRatingByStudents: [ObjectId()]}});
+		const user = await users.updateUser({id:user1._id, ratings:{answerRatingByStudents: [user2._id]}});
 		console.log(user);
 	} catch (e) {
 		uuFailedTests.push(`5: ${e}`);
@@ -1315,7 +1316,7 @@ const main = async () => {
 	// 8 - successfully add to a user's questionIDs
 	uuTotalTests++;
 	try {
-		const user = await users.updateUser({id:user2._id, questionIDs:[ObjectId(), ObjectId()]});
+		const user = await users.updateUser({id:user2._id, questionIDs:[user1._id, ObjectId()]});
 		console.log(user);
 	} catch (e) {
 		uuFailedTests.push(`8: ${e}`);
@@ -1584,46 +1585,79 @@ const main = async () => {
 	} catch (e) {
 		console.log(`41: ${e}`);
 	}
-	// 42 - successfully update a user's profile picture
+	// 42 - successfully overwrite subjects
 	uuTotalTests++;
 	try {
-		const user = await users.updateUser({id:user2._id, profilePic:"public/images/corinne.jpg"});
+		const user = await users.updateUser({id:user2._id, relevantSubjects:['new subject1','new subject2']});
 		console.log(user);
 	} catch (e) {
 		uuFailedTests.push(`42: ${e}`);
 	}
-	// 43 - profilePic provided but wrong type
+	// 43 - ratings.avgRating provided but wrong format
 	uuTotalTests++;
 	try {
-		const user = await users.updateUser({id:user1._id,profilePic:["public/images/corinne.jpg"]});
+		const user = await users.updateUser({id:user1._id,ratings: {avgRating: "rating"}});
 		uuFailedTests.push(user);
 	} catch (e) {
 		console.log(`43: ${e}`);
 	}
-	// 44 - profilePic provided but undefined
+	// 44 - ratings.avgRating provided but wrong format
 	uuTotalTests++;
 	try {
-		const user = await users.updateUser({id:user1._id,profilePic:undefined});
+		const user = await users.updateUser({id:user1._id,ratings: {avgRating: [user1._id]}});
 		uuFailedTests.push(user);
 	} catch (e) {
 		console.log(`44: ${e}`);
 	}
-	// 45 - profilePic provided but empty string
+	// 45 - successfully update ratings.avgRating
 	uuTotalTests++;
 	try {
-		const user = await users.updateUser({id:user1._id,profilePic:"        "});
-		uuFailedTests.push(user);
+		const user = await users.updateUser({id:user1._id, ratings:{avgRating: 3}});
+		console.log(user);
 	} catch (e) {
-		console.log(`45: ${e}`);
+		uuFailedTests.push(`45: ${e}`);
 	}
-	// 46 - profilePic provided but wrong format
+	// 46 - ratings.avgRating provided but out of range
 	uuTotalTests++;
 	try {
-		const user = await users.updateUser({id:user1._id,profilePic:"public/images/corinne.gif"});
+		const user = await users.updateUser({id:user1._id,ratings: {avgRating: 0}});
 		uuFailedTests.push(user);
 	} catch (e) {
 		console.log(`46: ${e}`);
 	}
+	// 47 - ratings.avgRating provided but out of range
+	uuTotalTests++;
+	try {
+		const user = await users.updateUser({id:user1._id,ratings: {avgRating: 11}});
+		uuFailedTests.push(user);
+	} catch (e) {
+		console.log(`47: ${e}`);
+	}
+	// 48 - ratings.answerRatingByStudents provided but duplicate (should error because no valid inputs)
+	uuTotalTests++;
+	try {
+		const user = await users.updateUser({id:user1._id, ratings:{answerRatingByStudents: [user2._id]}});
+		uuFailedTests.push(user);
+	} catch (e) {
+		console.log(`48: ${e}`);
+	}
+	// 49 - questionIDs provided but duplicate (should error because no valid inputs)
+	uuTotalTests++;
+	try {
+		const user = await users.updateUser({id:user2._id, questionIDs:[user1._id]});
+		uuFailedTests.push(user);
+	} catch (e) {
+		console.log(`49: ${e}`);
+	}
+	// 50 - successfully updated questionIDs
+	uuTotalTests++;
+	try {
+		const user = await users.updateUser({id:user2._id, questionIDs:[ObjectId(), ObjectId(), ObjectId()]});
+		console.log(user);
+	} catch (e) {
+		uuFailedTests.push(`45: ${e}`);
+	}
+
 
 	/* get related users */
 	console.log("\ngetRelatedUsers:")
@@ -1688,6 +1722,7 @@ const main = async () => {
 	console.log('\nremoveUserFromTutorList:');
 	// 0 - successfully update user's tutorList
 	ruTotalTests++;
+	console.log(await getUserById(user2._id))
 	try {
 		const message = await users.removeUserFromTutorList(user1._id,user2._id);
 		console.log(message);

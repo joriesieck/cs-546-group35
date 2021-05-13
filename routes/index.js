@@ -1,6 +1,7 @@
-// import users routes
+// import routes
 const loginRoutes = require('./login');
 const newUserRoutes = require('./newUser');
+const requestTutorRoute = require('./requestTutor');
 const path = require("path");
 const questionsRoutes = require('./questions-forum');
 const profileRoutes = require('./profile');
@@ -34,6 +35,8 @@ const constructorMethod = (app) => {
 	});
 	app.use('/login', loginRoutes);
 	app.use('/new-user', newUserRoutes);
+	app.use('/request-tutor',requestTutorRoute);
+
 	// log the user out
 	app.use('/logout', async (req, res) => {
 		// expire the cookie
@@ -48,14 +51,13 @@ const constructorMethod = (app) => {
 		res.render('users/toptutors',{
 			title: "Dummy Top Rated Tutors Page",
 			loggedIn: !!req.session.user
-			// partial: req.session.user ? 'logged-in' : 'logged-out'	// render the appropriate nav bar, based on whether the user is logged in
 		});
 	});
-	// dummy homepage (which catches all other routes for now)
 
+	// question forum
 	app.use("/questions-forum", questionsRoutes);
-	/* dummy routes */
-	// dummy profile page
+	
+	// invalid urls
 	app.use('*', (req, res) => {
         res.status(404).sendFile(path.resolve("static/error.html"));
     });
