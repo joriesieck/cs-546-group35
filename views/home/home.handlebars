@@ -34,3 +34,31 @@
     </ul>
     <a href='/request-tutor' class="btn-tutor">Request a Tutor</a>
 </div>
+
+<div>
+    <h2>
+        Recent Questions
+    </h2>
+    <table id='home-question-table'>
+    <tr class="table-header">
+                <th>Date</th>
+                <th>Question Title</th>
+                <th>Tags</th>
+                <th>Link</th>
+                <th>Answered?</th>
+            </tr>
+            {{#each questions}}
+                {{#if this.visible}}
+                <tr class="table-question-row">
+                    <td class="table-date-posted">{{this.datePosted}}</td>
+                    <td class="table-question-title">{{this.title}}</td>
+                    <td class="table-question-tags">{{this.tags}}</td>
+                    <td class="table-question-link">
+                        <a href='questions-forum/{{this._id}}'>Link</a>
+                    </td>
+                    <td class="table-question-answered">{{this.answered}}</td>
+                </tr>
+                {{/if}}
+            {{/each}}
+    </table>
+</div>
