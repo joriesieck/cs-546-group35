@@ -200,10 +200,10 @@ router.get("/:id/edit", async (req, res) => {
 		});
 	} 
 	if (req.session.user && req.session.user.isTutor === false) {
-		res.status(401).json({error: "Unathorized access!"});
+		return res.status(401).json({error: "Unathorized access!"});
 	} 
 	if(!req.session.user) {
-		res.redirect("/login");
+		return res.redirect("/login");
 	}
 });
 

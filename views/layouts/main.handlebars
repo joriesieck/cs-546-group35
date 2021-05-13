@@ -16,13 +16,17 @@
 			<a href='/questions-forum'>Question Forum</a>
 
 			{{#if loggedIn}}
-			<a href='/questions-forum/post'>Ask a Question</a>
+				{{#if isStudent}}
+					<a href='/questions-forum/post'>Ask a Question</a>
+				{{/if}}
 			{{/if}}
 
 			<a href='/top-rated-tutors'>Top Rated Tutors</a>
 
 			{{#if loggedIn}}
-			<a href='request-tutor' class='logged-in'>Request a Tutor</a>
+				{{#if isStudent}}
+					<a href='request-tutor' class='logged-in'>Request a Tutor</a>
+				{{/if}}
 			{{/if}}
 
 			{{#if loggedIn}}
