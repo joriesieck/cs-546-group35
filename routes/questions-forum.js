@@ -27,6 +27,13 @@ router.get("/", async (req, res) => {
 		yearPosted = questionList[i].datePosted.getFullYear();
 		fullDatePosted = `${monthPosted}/${dayPosted}/${yearPosted}`;
 		questionList[i].datePosted = fullDatePosted;
+
+		if(questionList[i].answers.length == 0) {
+			questionList[i].answered = "No";
+		} 
+		if(questionList[i].answers.length > 0) {
+			questionList[i].answered = "Yes";
+		} 
 	}
 
 	if(!!req.session.user === false) {
@@ -56,6 +63,9 @@ router.get("/", async (req, res) => {
 // Route to ask a new question page
 router.get("/post", async (req, res) => {
 	if (req.session.user) {
+		if(req.session.user.isTutor === true) {
+			return res.status(401).json({error: "Please create a student account to ask a question!"});
+		} 
 		return res.render("questions/ask-question", {
 			title: "Ask a Question",
 			loggedIn: true,
@@ -67,6 +77,9 @@ router.get("/post", async (req, res) => {
 // Route for posting a new question
 router.post("/post", async (req, res) => {
 	if (req.session.user) {
+		if(req.session.user.isTutor === true) {
+			return res.status(401).json({error: "Please create a student account to ask a question!"});
+		} 
 		let questionInfo = xss(req.body);
 		let title = xss(req.body.questionTitle);
 		let questionBody = xss(req.body.questionBody);
