@@ -64,7 +64,8 @@ router.get("/", async (req, res) => {
 router.get("/post", async (req, res) => {
 	if (req.session.user) {
 		if(req.session.user.isTutor === true) {
-			return res.status(401).json({error: "Please create a student account to ask a question!"});
+			//return res.status(401).json({error: "Please create a student account to ask a question!"});
+			return res.render("questions/ask-question", {title: "Something Went Wrong", error: true, errorMessage: `Please create a student account to ask a question!`, loggedIn:true});
 		} 
 		return res.render("questions/ask-question", {
 			title: "Ask a Question",
@@ -200,7 +201,8 @@ router.get("/:id/edit", async (req, res) => {
 		});
 	} 
 	if (req.session.user && req.session.user.isTutor === false) {
-		return res.status(401).json({error: "Unathorized access!"});
+		//return res.status(401).json({error: "Unathorized access!"});
+		return res.status(401).render("questions/edit-question", {title: "Something Went Wrong", error: true, errorMessage: `Unauthorized access`, loggedIn:true});
 	} 
 	if(!req.session.user) {
 		return res.redirect("/login");
@@ -208,6 +210,9 @@ router.get("/:id/edit", async (req, res) => {
 });
 
 router.put("/:id/edit", async (req, res) => {
+	if (req.session.user && req.session.user.isTutor === false) {
+		return res.status(401).json({error: "Unathorized access!"});
+	} 
 	if (req.session.user && req.session.user.isTutor === true) {
 		let questionInfo = xss(req.body);
 		let title = xss(req.body.questionTitle);
