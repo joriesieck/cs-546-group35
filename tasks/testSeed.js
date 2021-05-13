@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const dbConnection = require('../config/mongoConnection');
 const data = require('../data');
 const users = data.users;
+const ratings = data.ratings;
 const { ObjectId } = require('mongodb');
 const { getUserById } = require('../data/users');
 
@@ -42,6 +43,12 @@ const main = async () => {
 	grFailedTests = [];
 	ruTotalTests = 0;	// remove user from tutorList
 	ruFailedTests = [];
+	crTotalTests = 0;	// create rating
+	crFailedTests = [];
+	griTotalTests = 0;	// get rating by id
+	griFailedTests = [];
+	drTotalTests = 0;	// delete rating
+	drFailedTests = [];
 
 	/* create user */
 	console.log("createUser:")
@@ -1252,7 +1259,7 @@ const main = async () => {
 	// 0 - successfully update user's tutorList
 	uuTotalTests++;
 	try {
-		const user = await users.updateUser({id:user2._id, tutorList:[user1._id, user3._id]});
+		const user = await users.updateUser({id:user1._id, tutorList:[user2._id]});
 		console.log(user);
 	} catch (e) {
 		uuFailedTests.push(`0: ${e}`);
@@ -1289,10 +1296,10 @@ const main = async () => {
 	} catch (e) {
 		uuFailedTests.push(`4: ${e}`);
 	}
-	// 5 - successfully add to a user's ratings
+	// 5 - successfully change a user's type back
 	uuTotalTests++;
 	try {
-		const user = await users.updateUser({id:user1._id, ratings:{answerRatingByStudents: [user2._id]}});
+		const user = await users.updateUser({id:user1._id, userType:"student"});
 		console.log(user);
 	} catch (e) {
 		uuFailedTests.push(`5: ${e}`);
@@ -1721,14 +1728,14 @@ const main = async () => {
 	/* remove user from tutorList */
 	console.log('\nremoveUserFromTutorList:');
 	// 0 - successfully update user's tutorList
-	ruTotalTests++;
-	console.log(await getUserById(user2._id))
-	try {
-		const message = await users.removeUserFromTutorList(user1._id,user2._id);
-		console.log(message);
-	} catch (e) {
-		ruFailedTests.push(`0: ${e}`);
-	}
+	// ruTotalTests++;
+	// console.log(await getUserById(user2._id))
+	// try {
+	// 	const message = await users.removeUserFromTutorList(user2._id,user1._id);
+	// 	console.log(message);
+	// } catch (e) {
+	// 	ruFailedTests.push(`0: ${e}`);
+	// }
 	ruTotalTests++;
 	try {
 		const user = await users.removeUserFromTutorList();
@@ -1779,15 +1786,254 @@ const main = async () => {
 	// 7 - user's tutorList is empty
 	ruTotalTests++;
 	try {
-		const message = await users.removeUserFromTutorList(user2._id, user1._id);
+		const message = await users.removeUserFromTutorList(user2._id, user3._id);
 		ruFailedTests.push(`7: ${message}`);
 	} catch (e) {
 		console.log(`7: ${e}`);
 	}
 
 	/* ratings collection tests */
-	
+	console.log('\ncreateRating:');
+	// 0 - successfully rate a user
+	crTotalTests++;
+	try {
+		const rating = await ratings.createRating(user1._id, user2._id, 10, 'answerRatingByStudents');
+		console.log(rating);
+		user2 = await users.getUserById(user2._id);
+		console.log(user2);
+	} catch (e) {
+		crFailedTests.push(`0: ${e}`);
+	}
+	// 1 - missing inputs
+	crTotalTests++;
+	try {
+		const rating = await ratings.createRating(user2._id, 10, 'answerRatingByStudents');
+		crFailedTests.push(`1: ${rating}`);
+	} catch (e) {
+		console.log(`1: ${e}`);
+	}
+	// 2 - userId wrong type
+	crTotalTests++;
+	try {
+		const rating = await ratings.createRating('thisisastring', user2._id, 10, 'answerRatingByStudents');
+		crFailedTests.push(`2: ${rating}`);
+	} catch (e) {
+		console.log(`2: ${e}`);
+	}
+	// 3 - ratedId wrong type
+	crTotalTests++;
+	try {
+		const rating = await ratings.createRating(user2._id, true, 10, 'answerRatingByStudents');
+		crFailedTests.push(`3: ${rating}`);
+	} catch (e) {
+		console.log(`3: ${e}`);
+	}
+	// 4 - rating wrong type
+	crTotalTests++;
+	try {
+		const rating = await ratings.createRating(user1._id, user2._id, [10], 'answerRatingByStudents');
+		crFailedTests.push(`4: ${rating}`);
+	} catch (e) {
+		console.log(`4: ${e}`);
+	}
+	// 5 - rating out of range
+	crTotalTests++;
+	try {
+		const rating = await ratings.createRating(user1._id, user2._id, -10, 'answerRatingByStudents');
+		crFailedTests.push(`5: ${rating}`);
+	} catch (e) {
+		console.log(`5: ${e}`);
+	}
+	// 6 - type wrong type
+	crTotalTests++;
+	try {
+		const rating = await ratings.createRating(user1._id, user2._id, 10, 1234);
+		crFailedTests.push(`6: ${rating}`);
+	} catch (e) {
+		console.log(`6: ${e}`);
+	}
+	// 7 - type incorrect option
+	crTotalTests++;
+	try {
+		const rating = await ratings.createRating(user1._id, user2._id, 10, 'ratingByStudents');
+		crFailedTests.push(`7: ${rating}`);
+	} catch (e) {
+		console.log(`7: ${e}`);
+	}
+	// 8 - type is tutorRating but subject not given
+	crTotalTests++;
+	try {
+		const rating = await ratings.createRating(user1._id, user2._id, 10, 'tutorRating');
+		crFailedTests.push(`8: ${rating}`);
+	} catch (e) {
+		console.log(`8: ${e}`);
+	}
+	// 9 - ratee not a tutor
+	crTotalTests++;
+	try {
+		const rating = await ratings.createRating(user1._id, user1._id, 10, 'answerRatingByStudents');
+		crFailedTests.push(`9: ${rating}`);
+	} catch (e) {
+		console.log(`9: ${e}`);
+	}
+	// 10 - type is answerRatingByStudents but rater is tutor
+	crTotalTests++;
+	try {
+		const rating = await ratings.createRating(user2._id, user2._id, 10, 'answerRatingByStudents');
+		crFailedTests.push(`10: ${rating}`);
+	} catch (e) {
+		console.log(`10: ${e}`);
+	}
+	// 11 - type is answerRatingByTutors but rater is student
+	crTotalTests++;
+	try {
+		const rating = await ratings.createRating(user1._id, user2._id, 10, 'answerRatingByTutors');
+		crFailedTests.push(`11: ${rating}`);
+	} catch (e) {
+		console.log(`11: ${e}`);
+	}
+	// 12 - type is tutorRating but tutee and tutor have not interacted
+	crTotalTests++;
+	try {
+		const rating = await ratings.createRating(user3._id, user2._id, 10, 'tutorRating', 'math');
+		crFailedTests.push(`12: ${rating}`);
+	} catch (e) {
+		console.log(`12: ${e}`);
+	}
+	// 13 - ratee does not exist
+	crTotalTests++;
+	try {
+		const rating = await ratings.createRating(ObjectId(), user2._id, 10, 'answerRatingByStudents');
+		crFailedTests.push(`13: ${rating}`);
+	} catch (e) {
+		console.log(`13: ${e}`);
+	}
+	// 14 - rater does not exist
+	crTotalTests++;
+	try {
+		const rating = await ratings.createRating(user1._id, ObjectId(), 10, 'answerRatingByStudents');
+		crFailedTests.push(`14: ${rating}`);
+	} catch (e) {
+		console.log(`14: ${e}`);
+	}
 
+	/* get rating by id */
+	console.log('\nget rating by id')
+	// 0 - successfully get rating
+	griTotalTests++;
+	try {
+		const message = await ratings.getRatingById(user2.ratings.answerRatingByStudents[0]);
+		console.log(message);
+	} catch (e) {
+		griFailedTests.push(`0: ${e}`);
+	}
+	// 1 - no inputs
+	griTotalTests++;
+	try {
+		const rating = await ratings.getRatingById();
+		griFailedTests.push(rating);
+	} catch (e) {
+		console.log(`1: ${e}`);
+	}
+	// 2 - id undefined
+	griTotalTests++;
+	try {
+		const rating = await ratings.getRatingById(undefined);
+		griFailedTests.push(rating);
+	} catch (e) {
+		console.log(`2: ${e}`);
+	}
+	// 3 - id null
+	griTotalTests++;
+	try {
+		const rating = await ratings.getRatingById(null);
+		griFailedTests.push(rating);
+	} catch (e) {
+		console.log(`3: ${e}`);
+	}
+	// 4 - wrong type
+	griTotalTests++;
+	try {
+		const rating = await ratings.getRatingById('thisisanid');
+		griFailedTests.push(rating);
+	} catch (e) {
+		console.log(`4: ${e}`);
+	}
+	// 5 - invalid ObjectId
+	griTotalTests++;
+	try {
+		const rating = await ratings.getRatingById(123456789);
+		griFailedTests.push(rating);
+	} catch (e) {
+		console.log(`5: ${e}`);
+	}
+	// 6 - rating not found
+	griTotalTests++;
+	try {
+		const rating = await ratings.getRatingById(ObjectId());
+		griFailedTests.push(rating);
+	} catch (e) {
+		console.log(`6: ${e}`);
+	}
+	
+	/* delete rating */
+	console.log('\ndeleteRating');
+	// 0 - successfully delete rating
+	drTotalTests++;
+	try {
+		const message = await users.deleteUser(user2._id);
+		console.log(message);
+	} catch (e) {
+		grFailedTests.push(`0: ${e}`);
+	}
+	// 1 - no inputs
+	drTotalTests++;
+	try {
+		const rating = await ratings.deleteRating();
+		drFailedTests.push(rating);
+	} catch (e) {
+		console.log(`1: ${e}`);
+	}
+	// 2 - id undefined
+	drTotalTests++;
+	try {
+		const rating = await ratings.deleteRating(undefined);
+		drFailedTests.push(rating);
+	} catch (e) {
+		console.log(`2: ${e}`);
+	}
+	// 3 - id null
+	drTotalTests++;
+	try {
+		const rating = await ratings.deleteRating(null);
+		drFailedTests.push(rating);
+	} catch (e) {
+		console.log(`3: ${e}`);
+	}
+	// 4 - wrong type
+	drTotalTests++;
+	try {
+		const rating = await ratings.deleteRating('thisisanid');
+		drFailedTests.push(rating);
+	} catch (e) {
+		console.log(`4: ${e}`);
+	}
+	// 5 - invalid ObjectId
+	drTotalTests++;
+	try {
+		const rating = await ratings.deleteRating(123456789);
+		drFailedTests.push(rating);
+	} catch (e) {
+		console.log(`5: ${e}`);
+	}
+	// 6 - rating not found
+	drTotalTests++;
+	try {
+		const rating = await ratings.deleteRating(ObjectId());
+		drFailedTests.push(rating);
+	} catch (e) {
+		console.log(`6: ${e}`);
+	}
 
 	// display total number of tests + any failed tests
 	console.log('\nResults:')
@@ -1807,6 +2053,12 @@ const main = async () => {
 	grFailedTests.forEach((test) => console.log(test));
 	console.log(`\nremoveUserFromTutorList tests: ${ruTotalTests}, failed: ${ruFailedTests.length}`);
 	ruFailedTests.forEach((test) => console.log(test));
+	console.log(`\ncreateRating tests: ${crTotalTests}, failed: ${crFailedTests.length}`);
+	crFailedTests.forEach((test) => console.log(test));
+	console.log(`\ngetRatingById tests: ${griTotalTests}, failed: ${griFailedTests.length}`);
+	griFailedTests.forEach((test) => console.log(test));
+	console.log(`\ndeleteRating tests: ${drTotalTests}, failed: ${drFailedTests.length}`);
+	drFailedTests.forEach((test) => console.log(test));
 
 	console.log('\nDone seeding database');
 	await db.serverConfig.close();
