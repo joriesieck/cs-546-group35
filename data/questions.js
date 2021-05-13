@@ -75,18 +75,23 @@ async function createQuestion(userId, title, question, tags) {
     const questionId = insertInfo.insertedId;
 	const newQuestion = await getQuestionById(questionId);
     
-    //when a question is asked, it needs to be added to someones array of questions
-    //so get the user (require the user data)
-    //isolate the user's id
-    //and the user's current questions
-    //then update the user by sending back the id and the questions plus this new one's id
-
 	return newQuestion;
 }
 
 async function getQuestions() {
     const questionCollection = await questions();
     let questionList = await questionCollection.find().sort({"datePosted":-1}).toArray();
+    return questionList;
+}
+
+async function getAllUsersQuestions(id){
+    if (!id || id === undefined || id === null || id === '') throw "Error in getAllUsersQuestions, id is invalid";
+    let parsedId = ObjectID(id);
+    if (!parsedId || parsedId === undefined) throw "id is invalid";
+    //takes in an id, returns an array of JSON objects with all the questions for the user
+    const questionCollection = await questions();
+    //returning the most recent 10 to put on the profile
+    let questionList = await questionCollection.find({_id: parsedId}).sort({"datePosted":-1}).limit(10).toArray();
     return questionList;
 }
 
@@ -156,6 +161,7 @@ async function deleteQuestion(id) {
 module.exports = {
     createQuestion,
     getQuestions,
+    getAllUsersQuestions,
     getQuestionById,
     updateQuestion,
     deleteQuestion

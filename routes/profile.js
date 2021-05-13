@@ -3,6 +3,8 @@ const router = express.Router();
 const xss = require('xss');
 const bcrypt = require('bcryptjs');
 const userData = require('../data/users');
+const questionsData = require('../data/questions');
+const { questions } = require('../config/mongoCollections');
 
 const saltRounds = 16;
 
@@ -18,13 +20,20 @@ router.get('/', async (req, res) => {
         if (!user){
             res.redirect('/login');
         } else {
-            console.log(user);
             //we have a user and can render it
+            console.log(user);
+            //get their questions list to facilitate printing them
+            const questionsList = await questionsData.getAllUsersQuestions(user._id);
+            if (questionsList.length === 0){
+                questionsList.append('None');
+                //we will check for the first element being none/size being 1
+            }
             if (user.userType === "student"){
                 res.status(200).render('profile/student',{
                     user: user,
                     self: true,
                     title: `${user.username}'s Profile`,
+                    questions: questionsList,
                     loggedIn: true
                 });
             } else{ //is a tutor
@@ -32,6 +41,7 @@ router.get('/', async (req, res) => {
                     user: user,
                     self: true,
                     title: `${user.username}'s Profile`,
+                    questions: questionsList,
                     loggedIn: true
                 });
             }
@@ -118,6 +128,7 @@ router.post('/', async (req, res) => {
 
 router.post('/password', async (req, res) => {
     //as all fields here are required, I felt a separate function made sense
+    //no matter where the post request is made from, the user can only change their own password
     if (!req.session.user){
         res.redirect('/login');
     }
@@ -192,10 +203,11 @@ router.post('/password', async (req, res) => {
             return;
         }
     });
-})
+});
+
 
 //getting another user's profile
-router.get('/:username', (req,res) =>{
+router.get('/:username', async (req,res) =>{
     try{
         if (!req.session.user){
             res.redirect('/');
@@ -204,14 +216,19 @@ router.get('/:username', (req,res) =>{
             throw "Username is incorrect";
         }
         //only tutors can access this route as others cant see profiles
-        const user = userData.getUserByUsername(req.session.user.username); //get the user requesting the route
+        const user = await userData.getUserByUsername(req.session.user.username); //get the user requesting the route
+        if (!user) throw "No user found with this username";
+        const questions = await questionsData.getAllUsersQuestions(user._id);
+        if (questions.length === 0){
+            questions.append("None");
+        }
         //check if they're a tutor
         if (user.userType !== "tutor"){
             //they're a student and can't access this route
             res.redirect('/');
         } else {
             //they're a tutor and can
-            const retrievedUser = userData.getUserByUsername(req.params.username);
+            const retrievedUser = await userData.getUserByUsername(req.params.username);
             if (!retrievedUser){
                 //the user doesn't exist
                 //send to the main page
@@ -227,14 +244,16 @@ router.get('/:username', (req,res) =>{
                         user: retrievedUser,
                         self: false,
                         title: `${retrievedUser.username}'s Profile`,
-                        loggedIn: true
+                        loggedIn: true,
+                        questions: questions
                     })
                 } else{
                     res.status(200).render('profile/student', {
                         user: retrievedUser,
                         self: false,
                         title: `${retrievedUser.username}'s Profile`,
-                        loggedIn: true
+                        loggedIn: true,
+                        questions: questions
                     });
                 }
             }
