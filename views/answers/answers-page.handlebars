@@ -1,0 +1,48 @@
+<main>
+    <p>{{this.questionBody}}</p>
+    <a href="/questions-forum/post-answer">Click here to crete a new answer</a>
+    {{#if answers.length}}
+    <table id='answer-list-table'>
+
+        {{#if isTutor}}
+        <tr class="table-header">
+            <th>Date</th>
+            <th>Answer</th>
+            <th>Link</th>
+            {{#if answerUserId}}
+            <th>Edit</th>
+            {{/if}}
+        </tr>
+        {{#each answers}}
+        <tr class="table-answer-row">
+            <td class="table-date-posted">{{this.date}}</td>
+            <td class="table-answer-body">{{this.answer}}</td>
+            <td class="table-answer-link">
+                <a href='/questions-forum/{{this._id}}'>Link</a>
+            </td>
+            <td class="table-answer-edit">
+                <a href='/questions-forum/{{this._id}}/edit-answer'>Edit</a>
+            </td>
+        </tr>
+        {{/each}}
+        {{else}}
+        <tr class="table-header">
+            <th>Date</th>
+            <th>Answer</th>
+            <th>Link</th>
+        </tr>
+        {{#each answers}}
+        <tr class="table-answer-row">
+            <td class="table-date-posted">{{this.date}}</td>
+            <td class="table-answer-body">{{this.answer}}</td>
+            <td class="table-answer-link">
+                <a href='questions-forum/{{this._id}}'>Link</a>
+            </td>
+        </tr>
+        {{/each}}
+        {{/if}}
+    </table>
+    {{else}}
+    <p class="not-answers">We're sorry, no one has responded to this question yet.</p>
+    {{/if}}
+</main>

@@ -1,0 +1,26 @@
+<main>
+    <form id="edit-question-form">
+        <label for="update-title">Enter a title:</label>
+        <input type="text" id="update-title" value={{oldTitle}}>
+
+        <label for="update-body">Enter a question:</label>
+        <textarea type="text" id="update-body">{{oldBody}}</textarea>
+
+        <label for="update-tags">Enter at most 3 new tag(s) for the question, separated by a comma:</label>
+        <input type="text" id="update-tags" value={{oldTags}}>
+
+        <label for="visible">Choose question Visibility:</label>
+        <select id="visible" name="visible">
+            <option value="visible" selected>Visible</option>
+            <option value="not-visible">Not visible</option>
+        </select>
+
+        <button type="submit" id='submit-edit-question'>Submit</button>
+    </form>
+
+    <ul id="edit-question-errors-list" class="error" hidden></ul>
+</main>
+
+<script src="https://code.jquery.com/jquery-2.2.4.min.js"
+    integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+<script src="/public/js/editQuestion.js"></script>

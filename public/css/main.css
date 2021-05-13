@@ -13,19 +13,11 @@
  */
 
 /* Overall Site Styles */
-html {
-	height: 100%;	/* for footer styling */
-}
-
 body {
+	position: relative;	/* for footer styling */
+	min-height: 100vh;	/* the entire viewport */
 	background-color: #49d8af;
 	color: #003dac;
-	/* for footer styling */
-	display: flex;
-	flex-direction: column;
-	justify-content: space-between;
-	align-items: center;
-	height: 100%;
 	margin: 0;
 }
 
@@ -39,6 +31,8 @@ header h1 {
 	height: 35%;
 	width: 100%;
 	text-align: center;
+	margin-block-start: 0;
+	padding-top: .67em;	/* change margin to padding */
 }
 
 /* nav menu */
@@ -63,16 +57,20 @@ header h1 {
 
 /* footer */
 footer {
+	position:absolute;
+	bottom:0;
+	width: 100%;
+	height: 30px;
 	background-color: #0078d8;
 	color: #fff;
-	height: 5%;
-	width: 100%;
-	display: flex;
-	align-items: center;
 }
 footer p {
 	margin-left: 2%;
+	margin-bottom:5px;
+	margin-top:5px;
 	font-style: italic;
+	position: absolute;
+	bottom:0;
 }
 
 /* main */
@@ -80,6 +78,7 @@ main {
 	height: 100%;
 	width: 100%;
 	padding-top: 10px;
+	padding-bottom: 30px;	/* make space for footer */
 }
 
 /* links */
@@ -166,4 +165,56 @@ button.login-landing, button.new-user-landing {
 	width: 100%;
 	font-style: italic;
 	margin: 0;
+}
+
+/* Question forum - Redirect to asking question */
+#forum-ask-new-question {
+	margin: auto;
+	text-align: center;
+}
+
+/* Table Styling */
+table, th, td {
+	border: 1px solid black;
+	padding: 10px;
+}
+
+table {
+	margin-top: 10px;
+	width: 90%;
+	border-collapse: collapse;
+	margin-left: auto;
+  	margin-right: auto;
+}
+
+th {
+	font-size: 25px;
+}
+
+td{
+	font-size: 18px;
+	font-weight: 500;
+}
+
+.forum-input-container {
+	margin: auto;
+	text-align: center;
+}
+
+#search-bar-input {
+	padding:5px; 
+    border-radius: 5px;
+	border: 2px solid;
+	border-color: black;
+	height:20px;
+    font-size:14pt;
+}
+
+#search-tag-filter {
+	padding:5px; 
+    border-radius: 5px;
+	border: 2px solid;
+	border-color: black;
+	height:20px;
+    font-size:14pt;
 }

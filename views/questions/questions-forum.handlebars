@@ -1,0 +1,51 @@
+<main>
+    <a href="/questions-forum/post-question">Click here to ask a new question</a>
+    {{#if questions.length}}
+    <table id='question-list-table'>
+
+        {{#if isTutor}}
+        <tr class="table-header">
+            <th>Date</th>
+            <th>Question Title</th>
+            <th>Tags</th>
+            <th>Link</th>
+            <th>Edit</th>
+        </tr>
+        {{#each questions}}
+        <tr class="table-question-row">
+            <td class="table-date-posted">{{this.datePosted}}</td>
+            <td class="table-question-title">{{this.title}}</td>
+            <td class="table-question-tags">{{this.tags}}</td>
+            <td class="table-question-link">
+                <a href='questions-forum/{{this._id}}'>Link</a>
+            </td>
+            <td class="table-question-edit">
+                <a href='/questions-forum/{{this._id}}/edit-question'>Edit</a>
+            </td>
+        </tr>
+        {{/each}}
+        {{else}}
+        <tr class="table-header">
+            <th>Date</th>
+            <th>Question Title</th>
+            <th>Tags</th>
+            <th>Link</th>
+        </tr>
+        {{#each questions}}
+        {{#if this.visible}}
+        <tr class="table-question-row">
+            <td class="table-date-posted">{{this.datePosted}}</td>
+            <td class="table-question-title">{{this.title}}</td>
+            <td class="table-question-tags">{{this.tags}}</td>
+            <td class="table-question-link">
+                <a href='questions-forum/{{this._id}}'>Link</a>
+            </td>
+        </tr>
+        {{/if}}
+        {{/each}}
+        {{/if}}
+    </table>
+    {{else}}
+    <p class="not-questions">We're sorry, no questions have been asked yet.</p>
+    {{/if}}
+</main>

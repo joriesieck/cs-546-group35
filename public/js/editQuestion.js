@@ -1,15 +1,16 @@
 (function($) {
 	// get the form element
-	var newQuestionForm = $('#new-question-form');
+	var newQuestionForm = $('#edit-question-form');
 
 	// add an event listener for submit
 	newQuestionForm.submit(function (event) {
 		event.preventDefault();
 
-        var errors = $('#new-question-errors-list');
-        var questionTitle = $('#question-title').val().trim();
-        var questionBody = $('#question-body').val().trim();
-        var questionTags = $('#question-tags').val().trim();
+        var errors = $('#edit-question-errors-list');
+        var questionTitle = $('#update-title').val().trim();
+        var questionBody = $('#update-body').val().trim();
+        var questionTags = $('#update-tags').val().trim();
+        var questionVisibility = $('#visible').val().trim();
         var errorList = [];
 
         errors.empty();
@@ -17,7 +18,7 @@
 
 
         try {
-            if(questionTitle===undefined || questionTitle.trim().length === 0) throw 'Question title is required and must be non all empty space string';
+            if(questionTitle.trim().length === 0) throw 'Question title must be non all empty space string';
             if(typeof questionTitle !== 'string') throw 'Question title must be a string.';
             if(questionTitle.length > 100) throw 'Question title may not contain more than 100 characters.';
         } catch (e) {
@@ -25,14 +26,14 @@
 		}
 
         try {
-            if(questionBody===undefined || questionTitle.trim().length === 0) throw 'Question body is required and must be non all empty space string';
+            if(questionBody.trim().length === 0) throw 'Question body must be non all empty space string';
             if(typeof questionBody !== 'string') throw 'Question body must be a string.';
         } catch (e) {
 			errorList.push(e);
 		}
 
         try {
-            if(questionTags===undefined || questionTags.trim().length === 0) throw 'At least one question tag is required and must be non all empty space string';
+            if(questionTags.trim().length === 0) throw 'Question tag must be non all empty space string';
             if(typeof questionTags !== 'string') throw 'Question tags must be a string.';
             questionTagsArr = questionTags.split(',');
             for(let i = 0; i < questionTagsArr.length; i++) {
@@ -46,6 +47,13 @@
 			errorList.push(e);
 		}
 
+        try {
+            if(questionVisibility === undefined || questionVisibility === null) throw 'Question visibility option must be chosen';
+            if(typeof questionVisibility !== 'string') throw 'Question visibility must be a string.';
+        } catch (e) {
+			errorList.push(e);
+		}
+
         if (errorList.length > 0) {
 			errorList.forEach((errorStr) => {
 				var errorLi = $('<li>');
@@ -55,13 +63,14 @@
 			errors.show();
         } else {
             var requestConfig = {
-                method: 'POST',
-                url: '/questions-forum/post-question',
+                method: 'PUT',
+                url: window.location.pathname,
                 contentType: 'application/json',
                 data: JSON.stringify({
                     questionTitle,
                     questionBody,
-                    questionTags
+                    questionTags,
+                    questionVisibility
                 }),
                 error: function(e) {
                     console.log(e);
@@ -70,8 +79,8 @@
             };
             $.ajax(requestConfig).then(function (res) {
                 if (res.message==='success') {
-                    // redirect to answers page
-                    location.href = '/questions-forum/:id';
+                    // TODO: Redirect to single question page
+                    location.href = '/';
                 }
             });
         }

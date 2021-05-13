@@ -4,15 +4,18 @@
         <input type="text" id="question-title" name="question-title" placeholder="Title" required>
 
         <label for="question-body">Enter a question: </label>
-        <input type="text" id="question-body" name="question-body" placeholder="Question" required>
+        <textarea type="text" id="question-body" name="question-body" placeholder="Question" required></textarea>
 
         <label for="question-tags">Enter tag(s) for the question, separated by a comma: </label>
-        <input type="text" id="question-tags" name="question-title" placeholder="Tags" required>
+        <input type="text" id="question-tags" name="question-title"
+            placeholder="Tags (English, Math, Science, Web Programming, etc.)" required>
 
-        <button type='submit' id='submit-new-question'>Ask question</button>
+        <button type='submit' id='submit-new-question'>Ask Question</button>
     </form>
 
-    <script src="https://code.jquery.com/jquery-2.2.4.min.js"
-        integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
-    <script src="/public/js/newQuestion.js"></script>
+    <ul id="new-question-errors-list" class="error" hidden></ul>
 </main>
+
+<script src="https://code.jquery.com/jquery-2.2.4.min.js"
+    integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+<script src="/public/js/newQuestion.js"></script>

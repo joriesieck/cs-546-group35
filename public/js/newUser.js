@@ -33,7 +33,6 @@
 			if (typeof isTutor !== 'number' || isNaN(isTutor)) throw 'Invalid type for';
 			if (isTutor!==1 && isTutor!==2) throw 'Invalid value for';
 		} catch (e) {
-			// TODO how to handle this error, since it's not the user's fault?
 			errorList.push(`${e} isTutor.`);
 		}
 
@@ -85,7 +84,7 @@
 			// must be in correct email format
 			// regex source: https://www.geeksforgeeks.org/write-regular-expressions/
 			const emailRE = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
-			if (!emailRE.test(email)) throw 'Email must be of the format example@domain.suffix';
+			if (!emailRE.test(email)) throw 'Email must be of the format example@domain.suffix.';
 		} catch (e) {
 			errorList.push(e);
 		}
@@ -157,7 +156,7 @@
 			// must be a number
 			if (isNaN(year)) throw 'Graduation Year must be a number.';
 			// must be >= 0
-			if (year < 0) throw 'Graduation Year must be greater than 0.';
+			if (year < 0) throw 'Graduation Year must be greater than or equal to 0.';
 			// must be of the form YYYY
 			const yearRE = /^\d\d\d\d$/;
 			if (!yearRE.test(year)) throw 'Graduation Year must be of the form YYYY.';
@@ -176,7 +175,7 @@
 				// must contain at least one element
 				if (subjects.length<=0) throw 'Subjects must contain at least one subject.';
 				// must contain only strings
-				if (!subjects.every((subj) => typeof subj === 'string')) throw 'Subjects can only contain strings.';
+				if (!subjects.every((subj) => typeof subj === 'string')) throw 'Subjects may only contain strings.';
 				// must contain only non-whitespace strings
 				subjects = subjects.map((subj) => subj.trim());	// trim strings
 				if (!subjects.every((subj) => subj!=='')) throw 'Each subject must contain at least one non-whitespace character.';
@@ -189,7 +188,7 @@
 				// convert subjects to an array delimited by ','
 				subjects = subjects.split(',');
 				// must contain only strings
-				if (!subjects.every((subj) => typeof subj === 'string')) throw 'Subjects can only contain strings.';
+				if (!subjects.every((subj) => typeof subj === 'string')) throw 'Subjects may only contain strings.';
 				// must contain only non-whitespace strings
 				subjects = subjects.map((subj) => subj.trim());	// trim strings
 				if (!subjects.every((subj) => subj!=='')) throw 'Each subject must contain at least one non-whitespace character.';
@@ -211,6 +210,10 @@
 			});
 			errors.show();
 		} else {
+			// render a paragraph to let the user know that their account is being created
+			var loadingMsg = $('<p>');
+			loadingMsg.text('Please wait, your account is being created...');
+			newUserForm.after(loadingMsg);
 			// no errors, so submit ajax request to POST /new-user
 			var requestConfig = {
 				method: 'POST',
@@ -227,8 +230,8 @@
 					isTutor
 				}),
 				error: function(e) {
-					// TODO - decide what to actually do here
-					console.log(e);
+					// hide the loading message
+					loadingMsg.hide()
 					var errorMsg = $('<p>');
 					errorMsg.text(e.responseJSON.error);
 					errorMsg.appendTo(errors);
@@ -236,6 +239,8 @@
 				}
 			};
 			$.ajax(requestConfig).then(function (res) {
+				// hide the loading message
+				loadingMsg.hide()
 				// if message = 'success', redirect to home
 				if (res.message==='success') {
 					// redirect to home
