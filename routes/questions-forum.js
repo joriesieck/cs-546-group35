@@ -3,7 +3,6 @@ const router = express.Router();
 const xss = require("xss");
 const questionData = require("../data/questions");
 const userData = require("../data/users");
-const answerData = require("../data/answers")
 const { ObjectID } = require('mongodb');
 
 function createHelper(string) {
@@ -52,7 +51,7 @@ router.get("/", async (req, res) => {
 // Route to display the single question with answers page
 router.get("/:id", async (req, res) => {
 	let singleQuestion = await questionData.getQuestionById(id);
-	let answerList = await answerData.getAnswers();
+	let answerList = await questionData.getAnswers();
 	let monthPosted;
 	let dayPosted;
 	let yearPosted;
@@ -246,7 +245,7 @@ router.post("/post-answer", async (req, res) => {
 		let currentUserId = currentUser._id;
 
 		try {
-			const newAnswer = await answerData.createAnswer(
+			const newAnswer = await questionData.createAnswer(
 				currentUserId,
 				answerBody
 			);
@@ -404,7 +403,7 @@ router.get("/:id/edit-answer", async (req, res) => {
 	if (req.session.user && req.session.user.isTutor && answerUserId === true) {
 		let answerID = req.params.id
 		answerID = ObjectID(answerID);
-		const oldAnswer = await answerData.getAnswerById(answerID);
+		const oldAnswer = await questionData.getAnswerById(answerID);
 		let oldAnswerBody = oldAnswer.answerBody;
 		return res.render("answers/edit-answer", {
 			title: "Edit Your Answer",
@@ -447,7 +446,7 @@ router.put("/:id/edit-answer", async (req,res) => {
 		try {
 			let answerID = req.params.id
 			answerID = ObjectID(answerID);
-			const oldAnswer = await answerData.getAnswerById(answerID);
+			const oldAnswer = await questionData.getAnswerById(answerID);
 			updatedAnswerObj.userId = oldAnswer.userId;
 			updatedAnswerObj.answerBody = answerBody;
 			updatedAnswerObj.datePosted = oldAnswer.datePosted;
@@ -459,7 +458,7 @@ router.put("/:id/edit-answer", async (req,res) => {
 
 		try {
 			let answerID = req.params.id
-			const updatedAnswer = await answerData.updateAnswer(
+			const updatedAnswer = await questionData.updateAnswer(
 				answerID,
 				updatedAnswerObj
 			);
