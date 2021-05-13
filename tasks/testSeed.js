@@ -1785,6 +1785,9 @@ const main = async () => {
 		console.log(`7: ${e}`);
 	}
 
+	/* ratings collection tests */
+	
+
 
 	// display total number of tests + any failed tests
 	console.log('\nResults:')

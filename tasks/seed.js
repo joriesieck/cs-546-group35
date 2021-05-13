@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const dbConnection = require('../config/mongoConnection');
 const data = require('../data');
 const users = data.users;
+const ratings = data.ratings;
 
 /**
  * generate hashedPasswords for seed users
@@ -192,6 +193,22 @@ const main = async () => {
 		console.log(`Error updating user 3: ${e}`);
 	}
 
+	/* add ratings to 3 tutors */
+	try {
+		const rating1 = await ratings.createRating(user1._id, user6._id, 10, 'answerRatingByStudents');
+	} catch (e) {
+		console.log(`Error rating user 6: ${e}`);
+	}
+	try {
+		const rating2 = await ratings.createRating(user6._id, user7._id, 9, 'answerRatingByTutors');
+	} catch (e) {
+		console.log(`Error rating user 7: ${e}`);
+	}
+	try {
+		const rating3 = await ratings.createRating(user2._id, user9._id, 8, 'tutorRating', 'math');
+	} catch (e) {
+		console.log(`Error rating user 9: ${e}`);
+	}
 
 	console.log('\nDone seeding database');
 	await db.serverConfig.close();
