@@ -12,29 +12,30 @@
 	<header>
 		<h1>{{title}}</h1>
 		<nav id='main-menu'>
-			<a href='/'>Home</a>
-			<a href='/questions-forum'>Question Forum</a>
-
-			{{#if loggedIn}}
-				{{#if isStudent}}
-					<a href='/questions-forum/post'>Ask a Question</a>
+			{{#if isTutor}}
+				<a href='/'>Home</a>
+				<a href='/questions-forum'>Question Forum</a>
+				<a href='/top-rated-tutors'>Top Rated Tutors</a>
+				{{#if loggedIn}}
+					<a href='/profile' class='logged-in'>Profile</a>
+					<a href='/logout' class='logged-in'>Log Out</a>
+				{{else}}
+					<a href='/new-user' class='logged-out'>Create Account</a>
+					<a href='/login' class='logged-out'>Log In</a>
 				{{/if}}
-			{{/if}}
-
-			<a href='/top-rated-tutors'>Top Rated Tutors</a>
-
-			{{#if loggedIn}}
-				{{#if isStudent}}
-					<a href='request-tutor' class='logged-in'>Request a Tutor</a>
-				{{/if}}
-			{{/if}}
-
-			{{#if loggedIn}}
-			<a href='/profile' class='logged-in'>Profile</a>
-			<a href='/logout' class='logged-in'>Log Out</a>
 			{{else}}
-			<a href='/new-user' class='logged-out'>Create Account</a>
-			<a href='/login' class='logged-out'>Log In</a>
+				<a href='/'>Home</a>
+				<a href='/questions-forum'>Question Forum</a>
+				<a href='/questions-forum/post'>Ask a Question</a>
+				<a href='/top-rated-tutors'>Top Rated Tutors</a>
+				<a href='request-tutor' class='logged-in'>Request a Tutor</a>
+				{{#if loggedIn}}
+					<a href='/profile' class='logged-in'>Profile</a>
+					<a href='/logout' class='logged-in'>Log Out</a>
+				{{else}}
+					<a href='/new-user' class='logged-out'>Create Account</a>
+					<a href='/login' class='logged-out'>Log In</a>
+				{{/if}}
 			{{/if}}
 		</nav>
 	</header>

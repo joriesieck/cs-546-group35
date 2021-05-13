@@ -65,11 +65,12 @@ router.get("/post", async (req, res) => {
 	if (req.session.user) {
 		if(req.session.user.isTutor === true) {
 			//return res.status(401).json({error: "Please create a student account to ask a question!"});
-			return res.render("questions/ask-question", {title: "Something Went Wrong", error: true, errorMessage: `Please create a student account to ask a question!`, loggedIn:true});
+			return res.render("questions/ask-question", {title: "Something Went Wrong", error: true, errorMessage: `Please create a student account to ask a question!`, loggedIn:true, isTutor: req.session.user.isTutor});
 		} 
 		return res.render("questions/ask-question", {
 			title: "Ask a Question",
 			loggedIn: true,
+			isTutor: req.session.user.isTutor
 		});
 	}
 	res.redirect("/login");
@@ -185,27 +186,37 @@ router.post("/post", async (req, res) => {
 
 // Route to edit a question page
 router.get("/:id/edit", async (req, res) => {
-	if (req.session.user && req.session.user.isTutor === true) {
-		let questionID = req.params.id
-		questionID = ObjectID(questionID);
-		const oldQuestion = await questionData.getQuestionById(questionID);
-		let oldTitle = oldQuestion.title;
-		let oldQuestionBody = oldQuestion.questionBody;
-		let oldQuestionTags = oldQuestion.tags;
-		return res.render("questions/edit-question", {
-			title: "Edit a Question",
-			loggedIn: true,
-			oldTitle: oldTitle,
-			oldBody: oldQuestionBody,
-			oldTags: oldQuestionTags
-		});
-	} 
-	if (req.session.user && req.session.user.isTutor === false) {
-		//return res.status(401).json({error: "Unathorized access!"});
-		return res.status(401).render("questions/edit-question", {title: "Something Went Wrong", error: true, errorMessage: `Unauthorized access`, loggedIn:true});
-	} 
-	if(!req.session.user) {
-		return res.redirect("/login");
+	try {
+		if (req.session.user && req.session.user.isTutor === true) {
+			let questionID = req.params.id
+			questionID = ObjectID(questionID);
+			const oldQuestion = await questionData.getQuestionById(questionID);
+			let oldTitle = oldQuestion.title;
+			let oldQuestionBody = oldQuestion.questionBody;
+			let oldQuestionTags = oldQuestion.tags;
+			return res.render("questions/edit-question", {
+				title: "Edit a Question",
+				loggedIn: true,
+				oldTitle: oldTitle,
+				oldBody: oldQuestionBody,
+				oldTags: oldQuestionTags
+			});
+		} 
+		if (req.session.user && req.session.user.isTutor === false) {
+			//return res.status(401).json({error: "Unathorized access!"});
+			return res.status(401).render("questions/edit-question", {title: "Something Went Wrong", error: true, errorMessage: `Unauthorized access`, loggedIn:true, isTutor: req.session.user.isTutor});
+		} 
+		if(!req.session.user) {
+			return res.redirect("/login");
+		}
+	} catch(e) {
+		if (req.session.user) {
+			if(req.session.user.isTutor === false){
+				return res.status(401).render("questions/edit-question", {title: "Something Went Wrong", error: true, errorMessage: `Unauthorized access`, loggedIn:true, isTutor: req.session.user.isTutor});
+			} else {
+				return res.status(401).render("questions/edit-question", {title: "Something Went Wrong", error: true, errorMessage: `No question with this ID. Please check the question you are trying to edit.`, loggedIn:true, isTutor: req.session.user.isTutor});
+			}
+		} 
 	}
 });
 

@@ -31,7 +31,11 @@ const constructorMethod = (app) => {
 				questionList[i].answered = "Yes";
 			} 
 		}
-		res.render('home/home',{title: "Stress-Less Tutoring", loggedIn: !!req.session.user, questions: questionList, isStudent: !req.session.user.isTutor});
+		if(req.session.user) {
+			return res.render('home/home',{title: "Stress-Less Tutoring", loggedIn: !!req.session.user, questions: questionList, isTutor: req.session.user.isTutor});
+		} else {
+			return res.render('home/home',{title: "Stress-Less Tutoring", loggedIn: !!req.session.user, questions: questionList});
+		}
 	});
 	app.use('/login', loginRoutes);
 	app.use('/new-user', newUserRoutes);
