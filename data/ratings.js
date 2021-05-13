@@ -103,27 +103,6 @@ module.exports = {
         return rating;
     },
 
-    async updateRating(ratingId, updatedRating) {
-        if (ratingId === undefined) throw "Error: No id parameter provided.";
-        if (ObjectId.isValid(ratingId) === false) throw "Error: Invalid rating ID provided.";
-    
-        const updatedRatingData = {};
-        if (updatedRating === undefined) throw "Error: Must provide updated rating information.";
-    
-        if (updatedRating.rating) {
-            if (updatedRating.rating === undefined || typeof updatedRating.rating !== 'number' || updatedRating.rating < 1 || updatedRating.rating > 10) throw "Error: Updated rating parameter must be supplied and must be a number 1 through 10.";
-            updatedRatingData.rating = updatedAnswer.rating;
-        }
-    
-        const ratingCollection = await ratings();
-        const updatedInfo = await ratingCollection.updateOne(
-            {_id: ratingId},
-            {$set: updatedRatingData}
-        );
-        if (!updatedInfo.matchedCount && !updatedInfo.modifiedCount) throw 'Error: Could not update rating successfully.';
-        return await this.getRatingById(id);
-    },
-
     async deleteRating(id) {
         if (id === undefined) throw "Error: No id parameter provided.";
         if (ObjectId.isValid(id) === false) throw "Error: Invalid ID provided.";
