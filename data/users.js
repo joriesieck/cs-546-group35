@@ -588,7 +588,7 @@ const getTopTutors = async () => {
 	let sorter = {ratings:
 		{'avgRating': -1}
 	};
-	const tutors = await userCollection.find({userType: 'tutor'}).sort(sorter).toArray();
+	const tutors = await userCollection.find({'userType': 'tutor', 'ratings.avgRating': {$ne: null}}).sort(sorter).toArray();
 	if (tutors.length < 1) throw 'No tutors available to rank';
 	return tutors;
 }

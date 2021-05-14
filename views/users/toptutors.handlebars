@@ -9,16 +9,7 @@
         <div class="displayedTutor">
             <h3>{{this.username}}</h3>
             <h4>{{this.firstName}} {{this.lastName}}</h4>
-            <h5>{{this.rating}}</h5>
-        </div>
-        {{/each}}
-    </div>
-    <div id="questionsAnswered">
-        {{#each tutor}}
-        <div class="displayedTutor">
-            <h3>{{this.username}}</h3>
-            <h4>{{this.firstName}} {{this.lastName}}</h4>
-            <h5>{{this.rating}}</h5>
+            <h5>{{this.ratings.avgRating}}</h5>
         </div>
         {{/each}}
     </div>

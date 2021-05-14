@@ -6,7 +6,6 @@ router.get('/', async (req, res) => {
     if (!req.session.user){
         res.redirect('/');
     }
-
     try{
         const tutors = await userData.getTopTutors();
         if (!tutors || tutors.length < 1) {
