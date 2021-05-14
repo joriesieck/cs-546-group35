@@ -395,7 +395,7 @@ router.put("/edit-question/:id", async (req, res) => {
 
 		try {
 			let questionID = req.params.id
-			//questionID = ObjectID(questionID);
+			questionID = ObjectID(questionID);
 			const updatedQuestion = await questionData.updateQuestion(
 				questionID,
 				updatedQuestionObj
