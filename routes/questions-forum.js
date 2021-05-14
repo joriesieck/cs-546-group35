@@ -58,24 +58,32 @@ router.get("/", async (req, res) => {
 // Route to display the single question with answers page
 router.get("/:id", async (req, res) => {
 	let id = req.params.id;
-	id = ObjectID(id);
+	// input checks
+	try {
+		id = ObjectID(id);
+	} catch (e) {
+		res.status(400).json({error: "Invalid question ID provided"});
+	}
+	// get the question and its answers
 	let singleQuestion = await questionData.getQuestionById(id);
-	let answerList = await questionData.getAnswers();
+	let answerList = await questionData.getAnswers(id);
 	let monthPosted;
 	let dayPosted;
 	let yearPosted;
 	let fullDatePosted;
 
+	// format the date
 	for(let i = 0; i < answerList.length; i++) {
-		monthPosted = answerList[i].datePosted.getMonth() + 1;
-		dayPosted = answerList[i].datePosted.getDate() ;
-		yearPosted = answerList[i].datePosted.getFullYear();
+		monthPosted = answerList[i].date.getMonth() + 1;
+		dayPosted = answerList[i].date.getDate() ;
+		yearPosted = answerList[i].date.getFullYear();
 		fullDatePosted = `${monthPosted}/${dayPosted}/${yearPosted}`;
 		answerList[i].datePosted = fullDatePosted;
 	}
 
+	// render the appropriate page, depending on whether user is logged in
 	if(!!req.session.user === false) {
-		return res.render("questions/answer-list", {
+		return res.render("answers/answers-page", {
 			title: "Answers",
 			loggedIn: !!req.session.user,
 			question: singleQuestion,
@@ -84,7 +92,7 @@ router.get("/:id", async (req, res) => {
 	}
 
 	if(!!req.session.user === true) {
-		return res.render("questions/answers-list", {
+		return res.render("answers/answers-page", {
 			title: "Answers",
 			loggedIn: !!req.session.user,
 			question: singleQuestion,

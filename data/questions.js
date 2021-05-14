@@ -57,7 +57,6 @@ async function createQuestion(userId, title, question, tags) {
 
     let visible = true;
     let currentDate = new Date();
-    let answerObj = {};
 
     const questionCollection = await questions();
 
@@ -68,7 +67,7 @@ async function createQuestion(userId, title, question, tags) {
         tags: tags,
         visible: visible,
         datePosted: currentDate,
-        answers: [answerObj]
+        answers: []
     };
 
     const insertInfo = await questionCollection.insertOne(questionObj);
@@ -122,10 +121,15 @@ async function getQuestions() {
     return questionList;
 }
 
-async function getAnswers() {
-    const answerCollection = await questions();
-    let answerList = await answerCollection.find({}, {projection: {answer:1}}).toArray();
-    return answerList;
+async function getAnswers(questionId) {
+    // check inputs
+    if (ObjectID.isValid(questionId) === false) throw "Error: Invalid questionId provided.";
+
+    // get the question (throws if the question does not exist)
+    const question = await getQuestionById(questionId);
+
+    // return the answers
+    return question.answers;
 }
 
 async function getQuestionById(id) {
