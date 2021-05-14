@@ -1,6 +1,11 @@
 <main id="toptutors">
+    <div>
+        <label for="search-bar-input">Search for tutors by subject:</label>
+        <input id="search-bar-input" type="text" name="search-bar-input" onkeyup="searchBySubject()"
+        placeholder="Math, English, etc">
+    </div>
     <div id="tutoringList">
-        {{#each tutor}}
+        {{#each tutors}}
         <div class="displayedTutor">
             <h3>{{this.username}}</h3>
             <h4>{{this.firstName}} {{this.lastName}}</h4>

@@ -163,7 +163,7 @@ button.login-landing, button.new-user-landing {
 }
 
 /* profile styles */
-#passwordChangeForm, #userInfoChangeForm {
+#passwordChangeForm, #userInfoChangeForm, #ratingFormSection {
 	display: none;
 }
 
@@ -176,6 +176,7 @@ button.login-landing, button.new-user-landing {
 #shownInfo h3 {
 	font-weight: normal;
 }
+
 /* Question forum - Redirect to asking question */
 #forum-ask-new-question {
 	margin: auto;

@@ -583,7 +583,16 @@ const removeUserFromTutorList = async (userToRemove, userRemoveFrom) => {
 	return `User ${userToRemove} has been successfully removed from ${userRemoveFrom}'s tutorList.`;
 }
 
+const getTopTutors = async () => {
+	const userCollection = await users();
+	let sorter = {ratings:
+		{'avgRating': -1}
+	};
+	const tutors = await userCollection.find({userType: 'tutor'}).sort(sorter).toArray();
+	if (tutors.length < 1) throw 'No tutors available to rank';
+	return tutors;
+}
 
 module.exports = {
-	checkInputs, createUser, getUserById, getUserByEmail, getUserByUsername, getRelatedUsers, updateUser, deleteUser, removeUserFromTutorList
+	checkInputs, createUser, getUserById, getUserByEmail, getUserByUsername, getRelatedUsers, updateUser, deleteUser, removeUserFromTutorList, getTopTutors
 }

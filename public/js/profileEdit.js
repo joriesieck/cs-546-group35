@@ -1,6 +1,31 @@
 //on load of this page, get all the user's questions by id
 //replace the questions array with the actual question objects so info can be retrieved from handlebars
+$(document).ready(function(){
+    $('#ratingsSection').empty();
+    $.ajax({
+        method: 'POST',
+        url: '/profile/rating',
+        data: JSON.stringify({
+            ratedUsername: $('givenUsername').html()
+        })
+    }).then(function (res){
+        if (res.message === 'OK'){
+            var newButton = '<button id="ratingButton">Rate this Tutor</button>';
+            $('#ratingSection').append(newButton);
+            $('#ratingButton').click(function(event){
+                event.preventDefault();
+                $('#shownInfo').hide();
+                $('#ratingFormSection').show();
+                //if clicked, hide the shown info and show a rating form
+            })
+        } //in all other cases, rating is not possible, so do not display
+    })
 
+    $('#tutorList').empty();
+    // $.ajax({
+    //     method: 'POST'
+    // })
+});
 //also replace the tutor IDs with links to tutor profiles
 //get the user by ID and make sure the link shows name
 
@@ -19,7 +44,7 @@
     //when the user wants to change their password
     passwordButton.click((event) => {
         //hide the shown information
-        shownInfo.toggle();
+        shownInfo.css("display","none");
         //show the password form
         passwordChange.toggle();
     });
@@ -110,11 +135,13 @@
     $(".return").click((event) => {
         $("#passChange :input").val("");
         $("#infoChange :input").val("");
-        //if the return button is clicked, hide both forms just in case
+        $("#ratingForm :input").val("");
+        //if the return button is clicked, hide all forms just in case
         passwordChange.css("display", "none");
         infoChange.css("display", "none");
+        $("ratingFormSection").css("display", "none");
         //unhide the user's profile/shownInfo
-        shownInfo.css("display", "block");
+        shownInfo.css("display", "flex");
     });
 
 
@@ -238,5 +265,6 @@
         //if successful, return the user back to the main page, and show a box that says successful
         //if unsuccessful, keep the user on the change password page and report back on errors
     });
+
 
 })(window.jQuery);

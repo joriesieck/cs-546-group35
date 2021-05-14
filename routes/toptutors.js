@@ -1,14 +1,27 @@
 const express = require('express');
 const router = express.Router();
 const userData = require('../data/users');
-const ratingsData = require('../data/ratings');
-//getAllUsersRatings //getAllRatings
 
 router.get('/', async (req, res) => {
-    //query the database for the top 10 users by each rating
-    //tutorAnswer, studentAnswer, and tutor experience
-    //return each of these lists separately
-    //ajax can then take these and make them pretty
+    if (!req.session.user){
+        res.redirect('/');
+    }
+
+    try{
+        const tutors = await userData.getTopTutors();
+        if (!tutors || tutors.length < 1) {
+            throw "No tutors to rank";
+        }
+        else{
+            res.status(200).render('users/toptutors',{
+                tutors: tutors
+            });
+            return;
+        }
+    }catch(e){
+        res.status(400).json({error: e});
+    }
+    
 });
 
 router.use('*', (req, res) => {

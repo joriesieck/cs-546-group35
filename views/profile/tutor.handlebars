@@ -13,13 +13,16 @@
             {{/each}}
         </ul>
         <div id="questionLinks">
-            {{#each user.questionIDs}}
+            {{#each questions}}
             <a></a>
             {{/each}}
         </div>
         {{#if self}}
         <button id="userInfoChange">Change User Information</button>
         <button id="passwordChange">Change Password</button>
+        {{else}}
+        <div id="ratingSection"></div>
+        <button id="ratingButton">Rate {{user.name.firstName}}</button>
         {{/if}}
 
     </div>
@@ -55,7 +58,7 @@
             <input name="email" id="email" type="email">
 
             <label for="relevantSubjects">Subjects:</label>
-            <input>
+            <input name="relevantSubjects" id="relevantSubjects" type="text">
 
             <label for="year">Graduation Year:</label>
             <input name="year" id="year" type="number">
@@ -63,6 +66,15 @@
             <button type="submit">Submit</button>
             <button class="return">Return to Profile</button>
         </form>
+    </div>
+
+    <div id="ratingFormSection">
+        <form id="ratingForm">
+            <label for="rating">Rate your experience with {{user.name.firstName}} (1-10):</label>
+            <input type="number" name="rating" id="rating" min="1" max="10" step="1">
+            <button type="submit">Submit</button>
+        </form>
+        <button class="return">Return to Profile</button>
     </div>
 </main>
 

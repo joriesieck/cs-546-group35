@@ -12,7 +12,7 @@ function createHelper(string) {
 };
 
 module.exports = {
-    async createRating(userId, ratedId, rating, type, subject) {
+    async createRating(userId, ratedId, rating, type) {
         /* check inputs */
         // userId and ratedId must exist and be valid ObjectIds
         if (userId === undefined) throw "Error: No userId parameter provided.";
@@ -23,8 +23,6 @@ module.exports = {
         if (rating === undefined || typeof rating !== 'number'|| rating < 1 || rating > 10) throw "Error: Rating must be supplied and must be a number between 1 through 10!";
         // type must exist, be a nonempty string, and be either 'answerRatingByStudents', 'answerRatingByTutors', or 'tutorRating'
         if (createHelper(type) === false || (type !== 'answerRatingByStudents' && type !== 'answerRatingByTutors' && type !== 'tutorRating')) throw "Error: Rating type must be supplied, must be a string/non all empty space string, and must be either 'answerRatingByStudents', 'answerRatingByTutors', or 'tutorRating'.";
-        // for tutorRatings, subject must exist and be a nonempty string 
-        if (type === 'tutorRating' && createHelper(subject) === false) throw "Error: Relevant subject must be supplied and must be a string/non all empty space string.";
 
         // retrieve the user objects for userId and ratedId (these functions throw if the user does not exist)
         const rater = await users.getUserById(userId);
@@ -57,8 +55,7 @@ module.exports = {
             ratedId: ratedId,
             ratingDate: ratingDate,
             ratingType: type,
-            ratingValue: rating,
-            relevantSubject: subject
+            ratingValue: rating
         };
         const ratingCollection = await ratings();
         const insertInfo = await ratingCollection.insertOne(newRating);
@@ -103,14 +100,14 @@ module.exports = {
         return rating;
     },
 
-    async getAllUsersRatings(userId){
-        if (!userId || userId === undefined || userId === null || userId === '') throw "Error: id is required";
-        if (!ObjectId.isValid(userId)) throw "UserId is not a valid ObjectID";
-        const ratingCollection = await ratings();
-        let usersRatings = await ratingCollection.find({ratedId: userId},{ratingType, ratingValue});
-        //we just need the type and the value I think
-        return usersRatings; //can do more work with them in the routes
-    },
+    // async getAllUsersRatings(userId){
+    //     if (!userId || userId === undefined || userId === null || userId === '') throw "Error: id is required";
+    //     if (!ObjectId.isValid(userId)) throw "UserId is not a valid ObjectID";
+    //     const ratingCollection = await ratings();
+    //     let usersRatings = await ratingCollection.find({ratedId: userId},{ratingType, ratingValue});
+    //     //we just need the type and the value I think
+    //     return usersRatings; //can do more work with them in the routes
+    // },
 
     async deleteRating(id) {
         if (id === undefined) throw "Error: No id parameter provided.";

@@ -4,7 +4,8 @@ const xss = require('xss');
 const bcrypt = require('bcryptjs');
 const userData = require('../data/users');
 const questionsData = require('../data/questions');
-const { questions } = require('../config/mongoCollections');
+const ratingsData = require('../data/ratings');
+const { ObjectId } = require('mongodb');
 
 const saltRounds = 16;
 
@@ -23,17 +24,17 @@ router.get('/', async (req, res) => {
             //we have a user and can render it
             console.log(user);
             //get their questions list to facilitate printing them
-            const questionsList = await questionsData.getAllUsersQuestions(user._id);
-            if (questionsList.length === 0){
-                questionsList.append('None');
-                //we will check for the first element being none/size being 1
-            }
+            // const questionsList = await questionsData.getAllUsersQuestions(user._id);
+            // if (questionsList.length === 0){
+            //     questionsList.append('None');
+            //     //we will check for the first element being none/size being 1
+            // }
             if (user.userType === "student"){
                 res.status(200).render('profile/student',{
                     user: user,
                     self: true,
                     title: `${user.username}'s Profile`,
-                    questions: questionsList,
+                    //questions: questionsList,
                     loggedIn: true
                 });
             } else{ //is a tutor
@@ -41,14 +42,14 @@ router.get('/', async (req, res) => {
                     user: user,
                     self: true,
                     title: `${user.username}'s Profile`,
-                    questions: questionsList,
+                    //questions: questionsList,
                     loggedIn: true
                 });
             }
            
         }
     } catch(e) {
-        res.status(400).json({error: e});
+        res.status(400).json({error: `in GET /profile, ${e}`});
     }
 });
 
@@ -218,50 +219,161 @@ router.get('/:username', async (req,res) =>{
         //only tutors can access this route as others cant see profiles
         const user = await userData.getUserByUsername(req.session.user.username); //get the user requesting the route
         if (!user) throw "No user found with this username";
-        const questions = await questionsData.getAllUsersQuestions(user._id);
-        if (questions.length === 0){
-            questions.append("None");
-        }
-        //check if they're a tutor
-        if (user.userType !== "tutor"){
-            //they're a student and can't access this route
+        // const questions = await questionsData.getAllUsersQuestions(user._id);
+        // if (questions.length === 0){
+        //     questions.append("None");
+        // }
+        const retrievedUser = await userData.getUserByUsername(req.params.username);
+        if (!retrievedUser){
+            //the user doesn't exist
+            //send to the main page
             res.redirect('/');
         } else {
-            //they're a tutor and can
-            const retrievedUser = await userData.getUserByUsername(req.params.username);
-            if (!retrievedUser){
-                //the user doesn't exist
-                //send to the main page
-                res.redirect('/');
-            } else {
-                //got it
-                if (req.session.user.username === retrievedUser.username){
-                    res.redirect('/profile'); //they're requesting their own profile for some reason?
+            //got it
+            if (req.session.user.username === retrievedUser.username){
+                res.redirect('/profile'); //they're requesting their own profile for some reason?
+            }
+            if (retrievedUser.userType === "tutor"){
+                //tutor type
+                res.status(200).render('profile/tutor', {
+                    user: retrievedUser,
+                    self: false,
+                    title: `${retrievedUser.username}'s Profile`,
+                    loggedIn: true,
+                    //questions: questions
+                })
+            } else{
+                if (user.userType !== "tutor"){
+                    res.status(403).json({error: "You cannot visit this profile, as you are not a tutor"});
+                    return;
                 }
-                if (retrievedUser.userType === "tutor"){
-                    //tutor type
-                    res.status(200).render('profile/tutor', {
-                        user: retrievedUser,
-                        self: false,
-                        title: `${retrievedUser.username}'s Profile`,
-                        loggedIn: true,
-                        questions: questions
-                    })
-                } else{
-                    res.status(200).render('profile/student', {
-                        user: retrievedUser,
-                        self: false,
-                        title: `${retrievedUser.username}'s Profile`,
-                        loggedIn: true,
-                        questions: questions
-                    });
-                }
+                res.status(200).render('profile/student', {
+                    user: retrievedUser,
+                    self: false,
+                    title: `${retrievedUser.username}'s Profile`,
+                    loggedIn: true,
+                    //questions: questions
+                });
             }
         }
     } catch (e) {
         res.status(400).json({error: e});
         return;
     }   
+});
+
+
+//allows us to see if the user is allowed to rate the other user
+router.post('/rating', async (req, res) => {
+    if (!req.session.user){
+        res.redirect('/');
+    }
+    //id of user that is desired to be rated rated
+    let ratedUsername = xss(req.body.ratedUsername);
+    try{
+        if (!ratedUsername || ratedUsername === undefined || ratedUsername === null || typeof ratedUsername !== 'string' || ratedUsername.trim() === ''){
+            throw "Username for the rated user is of improper format"
+        }
+        if (req.session.user.username === ratedUsername){
+            res.status(200).json({message: 'SELF'});
+            return;
+        }
+    
+        const rater = await userData.getUserByUsername(req.session.user.username);
+        if (!rater) throw "Could not find rater's user details";
+        const rated = await userData.getUserByUsername(ratedUsername);
+        if (!rated) throw "Could not find the desired-to-be-rated's user details";
+
+        if (rated.userType !== 'tutor'){
+            res.status(200).json({message: 'FALSE'});
+            return;
+        }
+
+        if (rater.userType !== 'student' && rated.userType !== 'tutor') {
+            res.status(200).json({message: 'You are ineligible to rate this tutor'});
+            return;
+        }
+        let found = false;
+        for (tutor of rater.tutorList){
+            if (ratedId.equals(tutor)){
+                found = true;
+                break;
+            }
+        }
+        if (!found){
+            res.status(200).json({message: 'This is not a tutor on your tutor list'});
+            return;
+        }
+        let hasRated = false;
+        const usersRatings = await ratingsData.getAllUsersRatings(ratedId);
+        if (usersRatings.length > 0){
+            for (rating of usersRatings){
+                if (rating.userId === rater._id){
+                    //the user has rated before
+                    hasRated = true;
+                    break;
+                }
+            }
+        }
+        if (hasRated){
+            res.status(200).json({message: 'You have already rated this tutor'});
+        } else {
+            //should be able to submit a rating given all of this
+            res.status(200).json({message: 'OK'});
+        }
+    } catch(e){
+        res.status(400).json({error: e});
+        return;
+    }   
+});
+
+router.post('/rating', async (req, res) => {
+    if (!req.session.user) {
+        res.redirect('/');
+    }
+    let ratedId = xss(req.body.ratedId);
+    let rating = xss(req.body.rating);
+
+    try{
+        if (ratedId === undefined || ratedId === null || ratedId === ''){
+            throw "ID for the rated user is of improper format"
+        }
+        if (ObjectId.isValid(ratedId) === false) throw "ID for the rated user is not an ObjectID";
+        if (rating === undefined || rating === null || rating === ''){
+            throw "Rating is of improper format";
+        }
+        rating = parseInt(rating);
+        if (isNaN(rating)) throw "Rating must be a valid integer";
+        if (rating < 1 || rating > 10) throw "Rating may only be an integer from 1-10";
+        const userSubmittingRating = await userData.getUserByUsername(req.session.user.username);
+        if (!userSubmittingRating) throw "No user found by this username";
+        const userBeingRated = await userData.getUserById(ratedId);
+        if (!userBeingRated) throw "No user found by this id";
+
+        //we have all the info we need to make a rating, but need to make sure the tutor hasn't been rated by this other user
+        const usersRatings = await userData.getAllUsersRatings(userBeingRated);
+        if (usersRatings.length !== 0){
+            //we definitely need to check then!
+            for (i = 0; i < usersRatings.length; i++){
+                if (usersRatings[i].userId === userSubmittingRating._id){
+                    throw "You cannot rate this tutor more than once";
+                }
+            }
+        }
+        //if we get here, the user has not rated the tutor before so this can be safely submitted
+        const returnedRating = await ratingsData.createRating(userId, userBeingRated._id, rating, 'tutorRating');
+        if (!returnedRating){
+            throw "Something went wrong while attempting to create this rating";
+        } else{
+            res.status(200).json({message: 'success'});
+            return;
+        }
+        
+    } catch(e){
+        console.log(`error in POST /profile/rating ${e}`);
+        res.status(400).json({error: e});
+        return;
+    }
 });
 
 router.use('*', (req, res) => {
