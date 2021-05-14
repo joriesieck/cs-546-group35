@@ -110,6 +110,14 @@ async function createAnswer(userId, answer, questionId) {
     const insertInfo = await questionCollection.updateOne({_id:questionId}, {$addToSet: {answers:answerObj}});
     if (insertInfo.insertedCount === 0) throw 'Could not add answer';
 
+    const inseredAnswerId = answerObj._id;
+    let answerIdArr = [inseredAnswerId];
+    const userAnswerObj = {
+        id: userId,
+        questionIDs: answerIdArr
+    };
+    await userData.updateUser(userAnswerObj);
+
     // get and return the answer
     const newAnswer = await getAnswerById(answerId);
     return newAnswer;
