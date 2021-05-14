@@ -66,7 +66,7 @@ router.get("/:id", async (req, res) => {
 	}
 	// get the question and its answers
 	let singleQuestion = await questionData.getQuestionById(id);
-	let answerList = await questionData.getAnswers(id);
+	let answerList = singleQuestion.answers;
 	let monthPosted;
 	let dayPosted;
 	let yearPosted;
@@ -78,7 +78,7 @@ router.get("/:id", async (req, res) => {
 		dayPosted = answerList[i].date.getDate() ;
 		yearPosted = answerList[i].date.getFullYear();
 		fullDatePosted = `${monthPosted}/${dayPosted}/${yearPosted}`;
-		answerList[i].datePosted = fullDatePosted;
+		answerList[i].date = fullDatePosted;
 	}
 
 	// render the appropriate page, depending on whether user is logged in

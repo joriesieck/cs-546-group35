@@ -1,6 +1,10 @@
 <main>
-    <p>{{this.questionBody}}</p>
-    <a href="/questions-forum/post-answer">Click here to create a new answer</a>
+    <h2>Question Title</h2>
+    <p>{{question.title}}</p>
+
+    <h2>Question Body</h2>
+    <p>{{question.questionBody}}</p>
+    
     {{#if answers.length}}
     <table id='answer-list-table'>
 
@@ -8,18 +12,12 @@
         <tr class="table-header">
             <th>Date</th>
             <th>Answer</th>
-            <th>Link</th>
-            {{#if answerUserId}}
             <th>Edit</th>
-            {{/if}}
         </tr>
         {{#each answers}}
         <tr class="table-answer-row">
             <td class="table-date-posted">{{this.date}}</td>
             <td class="table-answer-body">{{this.answer}}</td>
-            <td class="table-answer-link">
-                <a href='/questions-forum/{{this._id}}'>Link</a>
-            </td>
             <td class="table-answer-edit">
                 <a href='/questions-forum/{{this._id}}/edit-answer'>Edit</a>
             </td>
@@ -29,15 +27,11 @@
         <tr class="table-header">
             <th>Date</th>
             <th>Answer</th>
-            <th>Link</th>
         </tr>
         {{#each answers}}
         <tr class="table-answer-row">
             <td class="table-date-posted">{{this.date}}</td>
             <td class="table-answer-body">{{this.answer}}</td>
-            <td class="table-answer-link">
-                <a href='questions-forum/{{this._id}}'>Link</a>
-            </td>
         </tr>
         {{/each}}
         {{/if}}
@@ -45,4 +39,5 @@
     {{else}}
     <p class="not-answers">We're sorry, no one has responded to this question yet.</p>
     {{/if}}
+    <a href="/questions-forum/post-answer">Click here to create a new answer</a>
 </main>
