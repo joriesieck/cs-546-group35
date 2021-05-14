@@ -103,6 +103,12 @@ async function getQuestions() {
     return questionList;
 }
 
+async function getAnswers() {
+    const answerCollection = await questions();
+    let answerList = await answerCollection.find({}, {projection: {answer:1}}).toArray();
+    return answerList;
+}
+
 async function getQuestionById(id) {
     if(id === undefined) throw "Error: No id parameter provided to remove function";
     if(ObjectID.isValid(id) === false) throw "Error: Invalid ID provided";
@@ -211,6 +217,7 @@ module.exports = {
     createQuestion,
     createAnswer,
     getQuestions,
+    getAnswers,
     getQuestionById,
     getAnswerById,
     updateQuestion,
