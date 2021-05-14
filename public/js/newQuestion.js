@@ -56,7 +56,7 @@
         } else {
             var requestConfig = {
                 method: 'POST',
-                url: '/questions-forum/post',
+                url: '/questions-forum/post-question',
                 contentType: 'application/json',
                 data: JSON.stringify({
                     questionTitle,
@@ -70,8 +70,7 @@
             };
             $.ajax(requestConfig).then(function (res) {
                 if (res.message==='success') {
-                    // TODO: Redirect to single question page
-                    location.href = '/';
+                    location.href = '/questions-forum/:id';
                 }
             });
         }

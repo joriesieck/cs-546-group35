@@ -79,8 +79,7 @@
             };
             $.ajax(requestConfig).then(function (res) {
                 if (res.message==='success') {
-                    // TODO: Redirect to single question page
-                    location.href = '/';
+                    location.href = '/questions-forum/:id';
                 }
             });
         }

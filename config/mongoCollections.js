@@ -21,6 +21,5 @@
  module.exports = {
 	users: getCollectionFN('users'),
 	questions: getCollectionFN('questions'),
-	answers: getCollectionFN('answers'),
 	ratings: getCollectionFN('ratings')
  }

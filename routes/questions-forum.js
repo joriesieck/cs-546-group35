@@ -55,13 +55,47 @@ router.get("/", async (req, res) => {
 
 });
 
-// TODO: Route to display single question asked
-// router.get("/:id", async (req, res) => {
-	
-// });
+// Route to display the single question with answers page
+router.get("/:id", async (req, res) => {
+	let id = req.params.id;
+	id = ObjectId(id);
+	let singleQuestion = await questionData.getQuestionById(id);
+	let answerList = await questionData.getAnswers();
+	let monthPosted;
+	let dayPosted;
+	let yearPosted;
+	let fullDatePosted;
+
+	for(let i = 0; i < answerList.length; i++) {
+		monthPosted = answerList[i].datePosted.getMonth() + 1;
+		dayPosted = answerList[i].datePosted.getDate() ;
+		yearPosted = answerList[i].datePosted.getFullYear();
+		fullDatePosted = `${monthPosted}/${dayPosted}/${yearPosted}`;
+		answerList[i].datePosted = fullDatePosted;
+	}
+
+	if(!!req.session.user === false) {
+		return res.render("questions/answer-list", {
+			title: "Answers",
+			loggedIn: !!req.session.user,
+			question: singleQuestion,
+			answers: answerList
+		});
+	}
+
+	if(!!req.session.user === true) {
+		return res.render("questions/answers-list", {
+			title: "Answers",
+			loggedIn: !!req.session.user,
+			question: singleQuestion,
+			answers: answerList,
+			isTutor: req.session.user.isTutor
+		});
+	}
+});
 
 // Route to ask a new question page
-router.get("/post", async (req, res) => {
+router.get("/post-question", async (req, res) => {
 	if (req.session.user) {
 		if(req.session.user.isTutor === true) {
 			//return res.status(401).json({error: "Please create a student account to ask a question!"});
@@ -76,8 +110,29 @@ router.get("/post", async (req, res) => {
 	res.redirect("/login");
 });
 
+// Route to create a new answer page
+router.get("/post-answer", async (req, res) => {
+	if (req.session.user) {
+		if(req.session.user.isTutor === false) {
+			return res.render("answers/create-answer", {
+				title: "Something went wrong",
+				error: true,
+				errorMessage: `Please create a tutor account to ask a new question!`,
+				loggedIn: true,
+				isTutor: req.session.isTutor
+			});
+		}
+		return res.render("answers/create-answer", {
+			title: "Create an Answer",
+			loggedIn: true,
+			isTutor: req.session.user.isTutor
+		});
+	} 
+	res.redirect("/login");
+});
+
 // Route for posting a new question
-router.post("/post", async (req, res) => {
+router.post("/post-question", async (req, res) => {
 	if (req.session.user) {
 		if(req.session.user.isTutor === true) {
 			return res.status(401).json({error: "Please create a student account to ask a question!"});
@@ -184,8 +239,60 @@ router.post("/post", async (req, res) => {
 	}
 });
 
+// Route to post a new answer
+router.post("/post-answer", async (req, res) => {
+	if (req.session.user) {
+		let answerInfo = xss(req.body);
+		let answerBody = xss(req.body.answer);
+
+		if (!answerInfo) {
+			res.status(400).json({
+				error: "You must provide data to create your answer",
+			});
+			return;
+		}
+		if (createHelper(answerBody) === false) {
+			res.status(400).json({
+				error: "Error: Answer body must be provided and of proper type",
+			});
+			return;
+		}
+
+		if (!answerBody) {
+			res.status(400).json({ error: "You must provide an answer body" });
+			return;
+		}
+
+		var regex = /(<([^>]+)>)/gi;
+		answerBody = answerBody.replace(regex, "");
+
+		let currentUser = await userData.getUserByUsername(
+			req.session.user.username
+		);
+		let currentUserId = currentUser._id;
+
+		let questionId = req.params.id;
+		questionId = Object(questionId);
+		try {
+			const newAnswer = await questionData.createAnswer(
+				currentUserId,
+				answerBody,
+				questionId
+			);
+
+			if(newAnswer) {
+				res.status(201).json({ message: "success" });
+			}
+		} catch (e) {
+			res.status(500).json({ error: e });
+		}
+	} else {
+		res.sendStatus(403);
+	}
+});
+
 // Route to edit a question page
-router.get("/:id/edit", async (req, res) => {
+router.get("/:id/edit-question", async (req, res) => {
 	try {
 		if (req.session.user && req.session.user.isTutor === true) {
 			let questionID = req.params.id
@@ -220,7 +327,7 @@ router.get("/:id/edit", async (req, res) => {
 	}
 });
 
-router.put("/:id/edit", async (req, res) => {
+router.put("/:id/edit-question", async (req, res) => {
 	if (req.session.user && req.session.user.isTutor === false) {
 		return res.status(401).json({error: "Unathorized access!"});
 	} 
@@ -328,6 +435,113 @@ router.put("/:id/edit", async (req, res) => {
 			}
 
 			if(updatedQuestion) {
+				res.status(201).json({ message: "success" });
+			}
+		} catch (e) {
+			res.status(500).json({ error: e });
+		}
+	}
+});
+
+// Route to edit an answer page
+router.get("/:id/edit-answer", async (req, res) => {
+	try {
+		let currentUser = await userData.getUserByUsername(req.session.user.username);
+		let answerUserId = currentUser.userId;
+		if (req.session.user && req.session.user.isTutor && answerUserId === true) {
+			let answerID = req.params.id
+			answerID = ObjectID(answerID);
+			const oldAnswer = await questionData.getAnswerById(answerID);
+			let oldAnswerBody = oldAnswer.answerBody;
+			return res.render("answers/edit-answer", {
+				title: "Edit Your Answer",
+				loggedIn: true,
+				oldBody: oldAnswerBody
+			});
+		}
+		if (req.session.user && req.session.user.isTutor && answerUserId === false) {
+			res.status(401).json({error: "Unathorized access!"});
+		} 
+		if(!req.session.user) {
+			res.redirect("/login");
+		}
+	} catch(e) {
+		let currentUser = await userData.getUserByUsername(req.session.user.username);
+		let answerUserId = currentUser.userId;
+		if (req.session.user) {
+			if(req.session.user.isTutor && answerUserId === false){
+				return res.status(401).render("answers/edit-answer", {title: "Something Went Wrong", error: true, errorMessage: `Unauthorized access`, loggedIn:true, isTutor: req.session.user.isTutor});
+			} else {
+				return res.status(401).render("answers/edit-answer", {title: "Something Went Wrong", error: true, errorMessage: `No answer with this ID. Please check the answer you are trying to edit.`, loggedIn:true, isTutor: req.session.user.isTutor});
+			}
+		} 
+	}
+});
+
+router.put("/:id/edit-answer", async (req,res) => {
+	let currentUser = await userData.getUserByUsername(req.session.user.username);
+	let answerUserId = currentUser.userId;
+	if (req.session.user && req.session.user.isTutor && answerUserId === false) {
+		return res.status(401).json({error: "Unathorized access!"});
+	}
+	if (req.session.user && req.session.user.isTutor && answerUserId === true) {
+		let answerInfo = xss(req.body);
+		let answerBody = xss(req.body.answerBody);
+		let updatedAnswerObj = {};
+
+		if(!answerInfo) {
+			res.status(400).json({error: "You must provide data to update your answer"});
+			return;
+		}
+		if(createHelper(answerBody) === false) {
+			res.status(400).json({ error: "Error: Answer body must be provided and of proper type" });
+			return;
+		}
+
+		if(
+			!answerBody
+		) {
+			res.status(400).json({ error: "You must supply the answer body" });
+			return;
+		}
+
+		try {
+			let answerID = req.params.id
+			answerID = ObjectID(answerID);
+			const oldAnswer = await questionData.getAnswerById(answerID);
+			updatedAnswerObj.userId = oldAnswer.userId;
+			updatedAnswerObj.answerBody = answerBody;
+			updatedAnswerObj.datePosted = oldAnswer.datePosted;
+			updatedAnswerObj.answers = oldAnswer.answers;
+		} catch (e) {
+			res.status(404).json({ error: "Answer not found" });
+			return;
+		}
+
+		try {
+			let answerID = req.params.id
+			const updatedAnswer = await questionData.updateAnswer(
+				answerID,
+				updatedAnswerObj
+			);
+
+			let currentUserId = currentUser._id;
+			let answerIdArr = [ObjectID(req.params.id)];
+			const userAnswerObj = {
+				id: currentUserId,
+				answerIDs: answerIdArr
+			};
+
+			let currentUserAnswerIDs = currentUser.answerIDs;
+			for (let i = 0; i < currentUserAnswerIDs.length; i++) {
+				currentUserAnswerIDs[i] = currentUserAnswerIDs[i].toString();
+			}
+			if (currentUserAnswerIDs.includes(req.params.id) === false) {
+				console.log("hi");
+				await userData.updateUser(userAnswerObj);
+			}
+
+			if(updatedAnswer) {
 				res.status(201).json({ message: "success" });
 			}
 		} catch (e) {
