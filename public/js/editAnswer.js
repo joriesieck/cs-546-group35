@@ -39,7 +39,7 @@
             };
             $.ajax(requestConfig).then(function (res) {
                 if (res.message==='success') {
-                    location.href = '/questions-forum/:id';
+                    location.href = `/questions-forum/${res.questionId}`;
                 }
             });
         }

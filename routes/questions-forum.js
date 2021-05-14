@@ -240,7 +240,7 @@ router.post("/post-answer", async (req, res) => {
 });
 
 // Route to create a new answer page
-router.get("/:id/post-answer", async (req, res) => {
+router.get("/post-answer/:id", async (req, res) => {
 	if (req.session.user) {
 		if(req.session.user.isTutor === false) {
 			return res.render("answers/create-answer", {
@@ -248,7 +248,7 @@ router.get("/:id/post-answer", async (req, res) => {
 				error: true,
 				errorMessage: `Only tutors can answer questions!`,
 				loggedIn: true,
-				isTutor: req.session.isTutor
+				isTutor: req.session.user.isTutor
 			});
 		} else {
 			let questionID = req.params.id
@@ -270,7 +270,11 @@ router.get("/:id/post-answer", async (req, res) => {
 });
 
 // Route to edit a question page
-router.get("/:id/edit-question", async (req, res) => {
+router.get("/edit-question/:id", async (req, res) => {
+	// if user is not logged in, redirect to login page
+	if (!req.session.user) {
+		return res.redirect('/login');
+	}
 	try {
 		if (req.session.user && req.session.user.isTutor === true) {
 			let questionID = req.params.id
@@ -305,7 +309,11 @@ router.get("/:id/edit-question", async (req, res) => {
 	}
 });
 
-router.put("/:id/edit-question", async (req, res) => {
+router.put("/edit-question/:id", async (req, res) => {
+	// if user is not logged in, redirect to login page
+	if (!req.session.user) {
+		return res.redirect('/login');
+	}
 	if (req.session.user && req.session.user.isTutor === false) {
 		return res.status(401).json({error: "Unathorized access!"});
 	} 
@@ -413,7 +421,7 @@ router.put("/:id/edit-question", async (req, res) => {
 			}
 
 			if(updatedQuestion) {
-				res.status(201).json({ message: "success" });
+				res.status(201).json({ message: "success", questionId: req.params.id });
 			}
 		} catch (e) {
 			res.status(500).json({ error: e });
@@ -422,22 +430,26 @@ router.put("/:id/edit-question", async (req, res) => {
 });
 
 // Route to edit an answer page
-router.get("/:id/edit-answer", async (req, res) => {
+router.get("/edit-answer/:id", async (req, res) => {
+	// if user is not logged in, redirect to login page
+	if (!req.session.user) {
+		return res.redirect('/login');
+	}
 	try {
 		let currentUser = await userData.getUserByUsername(req.session.user.username);
-		let answerUserId = currentUser.userId;
-		if (req.session.user && req.session.user.isTutor && answerUserId === true) {
-			let answerID = req.params.id
+		let answerUserId = currentUser._id;
+		if (req.session.user && req.session.user.isTutor && answerUserId) {
+			let answerID = req.params.id;
 			answerID = ObjectID(answerID);
 			const oldAnswer = await questionData.getAnswerById(answerID);
-			let oldAnswerBody = oldAnswer.answerBody;
+			let oldAnswerBody = oldAnswer.answer;
 			return res.render("answers/edit-answer", {
 				title: "Edit Your Answer",
 				loggedIn: true,
 				oldBody: oldAnswerBody
 			});
 		}
-		if (req.session.user && req.session.user.isTutor && answerUserId === false) {
+		if (!(req.session.user && req.session.user.isTutor && answerUserId)) {
 			res.status(401).json({error: "Unathorized access!"});
 		} 
 		if(!req.session.user) {
@@ -456,7 +468,7 @@ router.get("/:id/edit-answer", async (req, res) => {
 	}
 });
 
-router.put("/:id/edit-answer", async (req,res) => {
+router.put("/edit-answer/:id", async (req,res) => {
 	let currentUser = await userData.getUserByUsername(req.session.user.username);
 	let answerUserId = currentUser.userId;
 	if (req.session.user && req.session.user.isTutor && answerUserId === false) {
@@ -520,7 +532,7 @@ router.put("/:id/edit-answer", async (req,res) => {
 			}
 
 			if(updatedAnswer) {
-				res.status(201).json({ message: "success" });
+				res.status(201).json({ message: "success", questionId: req.params.id });
 			}
 		} catch (e) {
 			res.status(500).json({ error: e });

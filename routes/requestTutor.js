@@ -41,7 +41,7 @@ router.post('/', async (req, res) => {
 		return res.redirect('/login');
 	}
 	// if user is a tutor, display an error
-	if (req.session.isTutor) return res.render('users/request-tutor', {title: "Something Went Wrong", error: true, errorMessage: `Sorry, tutors may not request other tutors. <a href="/new-user/student"><button class="new-user-landing">Create a Student Account</button></a> if you would like private tutoring.`, loggedIn:true});
+	if (req.session.user.isTutor) return res.render('users/request-tutor', {title: "Something Went Wrong", error: true, errorMessage: `Sorry, tutors may not request other tutors. <a href="/new-user/student"><button class="new-user-landing">Create a Student Account</button></a> if you would like private tutoring.`, loggedIn:true});
 
 	// get the username of the requested tutor from the request body
 	const requestedTutor = xss(req.body.requestedTutor);
