@@ -50,6 +50,7 @@ router.get("/", async (req, res) => {
 
 // Route to display the single question with answers page
 router.get("/:id", async (req, res) => {
+	const id = ObjectId(id);
 	let singleQuestion = await questionData.getQuestionById(id);
 	let answerList = await questionData.getAnswers();
 	let monthPosted;
