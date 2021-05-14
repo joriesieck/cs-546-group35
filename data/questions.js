@@ -179,7 +179,7 @@ async function updateQuestion(questionId, updatedQuestion) {
     if(ObjectID.isValid(questionId) === false) throw "Error: Invalid ID provided";
 
     let updatedQuestionData = {}
-    if(updatedQuestion === undefined) throw 'Error: Must provide updated book information';
+    if(updatedQuestion === undefined) throw 'Error: Must provide updated question information';
 
     if(updatedQuestion.title) {
         if(createHelper(updatedQuestion.title) === false) throw 'Error: Updated title parameter must be supplied and must be a string/non all empty space string';
@@ -213,7 +213,7 @@ async function updateQuestion(questionId, updatedQuestion) {
         {_id: ObjectID(questionId)},
         {$set: updatedQuestionData}
     );
-    if(!updatedInfo.matchedCount && !updatedInfo.modifiedCount) throw 'Error: Could not update book successfully';
+    if(!updatedInfo.matchedCount && !updatedInfo.modifiedCount) throw 'Error: Could not update question successfully';
     return await this.getQuestionById(questionId);
 }
 

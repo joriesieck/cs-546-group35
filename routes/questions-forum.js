@@ -36,6 +36,9 @@ router.get("/", async (req, res) => {
 		} 
 	}
 
+	// filter questions by visibility
+	questionList = questionList.filter((question) => question.visible);
+
 	if(!!req.session.user === false) {
 		return res.render("questions/questions-forum", {
 			title: "Question Forum",
@@ -378,8 +381,13 @@ router.put("/edit-question/:id", async (req, res) => {
 		}
 
 		try {
-			let questionID = req.params.id
-			questionID = ObjectID(questionID);
+			let questionID = req.params.id;
+			try {
+				questionID = ObjectID(questionID);
+			} catch (e) {
+				res.status(400).json({error: "Invalid question ID."});
+				return;
+			}
 			const oldQuestion = await questionData.getQuestionById(questionID);
 			updatedQuestionObj.userId = oldQuestion.userId;
 			updatedQuestionObj.title = title;
@@ -395,7 +403,12 @@ router.put("/edit-question/:id", async (req, res) => {
 
 		try {
 			let questionID = req.params.id
-			//questionID = ObjectID(questionID);
+			try {
+				questionID = ObjectID(questionID);
+			} catch (e) {
+				res.status(400).json({error: "Invalid question ID."});
+				return;
+			}
 			const updatedQuestion = await questionData.updateQuestion(
 				questionID,
 				updatedQuestionObj
@@ -469,12 +482,16 @@ router.get("/edit-answer/:id", async (req, res) => {
 });
 
 router.put("/edit-answer/:id", async (req,res) => {
+	// if user is not logged in, redirect to login page
+	if (!req.session.user) {
+		return res.redirect('/login');
+	}
 	let currentUser = await userData.getUserByUsername(req.session.user.username);
-	let answerUserId = currentUser.userId;
-	if (req.session.user && req.session.user.isTutor && answerUserId === false) {
+	let answerUserId = currentUser._id;
+	if (!(req.session.user && req.session.user.isTutor && answerUserId)) {
 		return res.status(401).json({error: "Unathorized access!"});
 	}
-	if (req.session.user && req.session.user.isTutor && answerUserId === true) {
+	if (req.session.user && req.session.user.isTutor && answerUserId) {
 		let answerInfo = xss(req.body);
 		let answerBody = xss(req.body.answerBody);
 		let updatedAnswerObj = {};
