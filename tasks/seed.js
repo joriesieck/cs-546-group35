@@ -5,6 +5,7 @@ const dbConnection = require('../config/mongoConnection');
 const data = require('../data');
 const users = data.users;
 const ratings = data.ratings;
+const questions = data.questions;
 
 /**
  * generate hashedPasswords for seed users
@@ -208,6 +209,14 @@ const main = async () => {
 		const rating3 = await ratings.createRating(user2._id, user9._id, 8, 'tutorRating', 'math');
 	} catch (e) {
 		console.log(`Error rating user 9: ${e}`);
+	}
+
+	/* create 5 questions */
+	let question1;
+	try {
+		question1 = await questions.createQuestion(user3._id, "Question" ,"This is question 1" , ['CS 546', 'CS 554']);
+	} catch (e) {
+		console.log(`Error in creation of question 1: ${e}`)
 	}
 
 	console.log('\nDone seeding database');
