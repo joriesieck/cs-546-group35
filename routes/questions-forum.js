@@ -55,60 +55,6 @@ router.get("/", async (req, res) => {
 
 });
 
-// Route to display the single question with answers page
-router.get("/:id", async (req, res) => {
-	let id = req.params.id;
-	// input checks
-	try {
-		id = ObjectID(id);
-	} catch (e) {
-		res.status(400).json({error: "Invalid question ID provided"});
-	}
-	// get the question and its answers
-	let singleQuestion = await questionData.getQuestionById(id);
-	let answerList = singleQuestion.answers;
-	let monthPosted;
-	let dayPosted;
-	let yearPosted;
-	let fullDatePosted;
-
-	// format the date
-	for(let i = 0; i < answerList.length; i++) {
-		monthPosted = answerList[i].date.getMonth() + 1;
-		dayPosted = answerList[i].date.getDate() ;
-		yearPosted = answerList[i].date.getFullYear();
-		fullDatePosted = `${monthPosted}/${dayPosted}/${yearPosted}`;
-		answerList[i].date = fullDatePosted;
-	}
-
-	if(answerList.length > 0) {
-		for(let i = 0; i < answerList.length; i++) {
-			let username = await userData.getUserById(answerList[i].userId);
-			answerList[i].username = username.username;
-		}
-	}
-
-	// render the appropriate page, depending on whether user is logged in
-	if(!!req.session.user === false) {
-		return res.render("answers/answers-page", {
-			title: "Answers",
-			loggedIn: !!req.session.user,
-			question: singleQuestion,
-			answers: answerList
-		});
-	}
-
-	if(!!req.session.user === true) {
-		return res.render("answers/answers-page", {
-			title: "Answers",
-			loggedIn: !!req.session.user,
-			question: singleQuestion,
-			answers: answerList,
-			isTutor: req.session.user.isTutor
-		});
-	}
-});
-
 // Route to ask a new question page
 router.get("/post-question", async (req, res) => {
 	if (req.session.user) {
@@ -122,36 +68,6 @@ router.get("/post-question", async (req, res) => {
 			isTutor: req.session.user.isTutor
 		});
 	}
-	res.redirect("/login");
-});
-
-// Route to create a new answer page
-router.get("/:id/post-answer", async (req, res) => {
-	if (req.session.user) {
-		if(req.session.user.isTutor === false) {
-			return res.render("answers/create-answer", {
-				title: "Something went wrong",
-				error: true,
-				errorMessage: `Only tutors can answer questions!`,
-				loggedIn: true,
-				isTutor: req.session.isTutor
-			});
-		} else {
-			let questionID = req.params.id
-			questionID = ObjectID(questionID);
-			const question = await questionData.getQuestionById(questionID);
-			let questionTitle = question.title;
-			let questionBody = question.questionBody;
-			return res.render("answers/create-answer", {
-				title: "Create an Answer",
-				questionTitle: questionTitle,
-				questionBody: questionBody,
-				loggedIn: true,
-				isTutor: req.session.user.isTutor,
-				questionId: req.params.id
-			});
-		}
-	} 
 	res.redirect("/login");
 });
 
@@ -321,6 +237,90 @@ router.post("/post-answer", async (req, res) => {
 	} else {
 		res.sendStatus(403);
 	}
+});
+
+// Route to display the single question with answers page
+router.get("/:id", async (req, res) => {
+	let id = req.params.id;
+	// input checks
+	try {
+		id = ObjectID(id);
+	} catch (e) {
+		res.status(400).json({error: "Invalid question ID provided"});
+	}
+	// get the question and its answers
+	let singleQuestion = await questionData.getQuestionById(id);
+	let answerList = singleQuestion.answers;
+	let monthPosted;
+	let dayPosted;
+	let yearPosted;
+	let fullDatePosted;
+
+	// format the date
+	for(let i = 0; i < answerList.length; i++) {
+		monthPosted = answerList[i].date.getMonth() + 1;
+		dayPosted = answerList[i].date.getDate() ;
+		yearPosted = answerList[i].date.getFullYear();
+		fullDatePosted = `${monthPosted}/${dayPosted}/${yearPosted}`;
+		answerList[i].date = fullDatePosted;
+	}
+
+	if(answerList.length > 0) {
+		for(let i = 0; i < answerList.length; i++) {
+			let username = await userData.getUserById(answerList[i].userId);
+			answerList[i].username = username.username;
+		}
+	}
+
+	// render the appropriate page, depending on whether user is logged in
+	if(!!req.session.user === false) {
+		return res.render("answers/answers-page", {
+			title: "Answers",
+			loggedIn: !!req.session.user,
+			question: singleQuestion,
+			answers: answerList
+		});
+	}
+
+	if(!!req.session.user === true) {
+		return res.render("answers/answers-page", {
+			title: "Answers",
+			loggedIn: !!req.session.user,
+			question: singleQuestion,
+			answers: answerList,
+			isTutor: req.session.user.isTutor
+		});
+	}
+});
+
+// Route to create a new answer page
+router.get("/:id/post-answer", async (req, res) => {
+	if (req.session.user) {
+		if(req.session.user.isTutor === false) {
+			return res.render("answers/create-answer", {
+				title: "Something went wrong",
+				error: true,
+				errorMessage: `Only tutors can answer questions!`,
+				loggedIn: true,
+				isTutor: req.session.isTutor
+			});
+		} else {
+			let questionID = req.params.id
+			questionID = ObjectID(questionID);
+			const question = await questionData.getQuestionById(questionID);
+			let questionTitle = question.title;
+			let questionBody = question.questionBody;
+			return res.render("answers/create-answer", {
+				title: "Create an Answer",
+				questionTitle: questionTitle,
+				questionBody: questionBody,
+				loggedIn: true,
+				isTutor: req.session.user.isTutor,
+				questionId: req.params.id
+			});
+		}
+	} 
+	res.redirect("/login");
 });
 
 // Route to edit a question page
