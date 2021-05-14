@@ -50,7 +50,8 @@ router.get("/", async (req, res) => {
 
 // Route to display the single question with answers page
 router.get("/:id", async (req, res) => {
-	const id = ObjectId(id);
+	let id = req.params.id;
+	id = ObjectId(id);
 	let singleQuestion = await questionData.getQuestionById(id);
 	let answerList = await questionData.getAnswers();
 	let monthPosted;
@@ -99,7 +100,7 @@ router.get("/post-question", async (req, res) => {
 
 // Route to create a new answer page
 router.get("/post-answer", async (req, res) => {
-	if (req.session.user.isTutor) {
+	if (req.session.user && req.session.user.isTutor) {
 		return res.render("answers/create-answer", {
 			title: "Create an Answer",
 			loggedIn: true,
@@ -217,7 +218,7 @@ router.post("/post-question", async (req, res) => {
 router.post("/post-answer", async (req, res) => {
 	if (req.session.user) {
 		let answerInfo = xss(req.body);
-		let answerBody = xss(req.body.answerBody);
+		let answerBody = xss(req.body.answer);
 
 		if (!answerInfo) {
 			res.status(400).json({
@@ -245,15 +246,19 @@ router.post("/post-answer", async (req, res) => {
 		);
 		let currentUserId = currentUser._id;
 
+		let questionId = req.params.id;
+		questionId = Object(questionId);
 		try {
 			const newAnswer = await questionData.createAnswer(
 				currentUserId,
-				answerBody
+				answerBody,
+				questionId
 			);
 			let answerId = [newAnswer._id];
 			const userAnswerObj = {
 				id: currentUserId,
-				answerIDs: answerId
+				answerIDs: answerId,
+				questionID: questionId
 			};
 			await userData.updateUser(userAnswerObj);
 			if(newAnswer) {
