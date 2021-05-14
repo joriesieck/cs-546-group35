@@ -58,7 +58,7 @@ router.get("/", async (req, res) => {
 // Route to display the single question with answers page
 router.get("/:id", async (req, res) => {
 	let id = req.params.id;
-	id = ObjectId(id);
+	id = ObjectID(id);
 	let singleQuestion = await questionData.getQuestionById(id);
 	let answerList = await questionData.getAnswers();
 	let monthPosted;
@@ -111,22 +111,30 @@ router.get("/post-question", async (req, res) => {
 });
 
 // Route to create a new answer page
-router.get("/post-answer", async (req, res) => {
+router.get("/:id/post-answer", async (req, res) => {
 	if (req.session.user) {
 		if(req.session.user.isTutor === false) {
 			return res.render("answers/create-answer", {
 				title: "Something went wrong",
 				error: true,
-				errorMessage: `Please create a tutor account to ask a new question!`,
+				errorMessage: `Only tutors can answer questions!`,
 				loggedIn: true,
 				isTutor: req.session.isTutor
 			});
+		} else {
+			let questionID = req.params.id
+			questionID = ObjectID(questionID);
+			const question = await questionData.getQuestionById(questionID);
+			let questionTitle = question.title;
+			let questionBody = question.questionBody;
+			return res.render("answers/create-answer", {
+				title: "Create an Answer",
+				questionTitle: questionTitle,
+				questionBody: questionBody,
+				loggedIn: true,
+				isTutor: req.session.user.isTutor
+			});
 		}
-		return res.render("answers/create-answer", {
-			title: "Create an Answer",
-			loggedIn: true,
-			isTutor: req.session.user.isTutor
-		});
 	} 
 	res.redirect("/login");
 });
@@ -272,7 +280,7 @@ router.post("/post-answer", async (req, res) => {
 		let currentUserId = currentUser._id;
 
 		let questionId = req.params.id;
-		questionId = Object(questionId);
+		questionId = ObjectID(questionId);
 		try {
 			const newAnswer = await questionData.createAnswer(
 				currentUserId,

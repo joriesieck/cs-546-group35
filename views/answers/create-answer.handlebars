@@ -2,7 +2,13 @@
     {{#if error}}
 		<p>{{{errorMessage}}}</p>
 	{{else}}
-    <p>{{this.questionBody}}</p>
+    
+    <h2>Question Title</h2>
+    <p>{{questionTitle}}</p>
+
+    <h2>Question Body</h2>
+    <p>{{questionBody}}</p>
+
     <form id="new-answer-form">
         <label for="answer-body">Enter your answer: </label>
         <textarea type="text" id="answer-body" name="answer-body" placeholder="Answer" required></textarea>
@@ -11,6 +17,7 @@
     </form>
 
     <ul id="new-answer-error-list" class="error" hidden></ul>
+    {{/if}}
 </main>
 
 <script src="https://code.jquery.com/jquery-2.2.4.min.js"
