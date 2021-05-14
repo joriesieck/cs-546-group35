@@ -87,29 +87,32 @@ async function createQuestion(userId, title, question, tags) {
 }
 
 async function createAnswer(userId, answer, questionId) {
+    // input checks
     if(createHelper(answer) === false) throw 'Error: Answer must be supplied and must be a string/non all empty space string';
-    getQuestionById(questionId);
-    let datePosted = new Date();
+    if (ObjectID.isValid(userId) === false) throw "Error: Invalid userId provided.";
+    if (ObjectID.isValid(questionId) === false) throw "Error: Invalid questionId provided.";
 
+    // get the question collection
+    const questionCollection = await questions();
+
+    // build the answer object
+    let datePosted = new Date();
+    const answerId = ObjectID();
     let answerObj = {
+        _id: answerId,
         userId: userId,
         date: datePosted,
         answer: answer,
         tutorRatings: [],
         studentRatings: []
     };
-    const insertInfo = await questionCollection.insertOne(answerObj);
+
+    // add the answer to the question
+    const insertInfo = await questionCollection.updateOne({_id:questionId}, {$addToSet: {answers:answerObj}});
     if (insertInfo.insertedCount === 0) throw 'Could not add answer';
 
-    let questionIdArr = [answerId];
-    const userAnswerObj = {
-        id: userId,
-        answerIDs: questionIdArr
-    };
-    await userData.updateUser(userAnswerObj);
-
-    const answerId = insertInfo.insertedId;
-    const newAnswer = await getQuestionById(answerId);
+    // get and return the answer
+    const newAnswer = await getAnswerById(answerId);
     return newAnswer;
 }
 
@@ -130,22 +133,33 @@ async function getQuestionById(id) {
     if(ObjectID.isValid(id) === false) throw "Error: Invalid ID provided";
 
     const questionCollection = await questions();
-    const question = await questionCollection.findOne({_id: ObjectID(id)});
+    const question = await questionCollection.findOne({_id: id});
 	if(question===null) throw `Error in function getQuestionById: ${id} not found.`;
 	return question;
 }
 
 async function getAnswerById(id) {
+    // input checks
     if (id === undefined) throw "Error: No id parameter provided.";
-    if (ObjectId.isValid(id) === false) throw "Error: Invalid ID provided.";
+    if (ObjectID.isValid(id) === false) throw "Error: Invalid ID provided.";
 
-    let parseId = ObjectId(id);
-    const answerSubCollection = await questions();
-    let answerId = await answerSubCollection.findOne({ _id: parseId });
-    if (answerId === null) throw `Error: No answer with ID ${id} found.`;
-    answerId._id = answerId._id.toString();
+    // get the collection
+    const questionCollection = await questions();
 
-    return answerId;
+    // query questions for the answer
+    let answers;
+    try {
+		({answers} = await questionCollection.findOne({"answers._id":id},{projection: {_id:0, answers: {
+			$filter: {input: "$answers", as: "answers", cond: {$eq: ["$$answers._id",id]}}
+		}}}));
+    } catch (e) {
+        throw  `Error: No answer with ID ${id} found: ${e}`;
+    }
+    // make sure we actually got an answer
+    const answer = answers[0];
+    if (answer === null) throw `Error: No answer with ID ${id} found.`;
+
+    return answer;
 }
 
 async function updateQuestion(questionId, updatedQuestion) {
@@ -233,7 +247,7 @@ async function deleteAnswer(id) {
     if (id === undefined) throw "Error: No id parameter provided.";
     if (ObjectID.isValid(id) === false) throw "Error: Invalid ID provided.";
 
-    let parseId = ObjectId(id);
+    let parseId = ObjectID(id);
     const answerSubCollection = await questions();
     const deletionInfo = await answerSubCollection.deleteOne({ _id: parseId });
     if (deletionInfo.deletedCount === 0) throw `Could not delete answer/ID does not exist.`;

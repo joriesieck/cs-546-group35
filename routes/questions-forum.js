@@ -132,7 +132,8 @@ router.get("/:id/post-answer", async (req, res) => {
 				questionTitle: questionTitle,
 				questionBody: questionBody,
 				loggedIn: true,
-				isTutor: req.session.user.isTutor
+				isTutor: req.session.user.isTutor,
+				questionId: req.params.id
 			});
 		}
 	} 
@@ -250,37 +251,45 @@ router.post("/post-question", async (req, res) => {
 // Route to post a new answer
 router.post("/post-answer", async (req, res) => {
 	if (req.session.user) {
-		let answerInfo = xss(req.body);
-		let answerBody = xss(req.body.answer);
+		// get the answer and the questionId
+		let answerBody = xss(req.body.answerBody);
+		let questionId = xss(req.body.questionId);
 
-		if (!answerInfo) {
-			res.status(400).json({
-				error: "You must provide data to create your answer",
-			});
-			return;
-		}
+		// check inputs
 		if (createHelper(answerBody) === false) {
 			res.status(400).json({
 				error: "Error: Answer body must be provided and of proper type",
 			});
 			return;
 		}
-
 		if (!answerBody) {
 			res.status(400).json({ error: "You must provide an answer body" });
 			return;
 		}
-
 		var regex = /(<([^>]+)>)/gi;
 		answerBody = answerBody.replace(regex, "");
 
+		// check questionId existence
+		if (!questionId) {
+			res.status(400).json({error: "Missing Question Id"});
+			return;
+		}
+
+		// get the current user
 		let currentUser = await userData.getUserByUsername(
 			req.session.user.username
 		);
 		let currentUserId = currentUser._id;
 
-		let questionId = req.params.id;
-		questionId = ObjectID(questionId);
+		// convert questionId to an ObjectId, erroring if it's invalid
+		try {
+			questionId = ObjectID(questionId);
+		} catch (e) {
+			res.status(400).json({error: "Invalid Question Id"});
+			return;
+		}
+
+		// create the answer
 		try {
 			const newAnswer = await questionData.createAnswer(
 				currentUserId,
@@ -289,7 +298,7 @@ router.post("/post-answer", async (req, res) => {
 			);
 
 			if(newAnswer) {
-				res.status(201).json({ message: "success" });
+				res.status(201).json({ message: "success", questionId });
 			}
 		} catch (e) {
 			res.status(500).json({ error: e });

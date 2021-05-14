@@ -215,6 +215,7 @@ const main = async () => {
 	let question1;
 	try {
 		question1 = await questions.createQuestion(user3._id, "Question" ,"This is question 1" , ['CS 546', 'CS 554']);
+		console.log(question1);
 	} catch (e) {
 		console.log(`Error in creation of question 1: ${e}`)
 	}

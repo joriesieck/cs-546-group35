@@ -6,6 +6,7 @@
 
         var errors = $('#new-answer-errors-list');
         var answerBody = $('#answer-body').val().trim();
+        var questionId = $('#question-id').val();
         var errorList = [];
 
         errors.empty();
@@ -17,6 +18,12 @@
         } catch (e) {
 			errorList.push(e);
 		}
+
+        try {
+            if (questionId===undefined) throw 'Missing Question ID';
+        } catch (e) {
+            errorList.push(e);
+        }
 
         if (errorList.length > 0) {
 			errorList.forEach((errorStr) => {
@@ -31,16 +38,21 @@
                 url: '/questions-forum/post-answer',
                 contentType: 'application/json',
                 data: JSON.stringify({
-                    answerBody
+                    answerBody,
+                    questionId
                 }),
                 error: function(e) {
                     console.log(e);
-                    errors.show();
+                    if (e.responseJSON) {
+                        var errorMsg = $('<p class="error">');
+                        errorMsg.text(e.responseJSON.error);
+                        newAnswerForm.after(errorMsg);
+                    }
                 }
             };
             $.ajax(requestConfig).then(function (res) {
                 if (res.message==='success') {
-                    location.href = '/questions-forum/:id';
+                    location.href = `/questions-forum/${res.questionId}`;
                 }
             });
         }
