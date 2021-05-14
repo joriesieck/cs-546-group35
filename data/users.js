@@ -592,7 +592,29 @@ const getTopTutors = async () => {
 	if (tutors.length < 1) throw 'No tutors available to rank';
 	return tutors;
 }
+/**
+ * getAllEligibleTutors
+ * @param: none
+ * @returns: the list of all tutors with fewer than 10 students in their tutorList
+ */
+const getAllEligibleTutors = async () => {
+	// get the collection
+	const userCollection = await users();
+
+	// retrieve all tutors
+	let tutors = await userCollection.find({userType: 'tutor'}).toArray();
+
+	// filter out tutors with 10 or more tutees
+	tutors = tutors.filter((tutor) => tutor.tutorList.length < 10);
+
+	// remove the hashed password from each tutor
+	tutors.forEach((tutor) => {delete tutor.hashedPassword});
+
+	// return the list of tutors
+	return tutors;
+}
+
 
 module.exports = {
-	checkInputs, createUser, getUserById, getUserByEmail, getUserByUsername, getRelatedUsers, updateUser, deleteUser, removeUserFromTutorList, getTopTutors
+	checkInputs, createUser, getUserById, getUserByEmail, getUserByUsername, getRelatedUsers, updateUser, deleteUser, removeUserFromTutorList, getAllEligibleTutors, getTopTutors
 }

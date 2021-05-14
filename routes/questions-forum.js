@@ -167,12 +167,12 @@ router.post("/post", async (req, res) => {
 				questionBody,
 				tags
 			);
-			let questionId = [newQuestion._id];
-			const userQuestionObj = {
-				id: currentUserId,
-				questionIDs: questionId
-			};
-			await userData.updateUser(userQuestionObj);
+			// let questionId = [newQuestion._id];
+			// const userQuestionObj = {
+			// 	id: currentUserId,
+			// 	questionIDs: questionId
+			// };
+			// await userData.updateUser(userQuestionObj);
 			if(newQuestion) {
 				res.status(201).json({ message: "success" });
 			}
@@ -296,7 +296,7 @@ router.put("/:id/edit", async (req, res) => {
 			updatedQuestionObj.datePosted = oldQuestion.datePosted;
 			updatedQuestionObj.answers = oldQuestion.answers;
 		} catch (e) {
-			res.status(404).json({ error: "Book not found" });
+			res.status(404).json({ error: "Question not found" });
 			return;
 		}
 
@@ -317,7 +317,15 @@ router.put("/:id/edit", async (req, res) => {
 				id: currentUserId,
 				questionIDs: questionIdArr
 			};
-			await userData.updateUser(userQuestionObj);
+
+			let currentUserQuestionIDs = currentUser.questionIDs;
+			for(let i = 0; i < currentUserQuestionIDs.length; i++) {
+				currentUserQuestionIDs[i] = currentUserQuestionIDs[i].toString();
+			}
+			if(currentUserQuestionIDs.includes(req.params.id) === false) {
+				console.log("hi")
+				await userData.updateUser(userQuestionObj);
+			}
 
 			if(updatedQuestion) {
 				res.status(201).json({ message: "success" });

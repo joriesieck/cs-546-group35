@@ -1,5 +1,6 @@
 const mongoCollections = require('../config/mongoCollections');
 const questions = mongoCollections.questions;
+const userData = require("../data/users");
 const { ObjectID } = require('mongodb');
 
 /**
@@ -73,6 +74,13 @@ async function createQuestion(userId, title, question, tags) {
     if (insertInfo.insertedCount === 0) throw 'Could not add question';
 
     const questionId = insertInfo.insertedId;
+    let questionIdArr = [questionId]
+    const userQuestionObj = {
+        id: userId,
+        questionIDs: questionIdArr
+    };
+    await userData.updateUser(userQuestionObj);
+    
 	const newQuestion = await getQuestionById(questionId);
     
 	return newQuestion;
