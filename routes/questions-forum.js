@@ -81,6 +81,13 @@ router.get("/:id", async (req, res) => {
 		answerList[i].date = fullDatePosted;
 	}
 
+	if(answerList.length > 0) {
+		for(let i = 0; i < answerList.length; i++) {
+			let username = await userData.getUserById(answerList[i].userId);
+			answerList[i].username = username.username;
+		}
+	}
+
 	// render the appropriate page, depending on whether user is logged in
 	if(!!req.session.user === false) {
 		return res.render("answers/answers-page", {

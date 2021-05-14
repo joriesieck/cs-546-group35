@@ -12,12 +12,16 @@
         <tr class="table-header">
             <th>Date</th>
             <th>Answer</th>
+            <th>Tutor</th>
             <th>Edit</th>
         </tr>
         {{#each answers}}
         <tr class="table-answer-row">
             <td class="table-date-posted">{{this.date}}</td>
             <td class="table-answer-body">{{this.answer}}</td>
+            <td class="table-answer-tutor">
+                <a href='/profile/'>{{this.username}}</a>
+            </td>
             <td class="table-answer-edit">
                 <a href='/questions-forum/{{this._id}}/edit-answer'>Edit</a>
             </td>
@@ -27,11 +31,15 @@
         <tr class="table-header">
             <th>Date</th>
             <th>Answer</th>
+            <th>Tutor</th>
         </tr>
         {{#each answers}}
         <tr class="table-answer-row">
             <td class="table-date-posted">{{this.date}}</td>
             <td class="table-answer-body">{{this.answer}}</td>
+            <td class="table-answer-tutor">
+                <a href='/profile/'>{{this.username}}</a>
+            </td>
         </tr>
         {{/each}}
         {{/if}}
