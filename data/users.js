@@ -583,7 +583,29 @@ const removeUserFromTutorList = async (userToRemove, userRemoveFrom) => {
 	return `User ${userToRemove} has been successfully removed from ${userRemoveFrom}'s tutorList.`;
 }
 
+/**
+ * getAllEligibleTutors
+ * @param: none
+ * @returns: the list of all tutors with fewer than 10 students in their tutorList
+ */
+const getAllEligibleTutors = async () => {
+	// get the collection
+	const userCollection = await users();
+
+	// retrieve all tutors
+	let tutors = await userCollection.find({userType: 'tutor'}).toArray();
+
+	// filter out tutors with 10 or more tutees
+	tutors = tutors.filter((tutor) => tutor.tutorList.length < 10);
+
+	// remove the hashed password from each tutor
+	tutors.forEach((tutor) => {delete tutor.hashedPassword});
+
+	// return the list of tutors
+	return tutors;
+}
+
 
 module.exports = {
-	checkInputs, createUser, getUserById, getUserByEmail, getUserByUsername, getRelatedUsers, updateUser, deleteUser, removeUserFromTutorList
+	checkInputs, createUser, getUserById, getUserByEmail, getUserByUsername, getRelatedUsers, updateUser, deleteUser, removeUserFromTutorList, getAllEligibleTutors
 }

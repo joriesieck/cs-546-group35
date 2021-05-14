@@ -19,20 +19,12 @@ router.get('/', async (req, res) => {
 	try {
 		user = await userData.getUserByUsername(req.session.user.username);
 	} catch (e) {
-		return res.render('users/request-tutor', {title: "Something Went Wrong", error: true, errorMessage: `Sorry, something went wrong while retrieving your tutors: ${e}`, loggedIn:true});
+		return res.render('users/request-tutor', {title: "Something Went Wrong", error: true, errorMessage: `Sorry, something went wrong while retrieving potential tutors: ${e}`, loggedIn:true});
 	}
 	
 
-	// get the user objects for all of the user's related tutors
-	let possibleTutors;
-	try {
-		possibleTutors = await userData.getRelatedUsers(user._id);
-	} catch (e) {
-		return res.render('users/request-tutor', {title: "Something Went Wrong", error: true, errorMessage: `Sorry, something went wrong while retrieving your tutors: ${e}`, loggedIn:true});
-	}
-
-	// filter out tutors with 10 or more tutees
-	possibleTutors = possibleTutors.filter((tutor) => tutor.tutorList.length < 10);
+	// get the user objects for all tutors with less than 10 tutees
+	const possibleTutors = await userData.getAllEligibleTutors();
 
 	// for each remaining tutor, get name, username, and subjects
 	const tutorList = [];
@@ -60,10 +52,32 @@ router.post('/', async (req, res) => {
 		return;
 	}
 
-	// get the requestedTutor's user object
+	// get the user object for the user
+	let user;
+	try {
+		user = await userData.getUserByUsername(req.session.user.username);
+	} catch (e) {
+		res.status(400).json({error: `Sorry, something went wrong: ${e}`});
+		return;
+	}
+	// get the user object for the tutor
 	let tutor;
 	try {
 		tutor = await userData.getUserByUsername(requestedTutor);
+	} catch (e) {
+		res.status(400).json({error: `Sorry, something went wrong: ${e}`});
+		return;
+	}
+
+	// add the user to the requestedTutor's tutorList and vice versa
+	try {
+		tutor = await userData.updateUser({id: tutor._id, tutorList: [user._id]});
+	} catch (e) {
+		res.status(400).json({error: `Sorry, something went wrong: ${e}`});
+		return;
+	}
+	try {
+		user = await userData.updateUser({id: user._id, tutorList: [tutor._id]});
 	} catch (e) {
 		res.status(400).json({error: `Sorry, something went wrong: ${e}`});
 		return;
