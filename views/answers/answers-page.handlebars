@@ -47,5 +47,7 @@
     {{else}}
     <p class="not-answers">We're sorry, no one has responded to this question yet.</p>
     {{/if}}
+    {{#if isTutor}}
     <a href="/questions-forum/post-answer/{{question._id}}">Click here to create a new answer</a>
+    {{/if}}
 </main>
