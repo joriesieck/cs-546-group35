@@ -5,6 +5,7 @@ const requestTutorRoute = require('./requestTutor');
 const path = require("path");
 const questionsRoutes = require('./questions-forum');
 const profileRoutes = require('./profile');
+const toptutorsRoutes = require('./toptutors');
 const questionData = require("../data/questions");
 
 const constructorMethod = (app) => {
@@ -50,13 +51,7 @@ const constructorMethod = (app) => {
 	});
 	app.use('/profile', profileRoutes);
 
-	// dummy top rated tutors
-	app.use('/toptutors',(req,res) => {
-		res.render('users/toptutors',{
-			title: "Dummy Top Rated Tutors Page",
-			loggedIn: !!req.session.user
-		});
-	});
+	app.use('/toptutors',toptutorsRoutes);
 
 	// question forum
 	app.use("/questions-forum", questionsRoutes);

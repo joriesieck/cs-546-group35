@@ -15,8 +15,8 @@
 			{{#if isTutor}}
 				<a href='/'>Home</a>
 				<a href='/questions-forum'>Question Forum</a>
-				<a href='/top-rated-tutors'>Top Rated Tutors</a>
 				{{#if loggedIn}}
+					<a href='/toptutors'>Top Rated Tutors</a>
 					<a href='/profile' class='logged-in'>Profile</a>
 					<a href='/logout' class='logged-in'>Log Out</a>
 				{{else}}
@@ -26,8 +26,8 @@
 			{{else}}
 				<a href='/'>Home</a>
 				<a href='/questions-forum'>Question Forum</a>
-				<a href='/top-rated-tutors'>Top Rated Tutors</a>
 				{{#if loggedIn}}
+					<a href='/toptutors'>Top Rated Tutors</a>
 					<a href='/questions-forum/post-question'>Ask a Question</a>
 					<a href='/request-tutor' class='logged-in'>Request a Tutor</a>
 					<a href='/profile' class='logged-in'>Profile</a>
@@ -39,8 +39,7 @@
 			{{/if}}
 		</nav>
 	</header>
-	
-	{{{body}}}
+		{{{body}}}
 
 	<footer><p>Brandon Cao, Sebastian Muriel, Jorie Sieck, Corinne Wisniewski</p></footer>
 </body>

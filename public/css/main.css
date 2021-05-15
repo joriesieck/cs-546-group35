@@ -11,6 +11,7 @@
  * 		- Student
  * 4) Question Forum Page
  * 5) Request Tutor Page
+ * 6) Profile
  */
 
 /* Overall Site Styles */
@@ -170,6 +171,25 @@ p.error {
 	margin: 0;
 }
 
+/* profile styles */
+#passwordChangeForm, #userInfoChangeForm, #ratingFormSection {
+	display: none;
+}
+
+#shownInfo {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+#shownInfo h3 {
+	font-weight: normal;
+}
+
+#ratingFormSection{
+	text-align: center;
+}
+
 /* Question forum - Redirect to asking question */
 #forum-ask-new-question {
 	margin: auto;
@@ -222,6 +242,12 @@ td{
     font-size:14pt;
 }
 
+/**top rated tutors **/
+.displayedTutor{
+	border: 2px solid #003dac;
+}
+
+
 /* Request Tutor Page */
 /* make the form wider */
 form#tutor-request {
@@ -262,4 +288,11 @@ form#tutor-request button {
 /* instructions styling */
 #tutor-req-instr {
 	text-align: center;
+}
+
+/* Profile */
+#questionLinks a {
+	text-decoration: underline;
+	margin: 5px;
+	font-size: large;
 }

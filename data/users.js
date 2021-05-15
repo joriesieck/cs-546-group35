@@ -123,6 +123,8 @@ const checkInputs = (inputs, fn) => {
 		// must be of the form YYYY
 		const yearRE = /^\d\d\d\d$/;
 		if (!yearRE.test(year)) throw `Graduation Year must be of the form YYYY.`;
+		//can't be an unreasonable year (<1900 or 2100< I guess?)
+		if (year < 1900 || year > 2100) throw 'Graduation Year must be between 1900 and 2100';
 	}
 
 	// relevantSubjects
@@ -583,6 +585,12 @@ const removeUserFromTutorList = async (userToRemove, userRemoveFrom) => {
 	return `User ${userToRemove} has been successfully removed from ${userRemoveFrom}'s tutorList.`;
 }
 
+const getAllTutors = async () => {
+	const userCollection = await users();
+	const tutors = await userCollection.find({'userType': 'tutor', 'ratings.avgRating': {$ne: null}}).toArray();
+	if (tutors.length < 1) throw 'No tutors available to rank';
+	return tutors;
+}
 /**
  * getAllEligibleTutors
  * @param: none
@@ -607,5 +615,5 @@ const getAllEligibleTutors = async () => {
 
 
 module.exports = {
-	checkInputs, createUser, getUserById, getUserByEmail, getUserByUsername, getRelatedUsers, updateUser, deleteUser, removeUserFromTutorList, getAllEligibleTutors
+	checkInputs, createUser, getUserById, getUserByEmail, getUserByUsername, getRelatedUsers, updateUser, deleteUser, removeUserFromTutorList, getAllEligibleTutors, getAllTutors
 }

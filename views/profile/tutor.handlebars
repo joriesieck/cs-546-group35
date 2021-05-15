@@ -1,0 +1,88 @@
+<main id="tutorProfile" class="profiles">
+    <div id="shownInfo">
+        <div id="messages"></p>
+        <h2  id="givenUsername">{{user.username}}</h2>
+        <h2>Tutor</h2>
+        <h3>{{user.name.firstName}} {{user.name.lastName}}</h3>
+        <h3>Average Rating: {{user.ratings.avgRating}}</h3>
+        {{#if isBeingTutored}}
+        <h4>Email: {{email}}</h4>
+        {{/if}}
+        <h4>Graduation Year: {{user.year}}</h4>
+        <h5>I'm happy to help you with:</h5>
+        <ul id="subjects">
+            {{#each user.relevantSubjects}}
+            <li>{{this}}</li>
+            {{/each}}
+        </ul>
+        <h3>Answers Given:</h3>
+        <div id="questionLinks">
+            {{#each answers}}
+            <a href='/questions-forum/{{this.questionId}}'>{{this.answer}}</a>
+            {{/each}}
+        </div>
+        {{#if self}}
+        <h5>Currently Tutoring:</h5>
+        <ul id="tutorList"></ul>
+        <button id="userInfoChange">Change User Information</button>
+        <button id="passwordChange">Change Password</button>
+        {{else}}
+        <div id="ratingSection"></div>
+        {{/if}}
+
+    </div>
+
+    <div id="passwordChangeForm">
+        <div id="passwordErrors"></div>
+        <form id="passChange">
+            <label for="currentPassword">Current Password:</label>
+            <input name="currentPassword" id="currentPassword" type="password">
+            <label for="newPassword">New Password</label>
+            <input name="newPassword" id="newPassword" type="password">
+            <label for="confirmPassword">Confirm Password</label>
+            <input name="confirmPassword" id="confirmPassword" type="password">
+            <button type="submit">Submit</button>
+            <button class="return">Return to Profile</button>
+        </form>
+    </div>
+
+    <div id="userInfoChangeForm">
+        <div id="userInfoErrors"></div>
+        <form id="infoChange">
+            <label for="username">Username:</label>
+            <input name="username" id="username" type="text">
+
+            <label for="firstName">First Name:</label>
+            <input name="firstName" id="firstName" type="text">
+
+            <label for="lastName">Last Name:</label>
+            <input name="lastName" id="lastName" type="text">
+
+            <label for="email">Email:</label>
+            <input name="email" id="email" type="email">
+
+            <label for="relevantSubjects">Subjects:</label>
+            <input name="relevantSubjects" id="relevantSubjects" type="text">
+
+            <label for="year">Graduation Year:</label>
+            <input name="year" id="year" type="number">
+
+            <button type="submit">Submit</button>
+            <button class="return">Return to Profile</button>
+        </form>
+    </div>
+
+    <div id="ratingFormSection">
+        <div id="ratingErrors"></div>
+        <form id="ratingForm">
+            <label for="rating">Rate your experience with {{user.name.firstName}} (1-10):</label>
+            <input type="number" name="rating" id="rating" min="1" max="10" step="1">
+            <button type="submit">Submit</button>
+            <button class="return">Return to Profile</button>
+        </form>
+    </div>
+</main>
+
+<script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+<script src="/public/js/profileEdit.js"></script>
+<script src="/public/js/tutorRating.js"></script>

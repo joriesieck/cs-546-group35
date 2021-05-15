@@ -160,6 +160,8 @@
 			// must be of the form YYYY
 			const yearRE = /^\d\d\d\d$/;
 			if (!yearRE.test(year)) throw 'Graduation Year must be of the form YYYY.';
+			//can't be an unreasonable year (<1900 or 2100< I guess?)
+			if (year < 1900 || year > 2100) throw 'Graduation Year must be between 1900 and 2100';
 		} catch (e) {
 			errorList.push(e);
 		}
@@ -232,7 +234,7 @@
 				}),
 				error: function(e) {
 					// hide the loading message
-					loadingMsg.hide()
+					loadingMsg.hide();
 					var errorMsg = $('<p>');
 					errorMsg.text(e.responseJSON.error);
 					errorMsg.appendTo(errors);
@@ -241,7 +243,7 @@
 			};
 			$.ajax(requestConfig).then(function (res) {
 				// hide the loading message
-				loadingMsg.hide()
+				loadingMsg.hide();
 				// if message = 'success', redirect to home
 				if (res.message==='success') {
 					// redirect to home

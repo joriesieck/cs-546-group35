@@ -82,6 +82,7 @@ async function createQuestion(userId, title, question, tags) {
     await userData.updateUser(userQuestionObj);
     
 	const newQuestion = await getQuestionById(questionId);
+    
 	return newQuestion;
 }
 
@@ -102,6 +103,7 @@ async function createAnswer(userId, answer, questionId) {
         userId: userId,
         date: datePosted,
         answer: answer,
+        questionId: questionId,
         tutorRatings: [],
         studentRatings: []
     };
@@ -126,6 +128,17 @@ async function createAnswer(userId, answer, questionId) {
 async function getQuestions() {
     const questionCollection = await questions();
     let questionList = await questionCollection.find().sort({"datePosted":-1}).toArray();
+    return questionList;
+}
+
+async function getAllUsersQuestions(id){
+    if (!id || id === undefined || id === null || id === '') throw "Error in getAllUsersQuestions, id is invalid";
+    let parsedId = ObjectID(id);
+    if (!parsedId || parsedId === undefined) throw "id is invalid";
+    //takes in an id, returns an array of JSON objects with all the questions for the user
+    const questionCollection = await questions();
+    //returning the most recent 10 to put on the profile
+    let questionList = await questionCollection.find({userId: parsedId}).sort({"datePosted":-1}).limit(10).toArray();
     return questionList;
 }
 
@@ -287,6 +300,7 @@ module.exports = {
     createQuestion,
     createAnswer,
     getQuestions,
+    getAllUsersQuestions,
     getAnswers,
     getQuestionById,
     getAnswerById,

@@ -1,0 +1,73 @@
+<main id="studentProfile" class="profiles">
+    <div id="shownInfo">
+        <div id="messages"></div>
+        <h2 id="givenUsername">{{user.username}}</h2>
+        <h3>{{user.name.firstName}} {{user.name.lastName}}</h3>
+        <h4>Email: {{user.email}}</h4>
+        
+        <h5>Graduation Year: {{user.year}}</h5>
+        <h5>Tutors</h5>
+        <ul id="tutorList">
+        </ul>
+        <h5>I need help in:</h5>
+        <ul id="subjects">
+            {{#each user.relevantSubjects}}
+            <li>{{this}}</li>
+            {{/each}}
+        </ul>
+        <h3>Questions Asked:</h3>
+        <div id="questionLinks">
+            {{#each questions}}
+            <a href='questions-forum/{{this._id}}'>{{this.title}}</a>
+            {{/each}}
+        </div>
+        {{#if self}}
+        <button id="userInfoChange">Change User Information</button>
+        <button id="passwordChange">Change Password</button>
+        {{/if}}
+    </div>
+
+    <div id="passwordChangeForm">
+        <div id="passwordErrors"></div>
+        <form id="passChange">
+            <label for="currentPassword">Current Password:</label>
+            <input name="currentPassword" id="currentPassword" type="password">
+            <label for="newPassword">New Password</label>
+            <input name="newPassword" id="newPassword" type="password">
+            <label for="confirmPassword">Confirm Password</label>
+            <input name="confirmPassword" id="confirmPassword" type="password">
+            <button type="submit">Submit</button>
+            <button class="return">Return to Profile</button>
+        </form>
+    </div>
+
+    <div id="userInfoChangeForm">
+        <div id="userInfoErrors"></div>
+        <form id="infoChange">
+            <label for="username">Username:</label>
+            <input name="username" id="username" type="text">
+
+            <label for="firstName">First Name:</label>
+            <input name="firstName" id="firstName" type="text">
+
+            <label for="lastName">Last Name:</label>
+            <input name="lastName" id="lastName" type="text">
+
+            <label for="email">Email:</label>
+            <input name="email" id="email" type="email">
+
+            <label for="relevantSubjects">Subjects:</label>
+            <input name="relevantSubjects" id="relevantSubjects" type="text">
+
+            <label for="year">Graduation Year:</label>
+            <input name="year" id="year" type="number">
+
+            <button type="submit">Submit</button>
+            <button class="return">Return to Profile</button>
+        </form>
+    </div>
+    
+</main>
+
+<script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+<script src="/public/js/profileEdit.js"></script>

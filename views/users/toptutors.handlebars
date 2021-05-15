@@ -1,3 +1,24 @@
 <main id="toptutors">
-    
+    <div>
+        <label for="search-bar-input">Search for tutors by subject:</label>
+        <input id="search-bar-input" type="text" name="search-bar-input" onkeyup="searchBySubject()"
+        placeholder="Math, English, etc">
+    </div>
+    <div id="tutoringList">
+        {{#each tutors}}
+        <div class="displayedTutor">
+            <h2><a href="/profile/{{this.username}}">"{{this.username}}"</a></h2>
+            <p>{{this.name.firstName}} {{this.name.lastName}}</p>
+            <p>Average Rating: {{this.ratings.avgRating}}</p>
+            <p>Subjects</p>
+            <ul>
+                {{#each this.relevantSubjects}}
+                <li class="subject">{{this}}</li>
+                {{/each}}
+            </ul>
+        </div>
+        {{/each}}
+    </div>
 </main>
+
+<script src='/public/js/toptutors.js'></script>
