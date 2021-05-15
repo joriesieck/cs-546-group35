@@ -222,10 +222,6 @@ td{
     font-size:14pt;
 }
 
-option {
-	color: #000;
-}
-
 /* Request Tutor Page */
 /* make the form wider */
 form#tutor-request {
