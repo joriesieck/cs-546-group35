@@ -215,7 +215,7 @@ router.post('/password', async (req, res) => {
 router.get('/:username', async (req,res) =>{
     try{
         if (!req.session.user){
-            return res.redirect('/');
+            return res.redirect('/login');
         }
         if (!req.params.username || typeof req.params.username !== 'string' || req.params.username === ""){
             throw "Username is incorrect";
@@ -228,7 +228,7 @@ router.get('/:username', async (req,res) =>{
         if (!retrievedUser){
             //the user doesn't exist
             //send to the main page
-            return res.redirect('/');
+            return res.redirect('/login');
         } else {
             //got it
             if (req.session.user.username === retrievedUser.username){
@@ -278,7 +278,7 @@ router.get('/:username', async (req,res) =>{
 //allows us to see if the user is allowed to rate the other user
 router.post('/rating', async (req, res) => {
     if (!req.session.user){
-        return res.redirect('/');
+        return res.redirect('/login');
     }
     //id of user that is desired to be rated rated
     let ratedUsername = xss(req.body.ratedUsername);
@@ -354,7 +354,7 @@ router.post('/rating', async (req, res) => {
 
 router.post('/addRating', async (req, res) => {
     if (!req.session.user) {
-        return res.redirect('/');
+        return res.redirect('/login');
     }
     let ratedUsername = xss(req.body.ratedUsername);
     // console.log(ratedUsername);
@@ -404,7 +404,7 @@ router.post('/addRating', async (req, res) => {
 
 router.get('/tutors/:username', async (req,res) => {
     if (!req.session.user){
-        return res.redirect('/');
+        return res.redirect('/login');
     }
     let username = req.params.username;
     try{
