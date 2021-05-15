@@ -1,0 +1,27 @@
+<main>
+    {{#if error}}
+		<p>{{{errorMessage}}}</p>
+	{{else}}
+    
+    <h2>Question Title</h2>
+    <p>{{questionTitle}}</p>
+
+    <h2>Question Body</h2>
+    <p>{{questionBody}}</p>
+    
+    <form id="new-answer-form">
+        <label for="answer-body">Enter your answer: </label>
+        <textarea type="text" id="answer-body" name="answer-body" placeholder="Answer" required></textarea>
+
+        <input type="hidden" id="question-id" value="{{questionId}}" hidden>
+
+        <button type='submit' id='submit-new-answer'>Submit Answer</button>
+    </form>
+
+    <ul id="new-answer-error-list" class="error" hidden></ul>
+    {{/if}}
+</main>
+
+<script src="https://code.jquery.com/jquery-2.2.4.min.js"
+    integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+<script src="/public/js/newAnswer.js"></script>

@@ -211,13 +211,68 @@ const main = async () => {
 		console.log(`Error rating user 9: ${e}`);
 	}
 
-	/* create 5 questions */
+	/* create 10 questions */
 	let question1;
 	try {
-		question1 = await questions.createQuestion(user3._id, "Question" ,"This is question 1" , ['CS 546', 'CS 554']);
+		question1 = await questions.createQuestion(user1._id, "Question1" ,"This is question 1" , ['CS 546', 'CS 554']);
 	} catch (e) {
 		console.log(`Error in creation of question 1: ${e}`)
 	}
+	let question2;
+	try {
+		question2 = await questions.createQuestion(user2._id, "Question 2" ,"This is question 2" , ['math', 'statistics']);
+	} catch (e) {
+		console.log(`Error in creation of question 2: ${e}`)
+	}
+	let question3;
+	try {
+		question3 = await questions.createQuestion(user3._id, "Question 3" ,"This is question 3" , ['computer science', 'web programming']);
+	} catch (e) {
+		console.log(`Error in creation of question 3: ${e}`)
+	}
+	let question4;
+	try {
+		question4 = await questions.createQuestion(user4._id, "Question 4" ,"This is question 4" , ['english']);
+	} catch (e) {
+		console.log(`Error in creation of question 4: ${e}`)
+	}
+	let question5;
+	try {
+		question5 = await questions.createQuestion(user5._id, "Question 5" ,"This is question 5" , ['CS492']);
+	} catch (e) {
+		console.log(`Error in creation of question 5: ${e}`)
+	}
+	let question6;
+	try {
+		question6 = await questions.createQuestion(user1._id, "Trivia" ,"What came first the chicken or the egg?" , ['Science', 'biology']);
+	} catch (e) {
+		console.log(`Error in creation of question 6: ${e}`)
+	}
+	let question7;
+	try {
+		question7 = await questions.createQuestion(user2._id, "Hindsight Bias" ,"What is hindsight bias?" , ['Psychology']);
+	} catch (e) {
+		console.log(`Error in creation of question 7: ${e}`)
+	}
+	let question8;
+	try {
+		question8 = await questions.createQuestion(user3._id, "Civil War" ,"What time period was the American Civil War?" , ['History']);
+	} catch (e) {
+		console.log(`Error in creation of question 8: ${e}`)
+	}
+	let question9;
+	try {
+		question9 = await questions.createQuestion(user4._id, "Web Dev" ,"What are the most popular languages used in Web Development?" , ['Web Dev']);
+	} catch (e) {
+		console.log(`Error in creation of question 9: ${e}`)
+	}
+	let question10;
+	try {
+		question10 = await questions.createQuestion(user5._id, "Operating Systems" ,"What languages are OS's written in?" , ['Computer Science', "OS", "CS492"]);
+	} catch (e) {
+		console.log(`Error in creation of question 10: ${e}`)
+	}
+
 
 	console.log('\nDone seeding database');
 	await db.serverConfig.close();
