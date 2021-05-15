@@ -1,7 +1,9 @@
 <main id="tutorProfile" class="profiles">
     <div id="shownInfo">
-        <h2>{{user.username}} - Tutor</h2>
+        <h2  id="givenUsername">{{user.username}}</h2>
+        <h2>Tutor</h3>
         <h3>{{user.name.firstName}} {{user.name.lastName}}</h3>
+        <h3>Average Rating: {{user.ratings.avgRating}}</h3>
         {{#if isBeingTutored}}
         <h5>Email: {{email}}</h5>
         {{/if}}
@@ -18,16 +20,17 @@
             {{/each}}
         </div>
         {{#if self}}
+        <ul id="tutorList"></ul>
         <button id="userInfoChange">Change User Information</button>
         <button id="passwordChange">Change Password</button>
         {{else}}
         <div id="ratingSection"></div>
-        <button id="ratingButton">Rate {{user.name.firstName}}</button>
         {{/if}}
 
     </div>
 
     <div id="passwordChangeForm">
+        <div id="passwordErrors"></div>
         <form id="passChange">
             <label for="currentPassword">Current Password:</label>
             <input name="currentPassword" id="currentPassword" type="password">
@@ -41,6 +44,7 @@
     </div>
 
     <div id="userInfoChangeForm">
+        <div id="userInfoErrors"></div>
         <form id="infoChange">
             <label for="username">Username:</label>
             <input name="username" id="username" type="text">
@@ -69,14 +73,16 @@
     </div>
 
     <div id="ratingFormSection">
+        <div id="ratingErrors"></div>
         <form id="ratingForm">
             <label for="rating">Rate your experience with {{user.name.firstName}} (1-10):</label>
             <input type="number" name="rating" id="rating" min="1" max="10" step="1">
             <button type="submit">Submit</button>
+            <button class="return">Return to Profile</button>
         </form>
-        <button class="return">Return to Profile</button>
     </div>
 </main>
 
 <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
 <script src="/public/js/profileEdit.js"></script>
+<script src="/public/js/tutorRating.js"></script>

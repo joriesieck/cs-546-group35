@@ -1,14 +1,16 @@
 //on load of this page, get all the user's questions by id
 //replace the questions array with the actual question objects so info can be retrieved from handlebars
 $(document).ready(function(){
-    $('#ratingsSection').empty();
+    $('#ratingSection').empty();
     $.ajax({
         method: 'POST',
-        url: '/profile/rating',
+        url: '/profile/rating/',
+        contentType: 'application/json',
         data: JSON.stringify({
-            ratedUsername: $('givenUsername').html()
+            ratedUsername: $('#givenUsername').html()
         })
     }).then(function (res){
+        //console.log(res);
         if (res.message === 'OK'){
             var newButton = '<button id="ratingButton">Rate this Tutor</button>';
             $('#ratingSection').append(newButton);
@@ -18,16 +20,31 @@ $(document).ready(function(){
                 $('#ratingFormSection').show();
                 //if clicked, hide the shown info and show a rating form
             })
-        } //in all other cases, rating is not possible, so do not display
+        }
+        else{
+            console.log(res.message);
+            //in all other cases, rating is not possible, so do not display
+            $('#ratingSection').empty();
+            $('#ratingSection').append(res.message);
+        }
     })
 
     $('#tutorList').empty();
-    // $.ajax({
-    //     method: 'POST'
-    // })
+    $.ajax({
+        method: 'GET',
+        url: `/profile/tutors/${$('#givenUsername').html()}`
+    }).then(function(array){ //the new tutor list with info
+        console.log("HELLO");
+        if (array.length = 0){
+            $('#tutorList').append('<p>No tutors assigned at this time</p>');
+        } else {
+            for (i = 0; i < array.length; i++){
+                let string = '<li><a href="/profile/'+array[i].username+'">'+array[i].username+'</a></li>';
+                $('#tutorList').appendChild(string);
+            }
+        }
+    });
 });
-//also replace the tutor IDs with links to tutor profiles
-//get the user by ID and make sure the link shows name
 
 (function($){
     //getting content
@@ -41,8 +58,13 @@ $(document).ready(function(){
     var passwordChange = $('#passwordChangeForm');
     var infoChange = $('#userInfoChangeForm');
 
+    //get error groups
+    var passwordErrors = $('#passwordErrors');
+    var userInfoErrors = $('#userInfoErrors');
+
     //when the user wants to change their password
     passwordButton.click((event) => {
+        passwordErrors.empty();
         //hide the shown information
         shownInfo.css("display","none");
         //show the password form
@@ -50,6 +72,7 @@ $(document).ready(function(){
     });
 
     infoButton.click((event) =>{
+        userInfoErrors.empty();
         //hide shown information
         shownInfo.css("display", "none");
         //show the info change details
@@ -61,7 +84,10 @@ $(document).ready(function(){
 
     //on submit of password change form
     passwordChangeForm.submit(function(event){
+        passwordErrors.empty();
+        passwordErrors.hide();
         event.preventDefault();
+        let numErrors = 0;
 
         //get the fields
         var currentPassword = $('#currentPassword').val();
@@ -71,21 +97,37 @@ $(document).ready(function(){
             if (!currentPassword || currentPassword === undefined || currentPassword === null){
                 throw "Missing current password";
             }
+            if (typeof currentPassword !== 'string' || currentPassword.trim() === ""){
+                throw "Current password is of incorrect type";
+            }
+        }catch(e){
+            passwordErrors.append()
+            numErrors++;
+        } 
+        try{
             if (!newPassword || newPassword === undefined || newPassword === null){
                 throw "Missing new password";
+            }
+            if (typeof newPassword !== 'string' || newPassword.trim() === ""){
+                throw "New password is of incorrect type";
+            }
+            
+        } catch(e){
+            passwordErrors.append()
+            numErrors++;
+        }
+        try{        
+            if (typeof confirmPassword !== 'string' || confirmPassword.trim() === ""){
+                throw "Confirm password is of incorrect type";
             }
             if (!confirmPassword || confirmPassword === undefined || confirmPassword === null){
                 throw "Missing confirmation of new password";
             }
-            if (typeof currentPassword !== 'string' || currentPassword.trim() === ""){
-                throw "Current password is of incorrect type";
-            }  
-            if (typeof newPassword !== 'string' || newPassword.trim() === ""){
-                throw "New password is of incorrect type";
-            }
-            if (typeof confirmPassword !== 'string' || confirmPassword.trim() === ""){
-                throw "Confirm password is of incorrect type";
-            }
+        }catch(e){
+            passwordErrors.append()
+            numErrors++;
+        }
+        try{
             if (newPassword.trim() !== confirmPassword.trim()) {
                 throw "New passwords do not match";
             }
@@ -95,15 +137,30 @@ $(document).ready(function(){
             //checking current password because if it doesn't meet the requirements, it can't be right
             if (currentPassword.length < 8) throw 'Current password must contain at least 8 characters';
             if (newPassword.length < 8 || confirmPassword.length < 8) throw 'New password must contain at least 8 characters';
-            
+        } catch(e){
+            passwordErrors.append()
+            numErrors++;
+        }
+        const passwordNumberRE = /[0-9]+/;
+		const passwordLetterRE = /[a-zA-Z]+/;
+        try{
             if (currentPassword.length > 254) throw 'Current password may contain at maximum 254 characters';
+            if (!passwordNumberRE.test(currentPassword) || !passwordLetterRE.test(currentPassword)) throw 'Current password must contain at least one letter and one number.';
+        } catch(e){
+            passwordErrors.append()
+            numErrors++;
+        }
+        try{
             if (newPassword.length > 254 || confirmPassword.length > 254) throw 'New password may contain at maximum 254 characters';
-
-            const passwordNumberRE = /[0-9]+/;
-			const passwordLetterRE = /[a-zA-Z]+/;
-			if (!passwordNumberRE.test(currentPassword) || !passwordLetterRE.test(currentPassword)) throw 'Current password must contain at least one letter and one number.';
 			if (!passwordNumberRE.test(newPassword) || !passwordLetterRE.test(newPassword) || !passwordNumberRE.test(confirmPassword) || !passwordLetterRE.test(confirmPassword)) throw 'New password must contain at least one letter and one number.';
-
+        }catch(e){
+            passwordErrors.append()
+            numErrors++;
+        }
+        if (numErrors>0){
+            passwordErrors.show();
+            //show the errors, don't make a request
+        } else{
             var requestConfig = {
                 method: 'POST',
                 url: '/profile/password',
@@ -114,7 +171,7 @@ $(document).ready(function(){
                     confirmPassword
                 }),
                 error: function (e){
-                    passwordChangeForm.before(`<p>Password could not be changed ${e}</p>`);
+                    alert(`Password could not be changed ${e}`);
                 }
             };
             $.ajax(requestConfig).then(function (res) {
@@ -126,20 +183,20 @@ $(document).ready(function(){
                     shownInfo.before("<p>Password Changed successfully</p>");
                 }
             });
-
-        } catch(e){
-            console.log(e);
         }
+            
+
     });
 
     $(".return").click((event) => {
+        event.preventDefault();
         $("#passChange :input").val("");
         $("#infoChange :input").val("");
         $("#ratingForm :input").val("");
         //if the return button is clicked, hide all forms just in case
         passwordChange.css("display", "none");
         infoChange.css("display", "none");
-        $("ratingFormSection").css("display", "none");
+        $("#ratingFormSection").css("display", "none");
         //unhide the user's profile/shownInfo
         shownInfo.css("display", "flex");
     });

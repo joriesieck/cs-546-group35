@@ -233,7 +233,7 @@
 				}),
 				error: function(e) {
 					// hide the loading message
-					loadingMsg.hide()
+					loadingMsg.hide();
 					var errorMsg = $('<p>');
 					errorMsg.text(e.responseJSON.error);
 					errorMsg.appendTo(errors);
@@ -242,7 +242,7 @@
 			};
 			$.ajax(requestConfig).then(function (res) {
 				// hide the loading message
-				loadingMsg.hide()
+				loadingMsg.hide();
 				// if message = 'success', redirect to home
 				if (res.message==='success') {
 					// redirect to home

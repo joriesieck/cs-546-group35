@@ -206,7 +206,7 @@ const main = async () => {
 		console.log(`Error rating user 7: ${e}`);
 	}
 	try {
-		const rating3 = await ratings.createRating(user2._id, user9._id, 8, 'tutorRating', 'math');
+		const rating3 = await ratings.createRating(user2._id, user9._id, 8, 'tutorRating');
 	} catch (e) {
 		console.log(`Error rating user 9: ${e}`);
 	}

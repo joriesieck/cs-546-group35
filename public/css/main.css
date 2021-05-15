@@ -177,6 +177,10 @@ button.login-landing, button.new-user-landing {
 	font-weight: normal;
 }
 
+#ratingFormSection{
+	text-align: center;
+}
+
 /* Question forum - Redirect to asking question */
 #forum-ask-new-question {
 	margin: auto;

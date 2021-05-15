@@ -211,7 +211,7 @@ router.post('/password', async (req, res) => {
 router.get('/:username', async (req,res) =>{
     try{
         if (!req.session.user){
-            res.redirect('/');
+            return res.redirect('/');
         }
         if (!req.params.username || typeof req.params.username !== 'string' || req.params.username === ""){
             throw "Username is incorrect";
@@ -227,11 +227,11 @@ router.get('/:username', async (req,res) =>{
         if (!retrievedUser){
             //the user doesn't exist
             //send to the main page
-            res.redirect('/');
+            return res.redirect('/');
         } else {
             //got it
             if (req.session.user.username === retrievedUser.username){
-                res.redirect('/profile'); //they're requesting their own profile for some reason?
+                return res.redirect('/profile'); //they're requesting their own profile for some reason?
             }
             if (retrievedUser.userType === "tutor"){
                 //tutor type
@@ -241,7 +241,8 @@ router.get('/:username', async (req,res) =>{
                     title: `${retrievedUser.username}'s Profile`,
                     loggedIn: true,
                     //questions: questions
-                })
+                });
+                return;
             } else{
                 if (user.userType !== "tutor"){
                     res.status(403).json({error: "You cannot visit this profile, as you are not a tutor"});
@@ -254,6 +255,7 @@ router.get('/:username', async (req,res) =>{
                     loggedIn: true,
                     //questions: questions
                 });
+                return;
             }
         }
     } catch (e) {
@@ -266,36 +268,36 @@ router.get('/:username', async (req,res) =>{
 //allows us to see if the user is allowed to rate the other user
 router.post('/rating', async (req, res) => {
     if (!req.session.user){
-        res.redirect('/');
+        return res.redirect('/');
     }
     //id of user that is desired to be rated rated
     let ratedUsername = xss(req.body.ratedUsername);
     try{
         if (!ratedUsername || ratedUsername === undefined || ratedUsername === null || typeof ratedUsername !== 'string' || ratedUsername.trim() === ''){
-            throw "Username for the rated user is of improper format"
+            throw "Username for the rated user is of improper format";
         }
         if (req.session.user.username === ratedUsername){
             res.status(200).json({message: 'SELF'});
             return;
         }
     
-        const rater = await userData.getUserByUsername(req.session.user.username);
-        if (!rater) throw "Could not find rater's user details";
-        const rated = await userData.getUserByUsername(ratedUsername);
-        if (!rated) throw "Could not find the desired-to-be-rated's user details";
+        const userRating = await userData.getUserByUsername(req.session.user.username);
+        if (!userRating) throw "Could not find rater's user details";
+        const userBeingRated = await userData.getUserByUsername(ratedUsername);
+        if (!userBeingRated) throw "Could not find the desired-to-be-rated's user details";
 
-        if (rated.userType !== 'tutor'){
+        if (userBeingRated.userType !== 'tutor'){
             res.status(200).json({message: 'FALSE'});
             return;
         }
 
-        if (rater.userType !== 'student' && rated.userType !== 'tutor') {
+        if (userRating.userType !== 'student') {
             res.status(200).json({message: 'You are ineligible to rate this tutor'});
             return;
         }
         let found = false;
-        for (tutor of rater.tutorList){
-            if (ratedId.equals(tutor)){
+        for (tutor of userRating.tutorList){
+            if (tutor.equals(userBeingRated._id)){
                 found = true;
                 break;
             }
@@ -305,40 +307,54 @@ router.post('/rating', async (req, res) => {
             return;
         }
         let hasRated = false;
-        const usersRatings = await ratingsData.getAllUsersRatings(ratedId);
+        let savedRatingVal;
+        const usersRatings = await ratingsData.getAllUsersRatings(userBeingRated._id);
+        if (!usersRatings) throw "COULD NOT GET USER RATINGS";
+        console.log(usersRatings);
         if (usersRatings.length > 0){
             for (rating of usersRatings){
-                if (rating.userId === rater._id){
+                console.log(rating.userId);
+                console.log(userRating._id);
+                if (rating.userId === userRating._id && rating.ratingType === "tutorRating"){
                     //the user has rated before
                     hasRated = true;
+                    savedRatingVal = rating.ratingValue;
+                    console.log(`RATED ${savedRatingVal}`);
                     break;
                 }
             }
         }
         if (hasRated){
-            res.status(200).json({message: 'You have already rated this tutor'});
+            res.status(200).json({
+                message: `You have already rated this tutor ${savedRatingVal}`, 
+            });
+            console.log("HAVE RATED");
+            return;
         } else {
+            console.log("OK");
             //should be able to submit a rating given all of this
             res.status(200).json({message: 'OK'});
         }
     } catch(e){
+        console.log(e);
         res.status(400).json({error: e});
         return;
     }   
 });
 
-router.post('/rating', async (req, res) => {
+router.post('/addRating', async (req, res) => {
     if (!req.session.user) {
-        res.redirect('/');
+        return res.redirect('/');
     }
-    let ratedId = xss(req.body.ratedId);
+    let ratedUsername = xss(req.body.ratedUsername);
+    console.log(ratedUsername);
     let rating = xss(req.body.rating);
 
     try{
-        if (ratedId === undefined || ratedId === null || ratedId === ''){
-            throw "ID for the rated user is of improper format"
+        if (ratedUsername === undefined || ratedUsername === null || ratedUsername === ''){
+            throw "Username for the rated user is of improper format"
         }
-        if (ObjectId.isValid(ratedId) === false) throw "ID for the rated user is not an ObjectID";
+        if (typeof ratedUsername !== 'string') throw "Username for the rated user is not an string";
         if (rating === undefined || rating === null || rating === ''){
             throw "Rating is of improper format";
         }
@@ -347,11 +363,11 @@ router.post('/rating', async (req, res) => {
         if (rating < 1 || rating > 10) throw "Rating may only be an integer from 1-10";
         const userSubmittingRating = await userData.getUserByUsername(req.session.user.username);
         if (!userSubmittingRating) throw "No user found by this username";
-        const userBeingRated = await userData.getUserById(ratedId);
+        const userBeingRated = await userData.getUserByUsername(ratedUsername);
         if (!userBeingRated) throw "No user found by this id";
-
+        console.log(`userBeingRated._id: ${userBeingRated._id}`)
         //we have all the info we need to make a rating, but need to make sure the tutor hasn't been rated by this other user
-        const usersRatings = await userData.getAllUsersRatings(userBeingRated);
+        const usersRatings = await ratingsData.getAllUsersRatings(userBeingRated._id);
         if (usersRatings.length !== 0){
             //we definitely need to check then!
             for (i = 0; i < usersRatings.length; i++){
@@ -361,7 +377,7 @@ router.post('/rating', async (req, res) => {
             }
         }
         //if we get here, the user has not rated the tutor before so this can be safely submitted
-        const returnedRating = await ratingsData.createRating(userId, userBeingRated._id, rating, 'tutorRating');
+        const returnedRating = await ratingsData.createRating(userSubmittingRating._id, userBeingRated._id, rating, 'tutorRating');
         if (!returnedRating){
             throw "Something went wrong while attempting to create this rating";
         } else{
@@ -370,9 +386,35 @@ router.post('/rating', async (req, res) => {
         }
         
     } catch(e){
-        console.log(`error in POST /profile/rating ${e}`);
+        console.log(`error in POST /profile/addRating ${e}`);
         res.status(400).json({error: e});
         return;
+    }
+});
+
+router.get('/tutors/:username', async (req,res) => {
+    if (!req.session.user){
+        return res.redirect('/');
+    }
+    let username = req.params.username;
+    try{
+        if (!username || username === null || username === undefined || username.trim() === '' || typeof username !== 'string'){
+            throw "Username is not in correct format";
+        }
+        const user = await userData.getUserByUsername(username);
+        if (!user) throw "No user found with that username";
+        let tutors = user.tutorList;
+        let newTutorList = [];
+        if (!tutors || tutors === [] || tutors.length < 1) return ['None'];
+        for (i = 0; i < tutors.length; i++){
+            const tutor = await userData.getUserById(tutors[i]);
+            if (!tutor) throw "Not all tutors can be found";
+            newTutorList[i] = tutor;
+        }
+        //console.log(newTutorList);
+        return newTutorList;
+    }catch(e){
+        return `Error: ${e}`;
     }
 });
 

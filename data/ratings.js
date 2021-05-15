@@ -100,14 +100,15 @@ module.exports = {
         return rating;
     },
 
-    // async getAllUsersRatings(userId){
-    //     if (!userId || userId === undefined || userId === null || userId === '') throw "Error: id is required";
-    //     if (!ObjectId.isValid(userId)) throw "UserId is not a valid ObjectID";
-    //     const ratingCollection = await ratings();
-    //     let usersRatings = await ratingCollection.find({ratedId: userId},{ratingType, ratingValue});
-    //     //we just need the type and the value I think
-    //     return usersRatings; //can do more work with them in the routes
-    // },
+    async getAllUsersRatings(userId){
+        console.log(userId);
+        if (!userId || userId === undefined || userId === null || userId === '') throw "Error: id is required";
+        if (!ObjectId.isValid(userId)) throw "UserId is not a valid ObjectID";
+        userId = ObjectId(userId);
+        const ratingCollection = await ratings();
+        const usersRatings = await ratingCollection.find({ratedId: userId});
+        return usersRatings; //can do more work with them in the routes
+    },
 
     async deleteRating(id) {
         if (id === undefined) throw "Error: No id parameter provided.";

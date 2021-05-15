@@ -7,16 +7,23 @@ router.get('/', async (req, res) => {
         res.redirect('/');
     }
     try{
-        const tutors = await userData.getTopTutors();
+        const tutors = await userData.getAllTutors();
         if (!tutors || tutors.length < 1) {
             throw "No tutors to rank";
         }
-        else{
-            res.status(200).render('users/toptutors',{
-                tutors: tutors
-            });
-            return;
-        }
+        tutors.sort(function(a,b){
+            let ratingA = a.ratings.avgRating;
+            let ratingB = b.ratings.avgRating;
+            //descending order
+            if (ratingA < ratingB) return 1;
+            if (ratingA > ratingB) return -1;
+            return 0;
+        });
+        res.status(200).render('users/toptutors',{
+            tutors: tutors,
+            loggedIn: true
+        });
+        return;
     }catch(e){
         res.status(400).json({error: e});
     }
