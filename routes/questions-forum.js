@@ -542,6 +542,13 @@ router.put("/edit-answer/:id", async (req,res) => {
 				return;
 			}
 			const oldAnswer = await questionData.getAnswerById(answerID);
+
+			// make sure the editor is actually the answer author
+			if (!oldAnswer.userId.equals(currentUser._id)) {
+				res.status(400).json({error: "You may only edit your own answers."});
+				return
+			}
+
 			updatedAnswerObj.userId = oldAnswer.userId;
 			updatedAnswerObj.answerBody = answerBody;
 			updatedAnswerObj.datePosted = oldAnswer.datePosted;
