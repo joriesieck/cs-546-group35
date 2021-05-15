@@ -1,15 +1,15 @@
 <main id="tutorProfile" class="profiles">
     <div id="shownInfo">
         <h2  id="givenUsername">{{user.username}}</h2>
-        <h2>Tutor</h3>
+        <h2>Tutor</h2>
         <h3>{{user.name.firstName}} {{user.name.lastName}}</h3>
         <h3>Average Rating: {{user.ratings.avgRating}}</h3>
         {{#if isBeingTutored}}
-        <h5>Email: {{email}}</h5>
+        <h4>Email: {{email}}</h4>
         {{/if}}
-        <h5>Graduation Year: {{user.year}}</h5>
-        <label for="relevantSubjects">I'm happy to help you with:</label>
-        <ul id="relevantSubjects">
+        <h4>Graduation Year: {{user.year}}</h4>
+        <h5>I'm happy to help you with:</h5>
+        <ul id="subjects">
             {{#each user.relevantSubjects}}
             <li>{{this}}</li>
             {{/each}}
@@ -21,7 +21,7 @@
             {{/each}}
         </div>
         {{#if self}}
-        <label for="tutorList">Currently Tutoring:</label>
+        <h5>Currently Tutoring:</h5>
         <ul id="tutorList"></ul>
         <button id="userInfoChange">Change User Information</button>
         <button id="passwordChange">Change Password</button>
@@ -52,7 +52,7 @@
             <input name="username" id="username" type="text">
 
             <label for="firstName">First Name:</label>
-            <input name="firstName" id="firstName" type="text" value={{firstName}}>
+            <input name="firstName" id="firstName" type="text">
 
             <label for="lastName">Last Name:</label>
             <input name="lastName" id="lastName" type="text">

@@ -2,14 +2,14 @@
     <div id="shownInfo">
         <h2 id="givenUsername">{{user.username}}</h2>
         <h3>{{user.name.firstName}} {{user.name.lastName}}</h3>
-        <h5>Email: {{user.email}}</h5>
+        <h4>Email: {{user.email}}</h4>
         
         <h5>Graduation Year: {{user.year}}</h5>
-        <label for="tutorList">Tutors</label>
+        <h5>Tutors</h5>
         <ul id="tutorList">
         </ul>
-        <label for="relevantSubjects">I need help in:</label>
-        <ul id="relevantSubjects">
+        <h5>I need help in:</h5>
+        <ul id="subjects">
             {{#each user.relevantSubjects}}
             <li>{{this}}</li>
             {{/each}}
@@ -45,7 +45,7 @@
             <input name="username" id="username" type="text">
 
             <label for="firstName">First Name:</label>
-            <input name="firstName" id="firstName" type="text" value={{firstName}}>
+            <input name="firstName" id="firstName" type="text">
 
             <label for="lastName">Last Name:</label>
             <input name="lastName" id="lastName" type="text">
