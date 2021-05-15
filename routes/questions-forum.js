@@ -36,6 +36,9 @@ router.get("/", async (req, res) => {
 		} 
 	}
 
+	// filter questions by visibility
+	questionList = questionList.filter((question) => question.visible);
+
 	if(!!req.session.user === false) {
 		return res.render("questions/questions-forum", {
 			title: "Question Forum",
@@ -55,13 +58,8 @@ router.get("/", async (req, res) => {
 
 });
 
-// TODO: Route to display single question asked
-// router.get("/:id", async (req, res) => {
-	
-// });
-
 // Route to ask a new question page
-router.get("/post", async (req, res) => {
+router.get("/post-question", async (req, res) => {
 	if (req.session.user) {
 		if(req.session.user.isTutor === true) {
 			//return res.status(401).json({error: "Please create a student account to ask a question!"});
@@ -77,7 +75,7 @@ router.get("/post", async (req, res) => {
 });
 
 // Route for posting a new question
-router.post("/post", async (req, res) => {
+router.post("/post-question", async (req, res) => {
 	if (req.session.user) {
 		if(req.session.user.isTutor === true) {
 			return res.status(401).json({error: "Please create a student account to ask a question!"});
@@ -174,7 +172,7 @@ router.post("/post", async (req, res) => {
 			// };
 			// await userData.updateUser(userQuestionObj);
 			if(newQuestion) {
-				res.status(201).json({ message: "success" });
+				res.status(201).json({ message: "success", questionId: newQuestion._id });
 			}
 		} catch (e) {
 			res.status(500).json({ error: e });
@@ -184,8 +182,102 @@ router.post("/post", async (req, res) => {
 	}
 });
 
+// Route to post a new answer
+router.post("/post-answer", async (req, res) => {
+	if (req.session.user) {
+		// get the answer and the questionId
+		let answerBody = xss(req.body.answerBody);
+		let questionId = xss(req.body.questionId);
+
+		// check inputs
+		if (createHelper(answerBody) === false) {
+			res.status(400).json({
+				error: "Error: Answer body must be provided and of proper type",
+			});
+			return;
+		}
+		if (!answerBody) {
+			res.status(400).json({ error: "You must provide an answer body" });
+			return;
+		}
+		var regex = /(<([^>]+)>)/gi;
+		answerBody = answerBody.replace(regex, "");
+
+		// check questionId existence
+		if (!questionId) {
+			res.status(400).json({error: "Missing Question Id"});
+			return;
+		}
+
+		// get the current user
+		let currentUser = await userData.getUserByUsername(
+			req.session.user.username
+		);
+		let currentUserId = currentUser._id;
+
+		// convert questionId to an ObjectId, erroring if it's invalid
+		try {
+			questionId = ObjectID(questionId);
+		} catch (e) {
+			res.status(400).json({error: "Invalid Question Id"});
+			return;
+		}
+
+		// create the answer
+		try {
+			const newAnswer = await questionData.createAnswer(
+				currentUserId,
+				answerBody,
+				questionId
+			);
+
+			if(newAnswer) {
+				res.status(201).json({ message: "success", questionId });
+			}
+		} catch (e) {
+			res.status(500).json({ error: e });
+		}
+	} else {
+		res.sendStatus(403);
+	}
+});
+
+// Route to create a new answer page
+router.get("/post-answer/:id", async (req, res) => {
+	if (req.session.user) {
+		if(req.session.user.isTutor === false) {
+			return res.render("answers/create-answer", {
+				title: "Something went wrong",
+				error: true,
+				errorMessage: `Only tutors can answer questions!`,
+				loggedIn: true,
+				isTutor: req.session.user.isTutor
+			});
+		} else {
+			let questionID = req.params.id
+			questionID = ObjectID(questionID);
+			const question = await questionData.getQuestionById(questionID);
+			let questionTitle = question.title;
+			let questionBody = question.questionBody;
+			return res.render("answers/create-answer", {
+				title: "Create an Answer",
+				questionTitle: questionTitle,
+				questionBody: questionBody,
+				loggedIn: true,
+				isTutor: req.session.user.isTutor,
+				questionId: req.params.id
+			});
+		}
+	} 
+	res.redirect("/login");
+});
+
 // Route to edit a question page
-router.get("/:id/edit", async (req, res) => {
+router.get("/edit-question/:id", async (req, res) => {
+	// if user is not logged in, redirect to login page
+	if (!req.session.user) {
+		return res.redirect('/login');
+	}
 	try {
 		if (req.session.user && req.session.user.isTutor === true) {
 			let questionID = req.params.id
@@ -220,7 +312,11 @@ router.get("/:id/edit", async (req, res) => {
 	}
 });
 
-router.put("/:id/edit", async (req, res) => {
+router.put("/edit-question/:id", async (req, res) => {
+	// if user is not logged in, redirect to login page
+	if (!req.session.user) {
+		return res.redirect('/login');
+	}
 	if (req.session.user && req.session.user.isTutor === false) {
 		return res.status(401).json({error: "Unathorized access!"});
 	} 
@@ -285,8 +381,13 @@ router.put("/:id/edit", async (req, res) => {
 		}
 
 		try {
-			let questionID = req.params.id
-			questionID = ObjectID(questionID);
+			let questionID = req.params.id;
+			try {
+				questionID = ObjectID(questionID);
+			} catch (e) {
+				res.status(400).json({error: "Invalid question ID."});
+				return;
+			}
 			const oldQuestion = await questionData.getQuestionById(questionID);
 			updatedQuestionObj.userId = oldQuestion.userId;
 			updatedQuestionObj.title = title;
@@ -302,7 +403,12 @@ router.put("/:id/edit", async (req, res) => {
 
 		try {
 			let questionID = req.params.id
-			//questionID = ObjectID(questionID);
+			try {
+				questionID = ObjectID(questionID);
+			} catch (e) {
+				res.status(400).json({error: "Invalid question ID."});
+				return;
+			}
 			const updatedQuestion = await questionData.updateQuestion(
 				questionID,
 				updatedQuestionObj
@@ -328,11 +434,213 @@ router.put("/:id/edit", async (req, res) => {
 			}
 
 			if(updatedQuestion) {
-				res.status(201).json({ message: "success" });
+				res.status(201).json({ message: "success", questionId: req.params.id });
 			}
 		} catch (e) {
 			res.status(500).json({ error: e });
 		}
+	}
+});
+
+// Route to edit an answer page
+router.get("/edit-answer/:id", async (req, res) => {
+	// if user is not logged in, redirect to login page
+	if (!req.session.user) {
+		return res.redirect('/login');
+	}
+	try {
+		let currentUser = await userData.getUserByUsername(req.session.user.username);
+		let answerUserId = currentUser._id;
+		if (req.session.user && req.session.user.isTutor && answerUserId) {
+			let answerID = req.params.id;
+			answerID = ObjectID(answerID);
+			const oldAnswer = await questionData.getAnswerById(answerID);
+			let oldAnswerBody = oldAnswer.answer;
+			return res.render("answers/edit-answer", {
+				title: "Edit Your Answer",
+				loggedIn: true,
+				oldBody: oldAnswerBody
+			});
+		}
+		if (!(req.session.user && req.session.user.isTutor && answerUserId)) {
+			res.status(401).json({error: "Unathorized access!"});
+		} 
+		if(!req.session.user) {
+			res.redirect("/login");
+		}
+	} catch(e) {
+		let currentUser = await userData.getUserByUsername(req.session.user.username);
+		let answerUserId = currentUser.userId;
+		if (req.session.user) {
+			if(req.session.user.isTutor && answerUserId === false){
+				return res.status(401).render("answers/edit-answer", {title: "Something Went Wrong", error: true, errorMessage: `Unauthorized access`, loggedIn:true, isTutor: req.session.user.isTutor});
+			} else {
+				return res.status(401).render("answers/edit-answer", {title: "Something Went Wrong", error: true, errorMessage: `No answer with this ID. Please check the answer you are trying to edit.`, loggedIn:true, isTutor: req.session.user.isTutor});
+			}
+		} 
+	}
+});
+
+router.put("/edit-answer/:id", async (req,res) => {
+	// if user is not logged in, redirect to login page
+	if (!req.session.user) {
+		return res.redirect('/login');
+	}
+	let currentUser = await userData.getUserByUsername(req.session.user.username);
+	let answerUserId = currentUser._id;
+	if (!(req.session.user && req.session.user.isTutor && answerUserId)) {
+		return res.status(401).json({error: "Unathorized access!"});
+	}
+	if (req.session.user && req.session.user.isTutor && answerUserId) {
+		let answerInfo = xss(req.body);
+		let answerBody = xss(req.body.answerBody);
+		let updatedAnswerObj = {};
+		let questionId = req.session.questionId;
+
+		// make sure questionId exists
+		if (!questionId) {
+			res.status(400).json({error: "No question ID found. Please go back to the page and try again."});
+		}
+
+		// convert questionId to an ObjectId
+		try {
+			questionId = ObjectID(questionId);
+		} catch (e) {
+			res.status(400).json({error: "Invalid question ID."});
+			return;
+		}
+
+		if(!answerInfo) {
+			res.status(400).json({error: "You must provide data to update your answer"});
+			return;
+		}
+		if(createHelper(answerBody) === false) {
+			res.status(400).json({ error: "Error: Answer body must be provided and of proper type" });
+			return;
+		}
+
+		if(
+			!answerBody
+		) {
+			res.status(400).json({ error: "You must supply the answer body" });
+			return;
+		}
+
+		try {
+			let answerID = req.params.id
+			try {
+				answerID = ObjectID(answerID);
+			} catch (e) {
+				res.status(400).json({error: "Invalid answer ID."});
+				return;
+			}
+			const oldAnswer = await questionData.getAnswerById(answerID);
+			updatedAnswerObj.userId = oldAnswer.userId;
+			updatedAnswerObj.answerBody = answerBody;
+			updatedAnswerObj.datePosted = oldAnswer.datePosted;
+			updatedAnswerObj.answers = oldAnswer.answers;
+		} catch (e) {
+			res.status(404).json({ error: "Answer not found" });
+			return;
+		}
+
+		try {
+			let answerID = req.params.id;
+			try {
+				answerID = ObjectID(answerID);
+			} catch (e) {
+				res.status(400).json({error: "Invalid answer ID."});
+				return;
+			}
+			const updatedAnswer = await questionData.updateAnswer(
+				questionId,
+				answerID,
+				updatedAnswerObj
+			);
+
+			let currentUserId = currentUser._id;
+			let answerIdArr = [ObjectID(req.params.id)];
+			const userAnswerObj = {
+				id: currentUserId,
+				answerIDs: answerIdArr
+			};
+
+			let currentUserAnswerIDs = currentUser.questionIDs;
+			for (let i = 0; i < currentUserAnswerIDs.length; i++) {
+				currentUserAnswerIDs[i] = currentUserAnswerIDs[i].toString();
+			}
+			if (currentUserAnswerIDs.includes(req.params.id) === false) {
+				await userData.updateUser(userAnswerObj);
+			}
+
+			if(updatedAnswer) {
+				res.status(201).json({ message: "success", questionId });
+			}
+		} catch (e) {
+			res.status(500).json({ error: e });
+		}
+	}
+});
+
+// Route to display the single question with answers page
+router.get("/:id", async (req, res) => {
+	let id = req.params.id;
+	// input checks
+	try {
+		id = ObjectID(id);
+	} catch (e) {
+		res.status(400).json({error: "Invalid question ID provided"});
+	}
+	// get the question and its answers
+	let singleQuestion;
+	try {
+		singleQuestion = await questionData.getQuestionById(id);
+	} catch (e) {
+		res.status(400).json({error: e});
+		return;
+	}
+	let answerList = singleQuestion.answers;
+	let monthPosted;
+	let dayPosted;
+	let yearPosted;
+	let fullDatePosted;
+
+	// format the date
+	for(let i = 0; i < answerList.length; i++) {
+		monthPosted = answerList[i].date.getMonth() + 1;
+		dayPosted = answerList[i].date.getDate() ;
+		yearPosted = answerList[i].date.getFullYear();
+		fullDatePosted = `${monthPosted}/${dayPosted}/${yearPosted}`;
+		answerList[i].date = fullDatePosted;
+	}
+
+	if(answerList.length > 0) {
+		for(let i = 0; i < answerList.length; i++) {
+			let username = await userData.getUserById(answerList[i].userId);
+			answerList[i].username = username.username;
+		}
+	}
+
+	// render the appropriate page, depending on whether user is logged in
+	if(!!req.session.user === false) {
+		return res.render("answers/answers-page", {
+			title: "Answers",
+			loggedIn: !!req.session.user,
+			question: singleQuestion,
+			answers: answerList
+		});
+	}
+
+	if(!!req.session.user === true) {
+		// add the questionID to the session
+		req.session.questionId = id;
+		return res.render("answers/answers-page", {
+			title: "Answers",
+			loggedIn: !!req.session.user,
+			question: singleQuestion,
+			answers: answerList,
+			isTutor: req.session.user.isTutor
+		});
 	}
 });
 

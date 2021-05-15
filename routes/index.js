@@ -16,7 +16,7 @@ const constructorMethod = (app) => {
 		let yearPosted;
 		let fullDatePosted;
 
-		questionList = questionList.slice(1,4);
+		questionList = questionList.slice(0,4);
 		for(let i = 0; i < questionList.length; i++) {
 			monthPosted = questionList[i].datePosted.getMonth() + 1;
 			dayPosted = questionList[i].datePosted.getDate() ;

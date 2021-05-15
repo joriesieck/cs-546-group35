@@ -20,7 +20,7 @@
     </div>
 
     <div id='forum-ask-new-question'>
-            <a href='questions-forum/post'>Click here to ask a new question</a>
+            <a href='questions-forum/post-question'>Click here to ask a new question</a>
 
     </div>
 
@@ -34,6 +34,7 @@
                 <th>Tags</th>
                 <th>Link</th>
                 <th>Answered?</th>
+                <th>Answer this Question</th>
                 <th>Edit</th>
             </tr>
             {{#each questions}}
@@ -45,8 +46,11 @@
                         <a href='questions-forum/{{this._id}}'>Link</a>
                     </td>
                     <td class="table-question-answered">{{this.answered}}</td>
+                    <td class="table-question-answer">
+                        <a href='/questions-forum/post-answer/{{this._id}}'>Answer</a>
+                    </td>
                     <td class="table-question-edit">
-                        <a href='/questions-forum/{{this._id}}/edit'>Edit</a>
+                        <a href='/questions-forum/edit-question/{{this._id}}'>Edit</a>
                     </td>
                 </tr>
             {{/each}}

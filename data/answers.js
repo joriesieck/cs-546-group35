@@ -50,7 +50,7 @@ module.exports = {
         if (ObjectID.isValid(answerId) === false) throw "Error: Invalid answer ID provided.";
     
         const updatedAnswerData = {};
-        if (updatedAnswer === undefined) throw "Error: Must provide updated book information.";
+        if (updatedAnswer === undefined) throw "Error: Must provide updated question information.";
     
         if (updatedAnswer.answer) {
             if (createHelper(updatedAnswer.answer) === false) throw "Error: Updated answer text parameter must be supplied and must be a string/non all empty space string.";
@@ -62,8 +62,8 @@ module.exports = {
             {_id: answerId},
             {$set: updatedAnswerData}
         );
-        if (!updatedInfo.matchedCount && !updatedInfo.modifiedCount) throw 'Error: Could not update book successfully';
-        return await this.getBookById(id);
+        if (!updatedInfo.matchedCount && !updatedInfo.modifiedCount) throw 'Error: Could not update question successfully';
+        return await this.getQuestionById(id);
     },
     
     async deleteAnswer(id) {

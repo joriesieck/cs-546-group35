@@ -1,0 +1,53 @@
+<main>
+    <h2>Question Title</h2>
+    <p>{{question.title}}</p>
+
+    <h2>Question Body</h2>
+    <p>{{question.questionBody}}</p>
+    
+    {{#if answers.length}}
+    <table id='answer-list-table'>
+
+        {{#if isTutor}}
+        <tr class="table-header">
+            <th>Date</th>
+            <th>Answer</th>
+            <th>Tutor</th>
+            <th>Edit</th>
+        </tr>
+        {{#each answers}}
+        <tr class="table-answer-row">
+            <td class="table-date-posted">{{this.date}}</td>
+            <td class="table-answer-body">{{this.answer}}</td>
+            <td class="table-answer-tutor">
+                <a href='/profile/'>{{this.username}}</a>
+            </td>
+            <td class="table-answer-edit">
+                <a href='/questions-forum/edit-answer/{{this._id}}'>Edit</a>
+            </td>
+        </tr>
+        {{/each}}
+        {{else}}
+        <tr class="table-header">
+            <th>Date</th>
+            <th>Answer</th>
+            <th>Tutor</th>
+        </tr>
+        {{#each answers}}
+        <tr class="table-answer-row">
+            <td class="table-date-posted">{{this.date}}</td>
+            <td class="table-answer-body">{{this.answer}}</td>
+            <td class="table-answer-tutor">
+                <a href='/profile/'>{{this.username}}</a>
+            </td>
+        </tr>
+        {{/each}}
+        {{/if}}
+    </table>
+    {{else}}
+    <p class="not-answers">We're sorry, no one has responded to this question yet.</p>
+    {{/if}}
+    {{#if isTutor}}
+    <a href="/questions-forum/post-answer/{{question._id}}">Click here to create a new answer</a>
+    {{/if}}
+</main>
