@@ -32,28 +32,3 @@
 
 <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
 <script src="/public/js/requestTutor.js"></script>
-{{!-- <main>
-	{{#if error}}
-	<p>{{errorMessage}}</p>
-	{{else}}
-	{{#if hasTutors}}
-		{{#each tutorList}}
-			<ul>
-				<li>{{name}}</li>
-				<li>{{username}}</li>
-				<li><ul>
-					{{#each subjects}}
-					<li>{{this}}</li>
-					{{/each}}
-				</ul></li>
-				<li><form method='/POST' action='/request-tutor'>
-					<button type='submit'>Request</button>
-					<input type='hidden' name='requestedTutor' value='{{username}}'>
-				</form></li>
-			</ul>
-		{{/each}}
-	{{else}}
-		<p>Sorry, there are no tutors available at this time. <a href='questions-forum/post'>Ask a question</a> instead.</p>
-	{{/if}}
-	{{/if}}
-</main> --}}
