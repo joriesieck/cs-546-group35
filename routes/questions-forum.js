@@ -618,6 +618,7 @@ router.get("/answer/:id", async (req, res) => {
 		loggedIn: !!req.session.user,
 		answer: answer.answer,
 		answerId: answer._id,
+		questionId: req.session.questionId,
 		isTutor: req.session.user.isTutor
 	});
 });
@@ -763,6 +764,8 @@ router.get("/:id", async (req, res) => {
 
 	// render the appropriate page, depending on whether user is logged in
 	if(!!req.session.user === false) {
+		// add the questionID to the session
+		req.session.questionId = id;
 		return res.render("answers/answers-page", {
 			title: "Answers",
 			loggedIn: !!req.session.user,
