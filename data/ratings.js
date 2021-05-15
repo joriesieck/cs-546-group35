@@ -33,6 +33,9 @@ module.exports = {
         const rater = await users.getUserById(userId);
         let ratee = await users.getUserById(ratedId);
 
+        // make sure rater and ratee are not the same person
+        if (rater._id.equals(ratee._id)) throw "You may not rate yourself.";
+
         // make sure the ratee is a tutor
         if (ratee.userType !== 'tutor') throw "Only tutors may be rated.";
 

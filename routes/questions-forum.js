@@ -665,6 +665,14 @@ router.post("/answer/:id", async (req, res) => {
 		res.status(400).json({error: e});
 		return;
 	}
+	// get the rater's id
+	const raterId = user._id;
+
+	// make sure ratee and rater are not the same person
+	if (rateeId.equals(raterId)) {
+		res.status(400).json({error: "You may not rate your own answer."});
+		return;
+	}
 
 	// rating type is either answerRatingByStudents or answerRatingByTutors
 	const type = req.session.user.isTutor ? 'answerRatingByTutors' : 'answerRatingByStudents';
