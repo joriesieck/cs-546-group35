@@ -9,14 +9,7 @@
 			{{#each tutorList}}
 				<div class='tutor-input-label' id='tutor-input-label-{{username}}'>
 				<input type='radio' id='{{username}}' name='requestedTutor' value='{{username}}'>
-				<label for='{{username}}'><ul class='tutor-label'>
-					<li>{{name}}</li>
-					<li><ul>
-					{{#each subjects}}
-						<li>{{this}}</li>
-						{{/each}}
-					</ul></li>
-				</ul></label>
+				<label for='{{username}}' class='tutor-label'>{{name}} can help with {{#each subjects}}{{this}} {{/each}}</label>
 				</div>
 			{{/each}}
 			</div>
@@ -25,7 +18,7 @@
 		<p id='success-msg' hidden></p>
 		<p id='tutor-req-error' class="error" hidden></p>
 	{{else}}
-		<p>Sorry, there are no tutors available at this time. <a href='questions-forum/post'>Ask a question</a> instead.</p>
+		<p>Sorry, there are no tutors available at this time. <a href='/questions-forum/post'>Ask a question</a> instead.</p>
 	{{/if}}
 	{{/if}}
 </main>

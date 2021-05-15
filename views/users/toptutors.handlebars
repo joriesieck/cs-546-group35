@@ -7,10 +7,11 @@
     <div id="tutoringList">
         {{#each tutors}}
         <div class="displayedTutor">
-            <h3><a href="/profile/{{this.username}}">"{{this.username}}"</a></h3>
-            <h4>{{this.firstName}} {{this.lastName}}</h4>
-            <h5>Average Rating: {{this.ratings.avgRating}}</h5>
-            <ul>Subjects
+            <h2><a href="/profile/{{this.username}}">"{{this.username}}"</a></h2>
+            <p>{{this.name.firstName}} {{this.name.lastName}}</p>
+            <p>Average Rating: {{this.ratings.avgRating}}</p>
+            <p>Subjects</p>
+            <ul>
                 {{#each this.relevantSubjects}}
                 <li class="subject">{{this}}</li>
                 {{/each}}

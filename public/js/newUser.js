@@ -161,7 +161,7 @@
 			const yearRE = /^\d\d\d\d$/;
 			if (!yearRE.test(year)) throw 'Graduation Year must be of the form YYYY.';
 			//can't be an unreasonable year (<1900 or 2100< I guess?)
-			if (year < 1900 || year > 2100) throw 'Graduation Year needs to make sense :)';
+			if (year < 1900 || year > 2100) throw 'Graduation Year must be between 1900 and 2100';
 		} catch (e) {
 			errorList.push(e);
 		}
@@ -216,6 +216,7 @@
 			var loadingMsg = $('<p>');
 			loadingMsg.text('Please wait, your account is being created...');
 			newUserForm.after(loadingMsg);
+			errors.hide();
 			// no errors, so submit ajax request to POST /new-user
 			var requestConfig = {
 				method: 'POST',

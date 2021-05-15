@@ -21,7 +21,13 @@
                 data: JSON.stringify({
                     ratedUsername: username,
                     rating: rating
-                })
+                }),
+                error: function (e) {
+                    var errorMsg = $('<p class="error">');
+					errorMsg.text(e.responseJSON.error);
+                    ratingForm.after(errorMsg);
+					errorMsg.show();
+                }
             };
             $.ajax(requestConfig).then(function (res){
                 if (res.message === 'success'){

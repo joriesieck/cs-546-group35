@@ -180,35 +180,28 @@ const main = async () => {
 	/* add tutors to 3 users */
 	try {
 		user1 = await users.updateUser({id:user1._id, tutorList: [user6._id, user7._id]});
+		user6 = await users.updateUser({id: user6._id, tutorList: [user1._id]});
+		user7 = await users.updateUser({id: user7._id, tutorList: [user1._id]});
 	} catch (e) {
-		console.log(`Error updating user 1: ${e}`);
+		console.log(`Error updating user 1, 6, 7: ${e}`);
 	}
 	try {
 		user2 = await users.updateUser({id:user2._id, tutorList: [user8._id, user9._id, user10._id]});
+		user8 = await users.updateUser({id: user8._id, tutorList: [user2._id]});
+		user9 = await users.updateUser({id: user9._id, tutorList: [user2._id]});
+		user10 = await users.updateUser({id: user10._id, tutorList: [user2._id]});
 	} catch (e) {
-		console.log(`Error updating user 2: ${e}`);
+		console.log(`Error updating user 2, 8, 9, 10: ${e}`);
 	}
 	try {
 		user3 = await users.updateUser({id:user3._id, tutorList: [user6._id, user7._id,user8._id, user9._id, user10._id]});
+		user6 = await users.updateUser({id: user6._id, tutorList: [user3._id]});
+		user7 = await users.updateUser({id: user7._id, tutorList: [user3._id]});
+		user8 = await users.updateUser({id: user8._id, tutorList: [user3._id]});
+		user9 = await users.updateUser({id: user9._id, tutorList: [user3._id]});
+		user10 = await users.updateUser({id: user10._id, tutorList: [user3._id]});
 	} catch (e) {
-		console.log(`Error updating user 3: ${e}`);
-	}
-
-	/* add ratings to 3 tutors */
-	try {
-		const rating1 = await ratings.createRating(user1._id, user6._id, 10, 'answerRatingByStudents');
-	} catch (e) {
-		console.log(`Error rating user 6: ${e}`);
-	}
-	try {
-		const rating2 = await ratings.createRating(user6._id, user7._id, 9, 'answerRatingByTutors');
-	} catch (e) {
-		console.log(`Error rating user 7: ${e}`);
-	}
-	try {
-		const rating3 = await ratings.createRating(user2._id, user9._id, 8, 'tutorRating');
-	} catch (e) {
-		console.log(`Error rating user 9: ${e}`);
+		console.log(`Error updating user 3, 6, 7, 8, 9, 10: ${e}`);
 	}
 
 	/* create 10 questions */
@@ -273,6 +266,119 @@ const main = async () => {
 		console.log(`Error in creation of question 10: ${e}`)
 	}
 
+	/* create 10 answers */
+	let answer1;
+	try {
+		answer1 = await questions.createAnswer(user6._id, 'this is an answer', question1._id);
+	} catch (e) {
+		console.log(`Error in creation of answer 1: ${e}`);
+	}
+	let answer2;
+	try {
+		answer2 = await questions.createAnswer(user7._id, 'this is a better answer', question1._id);
+	} catch (e) {
+		console.log(`Error in creation of answer 2: ${e}`);
+	}
+	let answer3;
+	try {
+		answer3 = await questions.createAnswer(user10._id, 'i am just adding a follow up answer', question1._id);
+	} catch (e) {
+		console.log(`Error in creation of answer 3: ${e}`);
+	}
+	let answer4;
+	try {
+		answer4 = await questions.createAnswer(user6._id, 'this is a great answer', question5._id);
+	} catch (e) {
+		console.log(`Error in creation of answer 4: ${e}`);
+	}
+	let answer5;
+	try {
+		answer5 = await questions.createAnswer(user7._id, 'i have more to add here', question5._id);
+	} catch (e) {
+		console.log(`Error in creation of answer 5: ${e}`);
+	}
+	let answer6;
+	try {
+		answer6 = await questions.createAnswer(user7._id, 'it was definitely the chicken', question6._id);
+	} catch (e) {
+		console.log(`Error in creation of answer 6: ${e}`);
+	}
+	let answer7;
+	try {
+		answer7 = await questions.createAnswer(user10._id, 'no, it was the egg', question6._id);
+	} catch (e) {
+		console.log(`Error in creation of answer 7: ${e}`);
+	}
+	let answer8;
+	try {
+		answer8 = await questions.createAnswer(user8._id, 'JavaScript is definitely one of them', question9._id);
+	} catch (e) {
+		console.log(`Error in creation of answer 8: ${e}`);
+	}
+	let answer9;
+	try {
+		answer9 = await questions.createAnswer(user9._id, 'HTML is another', question9._id);
+	} catch (e) {
+		console.log(`Error in creation of answer 9: ${e}`);
+	}
+	let answer10;
+	try {
+		answer10 = await questions.createAnswer(user8._id, 'HTML is a markup language, not a programming one', question9._id);
+	} catch (e) {
+		console.log(`Error in creation of answer 10: ${e}`);
+	}
+
+	/* add 10 ratings to tutors */
+	try {
+		const rating1 = await ratings.createRating(user1._id, user6._id, 10, 'answerRatingByStudents', answer1._id);
+	} catch (e) {
+		console.log(`Error rating user 6: ${e}`);
+	}
+	try {
+		const rating2 = await ratings.createRating(user6._id, user7._id, 9, 'answerRatingByTutors', answer2._id);
+	} catch (e) {
+		console.log(`Error rating user 7: ${e}`);
+	}
+	try {
+		const rating3 = await ratings.createRating(user2._id, user9._id, 8, 'tutorRating');
+	} catch (e) {
+		console.log(`Error rating user 9: ${e}`);
+	}
+	try {
+		const rating4 = await ratings.createRating(user3._id, user10._id, 1, 'answerRatingByStudents', answer3._id);
+	} catch (e) {
+		console.log(`Error rating user 10: ${e}`);
+	}
+	try {
+		const rating5 = await ratings.createRating(user9._id, user7._id, 2, 'answerRatingByTutors', answer2._id);
+	} catch (e) {
+		console.log(`Error rating user 7: ${e}`);
+	}
+	try {
+		const rating6 = await ratings.createRating(user3._id, user9._id, 5, 'tutorRating');
+	} catch (e) {
+		console.log(`Error rating user 9: ${e}`);
+	}
+	try {
+		const rating7 = await ratings.createRating(user4._id, user6._id, 7, 'answerRatingByStudents', answer4._id);
+	} catch (e) {
+		console.log(`Error rating user 6: ${e}`);
+	}
+	try {
+		const rating8 = await ratings.createRating(user6._id, user10._id, 4, 'answerRatingByTutors', answer3._id);
+	} catch (e) {
+		console.log(`Error rating user 10: ${e}`);
+	}
+	try {
+		const rating9 = await ratings.createRating(user2._id, user8._id, 1, 'tutorRating');
+	} catch (e) {
+		console.log(`Error rating user 8 ${e}`);
+	}
+	try {
+		const rating10 = await ratings.createRating(user3._id, user8._id, 10, 'tutorRating');
+	} catch (e) {
+		console.log(`Error rating user 10: ${e}`);
+	}
 
 	console.log('\nDone seeding database');
 	await db.serverConfig.close();

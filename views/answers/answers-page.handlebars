@@ -12,15 +12,23 @@
         <tr class="table-header">
             <th>Date</th>
             <th>Answer</th>
+            <th>Student Rating</th>
+            <th>Tutor Rating</th>
             <th>Tutor</th>
+            <th>Rate</th>
             <th>Edit</th>
         </tr>
         {{#each answers}}
         <tr class="table-answer-row">
             <td class="table-date-posted">{{this.date}}</td>
             <td class="table-answer-body">{{this.answer}}</td>
+            <td class="table-answer-body">{{this.avgStudentRating}}</td>
+            <td class="table-answer-body">{{this.avgTutorRating}}</td>
             <td class="table-answer-tutor">
                 <a href='/profile/'>{{this.username}}</a>
+            </td>
+            <td class="table-answer-rate">
+                <a href='/questions-forum/answer/{{this._id}}'>Rate</a>
             </td>
             <td class="table-answer-edit">
                 <a href='/questions-forum/edit-answer/{{this._id}}'>Edit</a>
@@ -31,14 +39,22 @@
         <tr class="table-header">
             <th>Date</th>
             <th>Answer</th>
+            <th>Student Rating</th>
+            <th>Tutor Rating</th>
             <th>Tutor</th>
+            <th>Rate</th>
         </tr>
         {{#each answers}}
         <tr class="table-answer-row">
             <td class="table-date-posted">{{this.date}}</td>
             <td class="table-answer-body">{{this.answer}}</td>
+            <td class="table-answer-body">{{this.avgStudentRating}}</td>
+            <td class="table-answer-body">{{this.avgTutorRating}}</td>
             <td class="table-answer-tutor">
-                <a href='/profile/'>{{this.username}}</a>
+                <a href='/profile/{{this.username}}'>{{this.username}}</a>
+            </td>
+            <td class="table-answer-rate">
+                <a href='/questions-forum/answer/{{this._id}}'>Rate</a>
             </td>
         </tr>
         {{/each}}

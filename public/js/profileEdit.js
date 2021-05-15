@@ -166,6 +166,10 @@ $(document).ready(function(){
             //passwordErrors.show();
             //show the errors, don't make a request
         } else{
+            // render a paragraph to let the user know that their changes are being made
+			var loadingMsg = $('<p>');
+			loadingMsg.text('Please wait, we are updating your password...');
+			passwordChangeForm.after(loadingMsg);
             var requestConfig = {
                 method: 'POST',
                 url: '/profile/password',
@@ -176,10 +180,14 @@ $(document).ready(function(){
                     confirmPassword
                 }),
                 error: function (e){
+                    // hide the loading message
+					loadingMsg.hide();
                     alert(`Password could not be changed ${e}`);
                 }
             };
             $.ajax(requestConfig).then(function (res) {
+                // hide the loading message
+                loadingMsg.hide();
                 if (res.message === "success" ){
                     //PASSWORD COULD BE CHANGED ONLY
                     $("#passChange :input").val("");
@@ -251,7 +259,7 @@ $(document).ready(function(){
             try{
                 year = parseInt(year);
                 if (isNaN(year)) throw 'Grad year must be a number';
-                if (year < 1900 || year > 2100) throw 'Grad year must make sense :)';
+                if (year < 1900 || year > 2100) throw 'Grad year must be between 1900 and 2100';
                 const yearRE = /^\d\d\d\d$/;
 			    if (!yearRE.test(year)) throw 'Graduation Year must be of the form YYYY.';
                 fieldsToChange['year'] = year;

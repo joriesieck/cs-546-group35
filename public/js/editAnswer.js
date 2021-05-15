@@ -34,7 +34,10 @@
                 }),
                 error: function(e) {
                     console.log(e);
-                    errors.show();
+                    var errorMsg = $('<p class="error">');
+                    errorMsg.text(e.responseJSON.error);
+                    newAnswerForm.after(errorMsg);
+                    errorMsg.show();
                 }
             };
             $.ajax(requestConfig).then(function (res) {

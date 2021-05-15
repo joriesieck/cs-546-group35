@@ -12,7 +12,7 @@ function createHelper(string) {
 };
 
 module.exports = {
-    async createRating(userId, ratedId, rating, type) {
+    async createRating(userId, ratedId, rating, type, answerId) {
         /* check inputs */
         // userId and ratedId must exist and be valid ObjectIds
         if (userId === undefined) throw "Error: No userId parameter provided.";
@@ -23,10 +23,18 @@ module.exports = {
         if (rating === undefined || typeof rating !== 'number'|| rating < 1 || rating > 10) throw "Error: Rating must be supplied and must be a number between 1 through 10!";
         // type must exist, be a nonempty string, and be either 'answerRatingByStudents', 'answerRatingByTutors', or 'tutorRating'
         if (createHelper(type) === false || (type !== 'answerRatingByStudents' && type !== 'answerRatingByTutors' && type !== 'tutorRating')) throw "Error: Rating type must be supplied, must be a string/non all empty space string, and must be either 'answerRatingByStudents', 'answerRatingByTutors', or 'tutorRating'.";
+        // if type is answerRating, answerId must exist and be a valid ObjectId
+        if (type!=='tutorRating') {
+            if (answerId === undefined) throw "Error: No answerId parameter provided.";
+            if (ObjectId.isValid(answerId) === false) throw "Error: Invalid answerId provided.";
+        }
 
         // retrieve the user objects for userId and ratedId (these functions throw if the user does not exist)
         const rater = await users.getUserById(userId);
         let ratee = await users.getUserById(ratedId);
+
+        // make sure rater and ratee are not the same person
+        if (rater._id.equals(ratee._id)) throw "You may not rate yourself.";
 
         // make sure the ratee is a tutor
         if (ratee.userType !== 'tutor') throw "Only tutors may be rated.";
@@ -35,6 +43,18 @@ module.exports = {
         if (type=='answerRatingByStudents' && rater.userType!=='student') throw "Tutors may not submit 'answerRatingByStudents' ratings, please submit an 'answerRatingByTutors' rating instead.";
         if (type=='answerRatingByTutors' && rater.userType!=='tutor') throw "Students may not submit 'answerRatingByTutors' ratings, please submit an 'answerRatingByTutors' rating instead.";
         if (type==='tutorRating' && rater.userType!=='student') throw "Tutors may not rate other tutors.";
+
+        // if the type is an answerRating, make sure the tutor actually gave that answer
+        if (type!=='tutorRating') {
+            let found = false;
+            for (ans of ratee.questionIDs) {
+                if (ans.equals(answerId)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) throw `Sorry, ${ratee.username} did not write answer ${answerId}`;
+        }
 
         // if the type of rating is tutorRating, make sure the ratee is in the rater's tutorList
         if (type==='tutorRating') {
@@ -55,9 +75,24 @@ module.exports = {
             ratedId: ratedId,
             ratingDate: ratingDate,
             ratingType: type,
-            ratingValue: rating
+            ratingValue: rating,
+            answerId: type!=='tutorRating' ? answerId : null
         };
+
+        // get the collection
         const ratingCollection = await ratings();
+
+        // if ratingType is tutorRating, query the collection for ratings by this user and make sure they have not rated this tutor before
+        if (type === 'tutorRating') {
+            const prevRatings = await ratingCollection.find({userId, ratedId, ratingType:'tutorRating'}).toArray();
+            if (prevRatings.length>0) throw `Sorry, you have already rated ${ratee.username}.`;
+        }
+        // if type is an answerRating, query the collection for ratings by this user and make sure that the answer was not already rated by that rater
+        if (type!=='tutorRating') {
+            const prevRatings = await ratingCollection.find({userId, ratedId, ratingType:type, answerId}).toArray();
+            if (prevRatings.length>0) throw `Sorry, you have already rated this answer.`;
+        }
+
         const insertInfo = await ratingCollection.insertOne(newRating);
         if (insertInfo.insertedCount === 0) throw "Error: Could not add rating.";
 
@@ -101,13 +136,26 @@ module.exports = {
     },
 
     async getAllUsersRatings(userId){
-        console.log(userId);
         if (!userId || userId === undefined || userId === null || userId === '') throw "Error: id is required";
         if (!ObjectId.isValid(userId)) throw "UserId is not a valid ObjectID";
         userId = ObjectId(userId);
         const ratingCollection = await ratings();
-        const usersRatings = await ratingCollection.find({ratedId: userId});
+        const usersRatings = await ratingCollection.find({ratedId: userId}).toArray();
         return usersRatings; //can do more work with them in the routes
+    },
+
+    async getRatingsForAnswer(answerId) {
+        // input checks
+        if (answerId === undefined) throw "Error: No answerId parameter provided.";
+        if (ObjectId.isValid(answerId) === false) throw "Error: Invalid answerId provided.";
+
+        // get the collection
+        const ratingCollection = await ratings();
+
+        // query the ratings collection for all ratings for this answer
+        const answerRatings = await ratingCollection.find({answerId}).toArray();
+
+        return answerRatings;
     },
 
     async deleteRating(id) {

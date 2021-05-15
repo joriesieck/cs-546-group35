@@ -103,6 +103,7 @@ async function createAnswer(userId, answer, questionId) {
         userId: userId,
         date: datePosted,
         answer: answer,
+        questionId: questionId,
         tutorRatings: [],
         studentRatings: []
     };
@@ -137,9 +138,10 @@ async function getAllUsersQuestions(id){
     //takes in an id, returns an array of JSON objects with all the questions for the user
     const questionCollection = await questions();
     //returning the most recent 10 to put on the profile
-    let questionList = await questionCollection.find({_id: parsedId}).sort({"datePosted":-1}).limit(10).toArray();
+    let questionList = await questionCollection.find({userId: parsedId}).sort({"datePosted":-1}).limit(10).toArray();
     return questionList;
 }
+
 async function getAnswers(questionId) {
     // check inputs
     if (ObjectID.isValid(questionId) === false) throw "Error: Invalid questionId provided.";

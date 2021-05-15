@@ -14,7 +14,7 @@ router.get('/', async (req, res) => {
     //if no logged in user redirect to login
     try{
         if (!req.session.user){
-            res.redirect('/login');
+            return res.redirect('/login');
         }
         //if logged in, user should be getting their own profile page with their 
         const user = await userData.getUserByUsername(req.session.user.username);
@@ -22,27 +22,31 @@ router.get('/', async (req, res) => {
             res.redirect('/login');
         } else {
             //we have a user and can render it
-            console.log(user);
-            //get their questions list to facilitate printing them
-            // const questionsList = await questionsData.getAllUsersQuestions(user._id);
-            // if (questionsList.length === 0){
-            //     questionsList.append('None');
-            //     //we will check for the first element being none/size being 1
-            // }
             if (user.userType === "student"){
+                //get their questions list to facilitate printing them
+                const questionsList = await questionsData.getAllUsersQuestions(user._id);
                 res.status(200).render('profile/student',{
                     user: user,
                     self: true,
                     title: `${user.username}'s Profile`,
-                    //questions: questionsList,
+                    questions: questionsList,
                     loggedIn: true
                 });
             } else{ //is a tutor
+                //get their answers list to facilitate printing them
+                let answersList = [];
+                for (answerId of user.questionIDs) {
+                    try {
+                        answersList.push(await questionsData.getAnswerById(answerId));
+                    } catch (e) {
+                        // just move on (no op)
+                    }
+                }
                 res.status(200).render('profile/tutor',{
                     user: user,
                     self: true,
                     title: `${user.username}'s Profile`,
-                    //questions: questionsList,
+                    answers: answersList,
                     loggedIn: true
                 });
             }
@@ -211,7 +215,7 @@ router.post('/password', async (req, res) => {
 router.get('/:username', async (req,res) =>{
     try{
         if (!req.session.user){
-            return res.redirect('/');
+            return res.redirect('/login');
         }
         if (!req.params.username || typeof req.params.username !== 'string' || req.params.username === ""){
             throw "Username is incorrect";
@@ -219,15 +223,12 @@ router.get('/:username', async (req,res) =>{
         //only tutors can access this route as others cant see profiles
         const user = await userData.getUserByUsername(req.session.user.username); //get the user requesting the route
         if (!user) throw "No user found with this username";
-        // const questions = await questionsData.getAllUsersQuestions(user._id);
-        // if (questions.length === 0){
-        //     questions.append("None");
-        // }
+
         const retrievedUser = await userData.getUserByUsername(req.params.username);
         if (!retrievedUser){
             //the user doesn't exist
             //send to the main page
-            return res.redirect('/');
+            return res.redirect('/login');
         } else {
             //got it
             if (req.session.user.username === retrievedUser.username){
@@ -235,12 +236,20 @@ router.get('/:username', async (req,res) =>{
             }
             if (retrievedUser.userType === "tutor"){
                 //tutor type
+                let answersList = [];
+                for (answerId of retrievedUser.questionIDs) {
+                    try {
+                        answersList.push(await questionsData.getAnswerById(answerId));
+                    } catch (e) {
+                        // just move on (no op)
+                    }
+                }
                 res.status(200).render('profile/tutor', {
                     user: retrievedUser,
                     self: false,
                     title: `${retrievedUser.username}'s Profile`,
-                    loggedIn: true,
-                    //questions: questions
+                    answers: answersList,
+                    loggedIn: true
                 });
                 return;
             } else{
@@ -248,12 +257,13 @@ router.get('/:username', async (req,res) =>{
                     res.status(403).json({error: "You cannot visit this profile, as you are not a tutor"});
                     return;
                 }
+                const questionsList = await questionsData.getAllUsersQuestions(retrievedUser._id);
                 res.status(200).render('profile/student', {
                     user: retrievedUser,
                     self: false,
                     title: `${retrievedUser.username}'s Profile`,
                     loggedIn: true,
-                    //questions: questions
+                    questions: questionsList
                 });
                 return;
             }
@@ -268,7 +278,7 @@ router.get('/:username', async (req,res) =>{
 //allows us to see if the user is allowed to rate the other user
 router.post('/rating', async (req, res) => {
     if (!req.session.user){
-        return res.redirect('/');
+        return res.redirect('/login');
     }
     //id of user that is desired to be rated rated
     let ratedUsername = xss(req.body.ratedUsername);
@@ -310,16 +320,16 @@ router.post('/rating', async (req, res) => {
         let savedRatingVal;
         const usersRatings = await ratingsData.getAllUsersRatings(userBeingRated._id);
         if (!usersRatings) throw "COULD NOT GET USER RATINGS";
-        console.log(usersRatings);
+        // console.log(usersRatings);
         if (usersRatings.length > 0){
             for (rating of usersRatings){
-                console.log(rating.userId);
-                console.log(userRating._id);
+                // console.log(rating.userId);
+                // console.log(userRating._id);
                 if (rating.userId === userRating._id && rating.ratingType === "tutorRating"){
                     //the user has rated before
                     hasRated = true;
                     savedRatingVal = rating.ratingValue;
-                    console.log(`RATED ${savedRatingVal}`);
+                    // console.log(`RATED ${savedRatingVal}`);
                     break;
                 }
             }
@@ -328,15 +338,15 @@ router.post('/rating', async (req, res) => {
             res.status(200).json({
                 message: `You have already rated this tutor ${savedRatingVal}`, 
             });
-            console.log("HAVE RATED");
+            // console.log("HAVE RATED");
             return;
         } else {
-            console.log("OK");
+            // console.log("OK");
             //should be able to submit a rating given all of this
             res.status(200).json({message: 'OK'});
         }
     } catch(e){
-        console.log(e);
+        // console.log(e);
         res.status(400).json({error: e});
         return;
     }   
@@ -344,10 +354,10 @@ router.post('/rating', async (req, res) => {
 
 router.post('/addRating', async (req, res) => {
     if (!req.session.user) {
-        return res.redirect('/');
+        return res.redirect('/login');
     }
     let ratedUsername = xss(req.body.ratedUsername);
-    console.log(ratedUsername);
+    // console.log(ratedUsername);
     let rating = xss(req.body.rating);
 
     try{
@@ -365,7 +375,7 @@ router.post('/addRating', async (req, res) => {
         if (!userSubmittingRating) throw "No user found by this username";
         const userBeingRated = await userData.getUserByUsername(ratedUsername);
         if (!userBeingRated) throw "No user found by this id";
-        console.log(`userBeingRated._id: ${userBeingRated._id}`)
+        // console.log(`userBeingRated._id: ${userBeingRated._id}`)
         //we have all the info we need to make a rating, but need to make sure the tutor hasn't been rated by this other user
         const usersRatings = await ratingsData.getAllUsersRatings(userBeingRated._id);
         if (usersRatings.length !== 0){
@@ -386,7 +396,7 @@ router.post('/addRating', async (req, res) => {
         }
         
     } catch(e){
-        console.log(`error in POST /profile/addRating ${e}`);
+        // console.log(`error in POST /profile/addRating ${e}`);
         res.status(400).json({error: e});
         return;
     }
@@ -394,7 +404,7 @@ router.post('/addRating', async (req, res) => {
 
 router.get('/tutors/:username', async (req,res) => {
     if (!req.session.user){
-        return res.redirect('/');
+        return res.redirect('/login');
     }
     let username = req.params.username;
     try{

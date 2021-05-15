@@ -4,7 +4,7 @@ const userData = require('../data/users');
 
 router.get('/', async (req, res) => {
     if (!req.session.user){
-        res.redirect('/');
+        return res.redirect('/login');
     }
     try{
         const tutors = await userData.getAllTutors();
@@ -20,6 +20,7 @@ router.get('/', async (req, res) => {
             return 0;
         });
         res.status(200).render('users/toptutors',{
+            title: "Top Rated Tutors",
             tutors: tutors,
             loggedIn: true
         });
