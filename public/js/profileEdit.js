@@ -331,7 +331,7 @@ $(document).ready(function(){
                 relevantSubjects = relevantSubjects.map((subj) => subj.trim());
                 if (!relevantSubjects.every((subj) => subj!=='')) throw 'Each relevant subject must have at least one non whitespace character';
                 fieldsToChange['relevantSubjects'] = relevantSubjects;
-                console.log(relevantSubjects);
+                console.log(fieldsToChange.relevantSubjects);
                 numChanged++;
             } catch(e){
                 errorList.push(e);

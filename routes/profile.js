@@ -69,9 +69,13 @@ router.post('/', async (req, res) => {
     let email = xss(req.body.email);
     let newUsername = xss(req.body.username);
     let year = xss(req.body.year);
-    let relevantSubjects = xss(req.body.relevantSubjects);
-
+    let relevantSubjects = req.body.relevantSubjects;
     let username = req.session.user.username;
+
+    // xss relevantSubjects
+    for (let i=0; i<relevantSubjects.length;i++) {
+        relevantSubjects[i] = xss(relevantSubjects[i]);
+    }
 
     let changeFields = {}; //updateUser accepts an object
     let numChanged = 0;
