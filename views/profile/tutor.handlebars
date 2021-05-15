@@ -20,6 +20,7 @@
             {{/each}}
         </div>
         {{#if self}}
+        <label for="tutorList">Currently Tutoring:</label>
         <ul id="tutorList"></ul>
         <button id="userInfoChange">Change User Information</button>
         <button id="passwordChange">Change Password</button>
@@ -48,9 +49,6 @@
         <form id="infoChange">
             <label for="username">Username:</label>
             <input name="username" id="username" type="text">
-
-            <label for="profilePicture">Profile Picture:</label>
-            <input name="profilePicture" id="profilePicture" type="file" accept="image/.*">
 
             <label for="firstName">First Name:</label>
             <input name="firstName" id="firstName" type="text" value={{firstName}}>

@@ -12,10 +12,12 @@
             <h5>Average Rating: {{this.ratings.avgRating}}</h5>
             <ul>Subjects
                 {{#each this.relevantSubjects}}
-                <li>{{this}}</li>
+                <li class="subject">{{this}}</li>
                 {{/each}}
             </ul>
         </div>
         {{/each}}
     </div>
 </main>
+
+<script src='/public/js/toptutors.js'></script>

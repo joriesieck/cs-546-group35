@@ -412,7 +412,8 @@ router.get('/tutors/:username', async (req,res) => {
             newTutorList[i] = tutor;
         }
         //console.log(newTutorList);
-        return newTutorList;
+        res.status(200).send(newTutorList);
+        return;
     }catch(e){
         return `Error: ${e}`;
     }

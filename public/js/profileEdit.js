@@ -32,15 +32,19 @@ $(document).ready(function(){
     $('#tutorList').empty();
     $.ajax({
         method: 'GET',
+        dataType: 'json',
         url: `/profile/tutors/${$('#givenUsername').html()}`
-    }).then(function(array){ //the new tutor list with info
-        console.log("HELLO");
-        if (array.length = 0){
+    }).then(function(data){ //the new tutor list with info
+        console.log(data);
+        if (data.length === 0){
             $('#tutorList').append('<p>No tutors assigned at this time</p>');
-        } else {
-            for (i = 0; i < array.length; i++){
-                let string = '<li><a href="/profile/'+array[i].username+'">'+array[i].username+'</a></li>';
-                $('#tutorList').appendChild(string);
+        }
+        else {
+            for (i = 0; i < data.length; i++){
+                let username = data[i].username;
+                //console.log(data);
+                console.log(username);
+                $('#tutorList').append('<li><a href="/profile/'+username+'">'+username+'</a></li>');
             }
         }
     });
