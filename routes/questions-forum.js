@@ -3,6 +3,7 @@ const router = express.Router();
 const xss = require("xss");
 const questionData = require("../data/questions");
 const userData = require("../data/users");
+const ratingData = require("../data/ratings");
 const { ObjectID } = require('mongodb');
 
 function createHelper(string) {
@@ -620,6 +621,37 @@ router.get("/:id", async (req, res) => {
 			answerList[i].username = username.username;
 		}
 	}
+
+	// retrieve any ratings for the answers
+	await answerList.forEach(async (answer, i) => {
+		let ratings = [];
+		try {
+			ratings = await ratingData.getRatingsForAnswer(answer._id);
+		} catch (e) {
+			// just move on - no op
+		}
+		// calculate the average rating for each type
+		let sumSRs = 0, sumTRs = 0, numSRs = 0, numTRs = 0;
+		ratings.forEach((rating) => {
+			if (rating.ratingType==='answerRatingByStudents') {
+				const val = parseInt(rating.ratingValue);
+				if (!isNaN(val)){
+					sumSRs += val;
+					numSRs += 1;
+				}
+			} else {
+				const val = parseInt(rating.ratingValue);
+				if (!isNaN(val)){
+					sumTRs += val;
+					numTRs += 1;
+				}
+			}
+		})
+		const avgStudentRating = sumSRs / numSRs;
+		const avgTutorRating = sumTRs / numTRs;
+		answerList[i].avgStudentRating = !isNaN(avgStudentRating) ? avgStudentRating : 'N/A';
+		answerList[i].avgTutorRating = !isNaN(avgTutorRating) ? avgTutorRating : 'N/A';
+	});
 
 	// render the appropriate page, depending on whether user is logged in
 	if(!!req.session.user === false) {
