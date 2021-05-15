@@ -110,14 +110,14 @@ form button {
 }
 
 /* buttons */
-button {
+button, .button {
 	background-color: #003dac;
 	color: #fff;
 	border-radius: 5px;
 	border: 2px solid #fff;
 	padding: 5px;
 }
-button:hover {
+button:hover, .button:hover {
 	background-color: #49d8af;
 	color: #003dac;
 	border-color: #003dac;
@@ -147,11 +147,19 @@ p.error {
 	text-align: center;
 }
 
-button.login-landing, button.new-user-landing {
+.user-landing-buttons {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+}
+
+.button.login-landing, .button.new-user-landing {
 	font-size: large;
 	padding: 10px;
 	margin-left: 10px;
 	margin-right: 10px;
+	max-width: 100px;
 }
 
 /* Student, Tutor */
@@ -271,12 +279,7 @@ form#tutor-request button {
 	margin: 0;
 }
 /* label styling */
-ul.tutor-label {
-	list-style-type: none;
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	justify-content: space-between;
+.tutor-label {
 	padding: 10px;
 	margin: 0;
 	cursor: pointer;

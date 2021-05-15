@@ -255,7 +255,7 @@ router.post('/',async (req,res) => {
 			});
 			// if user was successfully created, log them in and send their username back to the client
 			if (user) {
-				req.session.user = {username};
+				req.session.user = {username, isTutor};
 				res.status(201).json({message:'success'});
 			}
 		} catch (e) {

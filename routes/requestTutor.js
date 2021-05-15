@@ -69,6 +69,21 @@ router.post('/', async (req, res) => {
 		return;
 	}
 
+	// if the tutor is in the user's tutorList or vice versa, error
+	for (tutorId of user.tutorList) {
+		if (tutorId.equals(tutor._id)) {
+			res.status(400).json({error: `Sorry, ${tutor.username} is already in your tutor list.`});
+			return;
+		}
+	}
+	for (studentId of tutor.tutorList) {
+		if (studentId.equals(user._id)) {
+			res.status(400).json({error: `Sorry, you are already in ${tutor.username}'s tutor list.`});
+			return;
+		}
+	}
+
+
 	// add the user to the requestedTutor's tutorList and vice versa
 	try {
 		tutor = await userData.updateUser({id: tutor._id, tutorList: [user._id]});

@@ -216,6 +216,7 @@
 			var loadingMsg = $('<p>');
 			loadingMsg.text('Please wait, your account is being created...');
 			newUserForm.after(loadingMsg);
+			errors.hide();
 			// no errors, so submit ajax request to POST /new-user
 			var requestConfig = {
 				method: 'POST',

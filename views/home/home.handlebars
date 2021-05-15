@@ -1,4 +1,5 @@
 <main>
+<div>
     <p class="bold">
         Tutoring, Simplified!
     </p>
@@ -46,7 +47,7 @@
                 <th>Date</th>
                 <th>Question Title</th>
                 <th>Tags</th>
-                <th>Link</th>
+                <th>Question Link</th>
                 <th>Answered?</th>
             </tr>
             {{#each questions}}
@@ -56,7 +57,7 @@
                     <td class="table-question-title">{{this.title}}</td>
                     <td class="table-question-tags">{{this.tags}}</td>
                     <td class="table-question-link">
-                        <a href='questions-forum/{{this._id}}'>Link</a>
+                        <a href='questions-forum/{{this._id}}'>View Question</a>
                     </td>
                     <td class="table-question-answered">{{this.answered}}</td>
                 </tr>
