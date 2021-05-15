@@ -1,0 +1,17 @@
+<main>
+	<h2>Answer:</h2>
+	<p>{{answer}}</p>
+
+	<div id="ratingFormSection">
+		<form id="ratingForm">
+				<label for="rating">Rate this answer (1-10):</label>
+				<input type="number" name="rating" id="rating" min="1" max="10" step="1">
+				<input type="hidden" id="answer-id" value="{{answerId}}" hidden>
+				<button type="submit">Submit</button>
+		</form>
+		<ul id="ratingErrors" class="errors" hidden></ul>
+	</div>
+</main>
+
+<script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+<script src="/public/js/rateAnswer.js"></script>

@@ -15,6 +15,7 @@
             <th>Student Rating</th>
             <th>Tutor Rating</th>
             <th>Tutor</th>
+            <th>Rate</th>
             <th>Edit</th>
         </tr>
         {{#each answers}}
@@ -25,6 +26,9 @@
             <td class="table-answer-body">{{this.avgTutorRating}}</td>
             <td class="table-answer-tutor">
                 <a href='/profile/'>{{this.username}}</a>
+            </td>
+            <td class="table-answer-rate">
+                <a href='/questions-forum/answer/{{this._id}}'>Rate</a>
             </td>
             <td class="table-answer-edit">
                 <a href='/questions-forum/edit-answer/{{this._id}}'>Edit</a>
@@ -38,6 +42,7 @@
             <th>Student Rating</th>
             <th>Tutor Rating</th>
             <th>Tutor</th>
+            <th>Rate</th>
         </tr>
         {{#each answers}}
         <tr class="table-answer-row">
@@ -47,6 +52,9 @@
             <td class="table-answer-body">{{this.avgTutorRating}}</td>
             <td class="table-answer-tutor">
                 <a href='/profile/'>{{this.username}}</a>
+            </td>
+            <td class="table-answer-rate">
+                <a href='/questions-forum/answer/{{this._id}}'>Rate</a>
             </td>
         </tr>
         {{/each}}

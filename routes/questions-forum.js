@@ -123,12 +123,14 @@ router.post("/post-question", async (req, res) => {
 						error:
 							"Error: Each tag must be a string and non all empty space string",
 					});
+					return;
 				}
 			}
 			if(tags.length > 3) {
 				res.status(400).json({
 					error: "Error: Please provide a maximum of three tags",
 				});
+				return;
 			}
 		}
 
@@ -234,12 +236,15 @@ router.post("/post-answer", async (req, res) => {
 
 			if(newAnswer) {
 				res.status(201).json({ message: "success", questionId });
+				return;
 			}
 		} catch (e) {
 			res.status(500).json({ error: e });
+			return;
 		}
 	} else {
 		res.sendStatus(403);
+		return;
 	}
 });
 
@@ -501,6 +506,7 @@ router.put("/edit-answer/:id", async (req,res) => {
 		// make sure questionId exists
 		if (!questionId) {
 			res.status(400).json({error: "No question ID found. Please go back to the page and try again."});
+			return;
 		}
 
 		// convert questionId to an ObjectId
@@ -583,6 +589,99 @@ router.put("/edit-answer/:id", async (req,res) => {
 	}
 });
 
+// display a single answer page for rating
+router.get("/answer/:id", async (req, res) => {
+	// if user is not logged in, redirect to login page
+	if (!req.session.user) {
+		return res.redirect('/login');
+	}
+	let id = req.params.id;
+	// input checks
+	try {
+		id = ObjectID(id);
+	} catch (e) {
+		res.status(400).json({error: "Invalid answer ID provided"});
+		return;
+	}
+	// get the answer
+	let answer;
+	try {
+		answer = await questionData.getAnswerById(id);
+	} catch (e) {
+		res.status(400).json({error: e});
+		return;
+	}
+
+	// render the page
+	return res.render('answers/single-answer', {
+		title: "Rate Answer",
+		loggedIn: !!req.session.user,
+		answer: answer.answer,
+		answerId: answer._id,
+		isTutor: req.session.user.isTutor
+	});
+});
+
+// rate an answer
+router.post("/answer/:id", async (req, res) => {
+	// if user is not logged in, redirect to login page
+	if (!req.session.user) {
+		return res.redirect('/login');
+	}
+	let id = req.params.id;
+	let rating = xss(req.body.rating);
+	// input checks
+	try {
+		id = ObjectID(id);
+	} catch (e) {
+		res.status(400).json({error: "Invalid answer ID provided"});
+		return;
+	}
+	try {
+		if (!rating || rating === undefined || rating === null || rating.trim() === '') throw "Rating isn't present";
+		rating = parseInt(rating);
+		if (isNaN(rating)) throw "Rating isn't a number";
+		if (rating < 1 || rating > 10) throw "Rating is out of bounds";
+	} catch (e) {
+		res.status(400).json({error: e});
+		return;
+	}
+	// get the answer
+	let answer;
+	try {
+		answer = await questionData.getAnswerById(id);
+	} catch (e) {
+		res.status(400).json({error: e});
+		return;
+	}
+	// get the ratee's id
+	const rateeId = answer.userId;
+
+	// get the user
+	let user;
+	try {
+		user = await userData.getUserByUsername(req.session.user.username);
+	} catch (e) {
+		res.status(400).json({error: e});
+		return;
+	}
+
+	// rating type is either answerRatingByStudents or answerRatingByTutors
+	const type = req.session.user.isTutor ? 'answerRatingByTutors' : 'answerRatingByStudents';
+
+	// submit the rating
+	try {
+		const ratingObj = await ratingData.createRating(user._id, rateeId, rating, type, id);
+		if (ratingObj) {
+			res.status(201).json({message: 'success'});
+			return;
+		} else throw 'Something went wrong...';
+	} catch (e) {
+		res.status(500).json({error: e});
+		return;
+	}
+});
+
 // Route to display the single question with answers page
 router.get("/:id", async (req, res) => {
 	let id = req.params.id;
@@ -591,6 +690,7 @@ router.get("/:id", async (req, res) => {
 		id = ObjectID(id);
 	} catch (e) {
 		res.status(400).json({error: "Invalid question ID provided"});
+		return;
 	}
 	// get the question and its answers
 	let singleQuestion;
