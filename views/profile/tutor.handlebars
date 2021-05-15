@@ -14,9 +14,10 @@
             <li>{{this}}</li>
             {{/each}}
         </ul>
+        <h3>Answers Given:</h3>
         <div id="questionLinks">
-            {{#each questions}}
-            <a></a>
+            {{#each answers}}
+            <a href='questions-forum/{{this.questionId}}'>{{this.answer}}</a>
             {{/each}}
         </div>
         {{#if self}}

@@ -51,15 +51,7 @@ const constructorMethod = (app) => {
 	});
 	app.use('/profile', profileRoutes);
 
-	// dummy top rated tutors
-	// app.use('/toptutors',(req,res) => {
-	// 	res.render('users/toptutors',{
-	// 		title: "Top Rated Tutors",
-	// 		loggedIn: !!req.session.user
-	// 	});
-	// });
 	app.use('/toptutors',toptutorsRoutes);
-	// dummy homepage (which catches all other routes for now)
 
 	// question forum
 	app.use("/questions-forum", questionsRoutes);

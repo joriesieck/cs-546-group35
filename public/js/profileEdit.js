@@ -165,6 +165,10 @@ $(document).ready(function(){
             passwordErrors.show();
             //show the errors, don't make a request
         } else{
+            // render a paragraph to let the user know that their changes are being made
+			var loadingMsg = $('<p>');
+			loadingMsg.text('Please wait, we are updating your password...');
+			passwordChangeForm.after(loadingMsg);
             var requestConfig = {
                 method: 'POST',
                 url: '/profile/password',
@@ -175,10 +179,14 @@ $(document).ready(function(){
                     confirmPassword
                 }),
                 error: function (e){
+                    // hide the loading message
+					loadingMsg.hide();
                     alert(`Password could not be changed ${e}`);
                 }
             };
             $.ajax(requestConfig).then(function (res) {
+                // hide the loading message
+                loadingMsg.hide();
                 if (res.message === "success" ){
                     //PASSWORD COULD BE CHANGED ONLY
                     $("#passChange :input").val("");

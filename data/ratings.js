@@ -136,15 +136,14 @@ module.exports = {
     },
 
     async getAllUsersRatings(userId){
-        console.log(userId);
         if (!userId || userId === undefined || userId === null || userId === '') throw "Error: id is required";
         if (!ObjectId.isValid(userId)) throw "UserId is not a valid ObjectID";
         userId = ObjectId(userId);
         const ratingCollection = await ratings();
-        const usersRatings = await ratingCollection.find({ratedId: userId});
+        const usersRatings = await ratingCollection.find({ratedId: userId}).toArray();
         return usersRatings; //can do more work with them in the routes
     },
-    
+
     async getRatingsForAnswer(answerId) {
         // input checks
         if (answerId === undefined) throw "Error: No answerId parameter provided.";

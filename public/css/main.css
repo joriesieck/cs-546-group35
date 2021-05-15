@@ -11,6 +11,7 @@
  * 		- Student
  * 4) Question Forum Page
  * 5) Request Tutor Page
+ * 6) Profile
  */
 
 /* Overall Site Styles */
@@ -287,4 +288,11 @@ form#tutor-request button {
 /* instructions styling */
 #tutor-req-instr {
 	text-align: center;
+}
+
+/* Profile */
+#questionLinks a {
+	text-decoration: underline;
+	margin: 5px;
+	font-size: large;
 }
