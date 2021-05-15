@@ -4,6 +4,7 @@
     ratingForm.submit((event) => {
         event.preventDefault();
         var rating = $('#rating').val();
+        var ratingErrors = [];
         try{
             if (!rating || rating === undefined || rating === null || rating.trim() === ''){
                 throw "Rating isn't present";
@@ -33,7 +34,9 @@
                 }
             });
         } catch(e){
-            console.log(e);
+            var error = $('<p>');
+            error.text(e);
+            error.appendTo($('#ratingErrors'));
         }
         
     });

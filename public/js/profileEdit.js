@@ -22,7 +22,6 @@ $(document).ready(function(){
             })
         }
         else{
-            console.log(res.message);
             //in all other cases, rating is not possible, so do not display
             $('#ratingSection').empty();
             $('#ratingSection').append(res.message);
@@ -35,15 +34,12 @@ $(document).ready(function(){
         dataType: 'json',
         url: `/profile/tutors/${$('#givenUsername').html()}`
     }).then(function(data){ //the new tutor list with info
-        console.log(data);
         if (data.length === 0){
             $('#tutorList').append('<p>No tutors assigned at this time</p>');
         }
         else {
             for (i = 0; i < data.length; i++){
                 let username = data[i].username;
-                //console.log(data);
-                console.log(username);
                 $('#tutorList').append('<li><a href="/profile/'+username+'">'+username+'</a></li>');
             }
         }
@@ -80,7 +76,7 @@ $(document).ready(function(){
         //hide shown information
         shownInfo.css("display", "none");
         //show the info change details
-        infoChange.css("display", "block");
+        infoChange.toggle();
     });
 
     var passwordChangeForm = $('#passChange');
@@ -89,7 +85,7 @@ $(document).ready(function(){
     //on submit of password change form
     passwordChangeForm.submit(function(event){
         passwordErrors.empty();
-        passwordErrors.hide();
+        let errorList = [];
         event.preventDefault();
         let numErrors = 0;
 
@@ -105,7 +101,7 @@ $(document).ready(function(){
                 throw "Current password is of incorrect type";
             }
         }catch(e){
-            passwordErrors.append()
+            errorList.push(e);
             numErrors++;
         } 
         try{
@@ -117,7 +113,7 @@ $(document).ready(function(){
             }
             
         } catch(e){
-            passwordErrors.append()
+            errorList.push(e);
             numErrors++;
         }
         try{        
@@ -128,7 +124,7 @@ $(document).ready(function(){
                 throw "Missing confirmation of new password";
             }
         }catch(e){
-            passwordErrors.append()
+            errorList.push(e);
             numErrors++;
         }
         try{
@@ -142,7 +138,7 @@ $(document).ready(function(){
             if (currentPassword.length < 8) throw 'Current password must contain at least 8 characters';
             if (newPassword.length < 8 || confirmPassword.length < 8) throw 'New password must contain at least 8 characters';
         } catch(e){
-            passwordErrors.append()
+            errorList.push(e);
             numErrors++;
         }
         const passwordNumberRE = /[0-9]+/;
@@ -151,18 +147,23 @@ $(document).ready(function(){
             if (currentPassword.length > 254) throw 'Current password may contain at maximum 254 characters';
             if (!passwordNumberRE.test(currentPassword) || !passwordLetterRE.test(currentPassword)) throw 'Current password must contain at least one letter and one number.';
         } catch(e){
-            passwordErrors.append()
+            errorList.push(e);
             numErrors++;
         }
         try{
             if (newPassword.length > 254 || confirmPassword.length > 254) throw 'New password may contain at maximum 254 characters';
 			if (!passwordNumberRE.test(newPassword) || !passwordLetterRE.test(newPassword) || !passwordNumberRE.test(confirmPassword) || !passwordLetterRE.test(confirmPassword)) throw 'New password must contain at least one letter and one number.';
         }catch(e){
-            passwordErrors.append()
+            errorList.push(e);
             numErrors++;
         }
-        if (numErrors>0){
-            passwordErrors.show();
+        if (errorList.length>0){
+            errorList.forEach((error) => {
+                var errorEl = $('<p>');
+                errorEl.text(error);
+                errorEl.appendTo(passwordErrors);
+            });
+            //passwordErrors.show();
             //show the errors, don't make a request
         } else{
             var requestConfig = {
@@ -184,19 +185,22 @@ $(document).ready(function(){
                     $("#passChange :input").val("");
                     passwordChange.css("display","none");
                     shownInfo.css("display", "block");
-                    shownInfo.before("<p>Password Changed successfully</p>");
+                    var element = $('<p>');
+                    element.text("Password successfully changed");
+                    $('#messages').appendTo(element);
                 }
             });
         }
-            
-
     });
 
     $(".return").click((event) => {
         event.preventDefault();
+        $('#messages').empty();
         $("#passChange :input").val("");
         $("#infoChange :input").val("");
         $("#ratingForm :input").val("");
+        $('#passwordErrors').empty();
+        $('#userInfoErrors').empty();
         //if the return button is clicked, hide all forms just in case
         passwordChange.css("display", "none");
         infoChange.css("display", "none");
@@ -214,8 +218,13 @@ $(document).ready(function(){
         var firstName = $('#firstName').val();
         var lastName = $('#lastName').val();
         var email = $('#email').val().toLowerCase();
-        //relevant subjects ?
+        var relevantSubjects = $('#relevantSubjects').val().toLowerCase();
         var year = $('#year').val();
+
+        let errors = $('#userInfoErrors');
+        errors.empty();
+
+        let errorList = [];
 
         let fieldsToChange = {};
         let numChanged = 0;
@@ -230,9 +239,9 @@ $(document).ready(function(){
                 const usernameRE = /^([a-zA-Z0-9\-\_\.]+)$/;
                 if (!usernameRE.test(username)) throw 'Username may only contain alphanumeric characters, ., _, or -.';
                 fieldsToChange['username'] = username;
+                numChanged++;
             } catch(e) {
-                console.log(e);
-                //TODO figure out what to do with errors when thrown
+                errorList.push(e);
             }
         }
         
@@ -246,9 +255,9 @@ $(document).ready(function(){
                 const yearRE = /^\d\d\d\d$/;
 			    if (!yearRE.test(year)) throw 'Graduation Year must be of the form YYYY.';
                 fieldsToChange['year'] = year;
+                numChanged++;
             } catch (e) {
-                //TODO
-                console.log(e);
+                errorList.push(e);
             }
             
         }
@@ -264,9 +273,9 @@ $(document).ready(function(){
                 const nameRE = /^([a-zA-Z'\- ]+)$/;
 			    if (!nameRE.test(firstName)) throw 'First Name may only contain alphabet characters, \' , -, or spaces.';
                 fieldsToChange['firstName'] = firstName;
+                numChanged++;
             }catch (e){
-                //TODO
-                console.log(e);
+                errorList.push(e);
             }
         }
 
@@ -280,9 +289,9 @@ $(document).ready(function(){
                 const nameRE = /^([a-zA-Z'\- ]+)$/;
 			    if (!nameRE.test(lastName)) throw 'Last Name may only contain alphabet characters, \' , -, or space.';
                 fieldsToChange['lastName'] = lastName;
+                numChanged++;
             } catch (e) {
-                //TODO
-                console.log(e);
+                errorList.push(e);
             }
         }
 
@@ -299,32 +308,57 @@ $(document).ready(function(){
                 const emailRE = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
                 if (!emailRE.test(email)) throw 'Email must be of the format example@domain.suffix.';
                 fieldsToChange['email'] = email;
+                numChanged++;
             } catch(e){
-                //TODO
-                console.log(e);
+                errorList.push(e);
             }
         }
-        //if all fields are checked and errors, show the user the errors and prevent their submission
-        //else, set up the request, and send it
-        var requestConfig = {
-            method: 'POST',
-            url: '/profile',
-            contentType: 'application/json',
-            data: JSON.stringify(fieldsToChange),
-            error: function (e){
-                infoChangeForm.before(`<p>User information could not be changed ${e}</p>`);
+
+        if (relevantSubjects !== undefined && relevantSubjects !== null && relevantSubjects.trim() !== ''){
+            try{
+                if (typeof relevantSubjects !== 'string') throw 'Relevant subjects must initially be a string';
+                relevantSubjects = relevantSubjects.split(',');
+                if (relevantSubjects.length<=0) throw 'Relevant subjects must contain at least one subject.';
+                if (!relevantSubjects.every((subj) => typeof subj === 'string')) throw 'Relevant subjects may only contain strings';
+                relevantSubjects = relevantSubjects.map((subj) => subj.trim());
+                if (!relevantSubjects.every((subj) => subj!=='')) throw 'Each relevant subject must have at least one non whitespace character';
+                fieldsToChange['relevantSubjects'] = relevantSubjects;
+                console.log(relevantSubjects);
+                numChanged++;
+            } catch(e){
+                errorList.push(e);
             }
-        };
-        $.ajax(requestConfig).then(function(res){
-            if (res.message === "success" ){
-                //USER COULD BE CHANGED ONLY
-                $("#infoChange :input").val("");
-                console.log("successful");
-                window.location.href = '/profile';
-            }
-        });
-        //if successful, return the user back to the main page, and show a box that says successful
-        //if unsuccessful, keep the user on the change password page and report back on errors
+        }
+
+        if (errorList.length > 0){
+            //we have errors, let's show them
+            errorList.forEach((error) => {
+                // create a p element to contain
+                var errorEl = $('<p>');
+                errorEl.text(error);
+                errorEl.appendTo(userInfoErrors);
+            });
+        }else{
+            //else, set up the request, and send it
+            var requestConfig = {
+                method: 'POST',
+                url: '/profile',
+                contentType: 'application/json',
+                data: JSON.stringify(fieldsToChange),
+                error: function (e){
+                    infoChangeForm.before(`<p>User information could not be changed ${JSON.stringify(e)}</p>`);
+                }
+            };
+            $.ajax(requestConfig).then(function(res){
+                if (res.message === "success" ){
+                    //USER COULD BE CHANGED ONLY
+                    $("#infoChange :input").val("");
+                    console.log("successful");
+                    window.location.href = '/profile';
+                }
+            });
+        }
+        
     });
 
 

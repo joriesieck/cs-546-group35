@@ -65,7 +65,7 @@ router.post('/', async (req, res) => {
     let email = xss(req.body.email);
     let newUsername = xss(req.body.username);
     let year = xss(req.body.year);
-    let subjects = xss(req.body.subjects);
+    let relevantSubjects = xss(req.body.relevantSubjects);
 
     let username = req.session.user.username;
 
@@ -92,8 +92,8 @@ router.post('/', async (req, res) => {
         changeFields['year'] = parseInt(year);
         numChanged++;
     }
-    if (subjects!==undefined && subjects!==null && subjects!=='' && subjects!==[]){
-        changeFields['relevantSubjects'] = subjects;
+    if (relevantSubjects!==undefined && relevantSubjects!==null && relevantSubjects!==[] && Array.isArray(relevantSubjects)){
+        changeFields['relevantSubjects'] = relevantSubjects;
         numChanged++;
     }
     if (numChanged === 0){

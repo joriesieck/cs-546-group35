@@ -1,5 +1,6 @@
 <main id="studentProfile" class="profiles">
     <div id="shownInfo">
+        <div id="messages"></div>
         <h2 id="givenUsername">{{user.username}}</h2>
         <h3>{{user.name.firstName}} {{user.name.lastName}}</h3>
         <h5>Email: {{user.email}}</h5>
@@ -26,6 +27,7 @@
     </div>
 
     <div id="passwordChangeForm">
+        <div id="passwordErrors"></div>
         <form id="passChange">
             <label for="currentPassword">Current Password:</label>
             <input name="currentPassword" id="currentPassword" type="password">
@@ -39,6 +41,7 @@
     </div>
 
     <div id="userInfoChangeForm">
+        <div id="userInfoErrors"></div>
         <form id="infoChange">
             <label for="username">Username:</label>
             <input name="username" id="username" type="text">
