@@ -250,7 +250,7 @@ $(document).ready(function(){
             try{
                 year = parseInt(year);
                 if (isNaN(year)) throw 'Grad year must be a number';
-                if (year < 1900 || year > 2100) throw 'Grad year must make sense :)';
+                if (year < 1900 || year > 2100) throw 'Grad year must be between 1900 and 2100';
                 const yearRE = /^\d\d\d\d$/;
 			    if (!yearRE.test(year)) throw 'Graduation Year must be of the form YYYY.';
                 fieldsToChange['year'] = year;
