@@ -257,7 +257,7 @@ router.get('/:username', async (req,res) =>{
                     res.status(403).json({error: "You cannot visit this profile, as you are not a tutor"});
                     return;
                 }
-                const questionsList = await questionsData.getAllUsersQuestions(user._id);
+                const questionsList = await questionsData.getAllUsersQuestions(retrievedUser._id);
                 res.status(200).render('profile/student', {
                     user: retrievedUser,
                     self: false,
