@@ -495,6 +495,20 @@ router.put("/edit-answer/:id", async (req,res) => {
 		let answerInfo = xss(req.body);
 		let answerBody = xss(req.body.answerBody);
 		let updatedAnswerObj = {};
+		let questionId = req.session.questionId;
+
+		// make sure questionId exists
+		if (!questionId) {
+			res.status(400).json({error: "No question ID found. Please go back to the page and try again."});
+		}
+
+		// convert questionId to an ObjectId
+		try {
+			questionId = ObjectID(questionId);
+		} catch (e) {
+			res.status(400).json({error: "Invalid question ID."});
+			return;
+		}
 
 		if(!answerInfo) {
 			res.status(400).json({error: "You must provide data to update your answer"});
@@ -514,7 +528,12 @@ router.put("/edit-answer/:id", async (req,res) => {
 
 		try {
 			let answerID = req.params.id
-			answerID = ObjectID(answerID);
+			try {
+				answerID = ObjectID(answerID);
+			} catch (e) {
+				res.status(400).json({error: "Invalid answer ID."});
+				return;
+			}
 			const oldAnswer = await questionData.getAnswerById(answerID);
 			updatedAnswerObj.userId = oldAnswer.userId;
 			updatedAnswerObj.answerBody = answerBody;
@@ -526,8 +545,15 @@ router.put("/edit-answer/:id", async (req,res) => {
 		}
 
 		try {
-			let answerID = req.params.id
+			let answerID = req.params.id;
+			try {
+				answerID = ObjectID(answerID);
+			} catch (e) {
+				res.status(400).json({error: "Invalid answer ID."});
+				return;
+			}
 			const updatedAnswer = await questionData.updateAnswer(
+				questionId,
 				answerID,
 				updatedAnswerObj
 			);
@@ -539,17 +565,16 @@ router.put("/edit-answer/:id", async (req,res) => {
 				answerIDs: answerIdArr
 			};
 
-			let currentUserAnswerIDs = currentUser.answerIDs;
+			let currentUserAnswerIDs = currentUser.questionIDs;
 			for (let i = 0; i < currentUserAnswerIDs.length; i++) {
 				currentUserAnswerIDs[i] = currentUserAnswerIDs[i].toString();
 			}
 			if (currentUserAnswerIDs.includes(req.params.id) === false) {
-				console.log("hi");
 				await userData.updateUser(userAnswerObj);
 			}
 
 			if(updatedAnswer) {
-				res.status(201).json({ message: "success", questionId: req.params.id });
+				res.status(201).json({ message: "success", questionId });
 			}
 		} catch (e) {
 			res.status(500).json({ error: e });
@@ -567,7 +592,13 @@ router.get("/:id", async (req, res) => {
 		res.status(400).json({error: "Invalid question ID provided"});
 	}
 	// get the question and its answers
-	let singleQuestion = await questionData.getQuestionById(id);
+	let singleQuestion;
+	try {
+		singleQuestion = await questionData.getQuestionById(id);
+	} catch (e) {
+		res.status(400).json({error: e});
+		return;
+	}
 	let answerList = singleQuestion.answers;
 	let monthPosted;
 	let dayPosted;
@@ -601,6 +632,8 @@ router.get("/:id", async (req, res) => {
 	}
 
 	if(!!req.session.user === true) {
+		// add the questionID to the session
+		req.session.questionId = id;
 		return res.render("answers/answers-page", {
 			title: "Answers",
 			loggedIn: !!req.session.user,

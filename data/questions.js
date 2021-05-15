@@ -167,6 +167,7 @@ async function getAnswerById(id) {
     } catch (e) {
         throw  `Error: No answer with ID ${id} found: ${e}`;
     }
+
     // make sure we actually got an answer
     const answer = answers[0];
     if (answer === null) throw `Error: No answer with ID ${id} found.`;
@@ -217,32 +218,48 @@ async function updateQuestion(questionId, updatedQuestion) {
     return await this.getQuestionById(questionId);
 }
 
-async function updateAnswer(answerId, updatedAnswer) {
-    if (answerId === undefined) throw "Error: No id parameter provided.";
+async function updateAnswer(questionId, answerId, updatedAnswer) {
+    if (questionId === undefined) throw "Error: No question id parameter provided.";
+    if (answerId === undefined) throw "Error: No answer id parameter provided.";
+    if (ObjectID.isValid(questionId) === false) throw "Error: Invalid question ID provided.";
     if (ObjectID.isValid(answerId) === false) throw "Error: Invalid answer ID provided.";
 
-    const updatedAnswerData = {};
+    let answer;
     if (updatedAnswer === undefined) throw "Error: Must provide updated answer information.";
 
-    if (updatedAnswer.answer) {
-        if (createHelper(updatedAnswer.answer) === false) throw "Error: Updated answer text parameter must be supplied and must be a string/non all empty space string.";
-        updatedAnswerData.answer = updatedAnswer.answer;
+    if (updatedAnswer.answerBody) {
+        if (createHelper(updatedAnswer.answerBody) === false) throw "Error: Updated answer text parameter must be supplied and must be a string/non all empty space string.";
+        answer = updatedAnswer.answerBody;
     }
 
     let answersArr = [];
     for (i = 0; i < answersArr.length; i++) {
         if (answersArr[i]._id == answerId) {
-            answersArr[i] = updatedAnswerData;
+            answersArr[i] = {answer};
         }
     };
 
+    // make sure the questionId matches the answerId
+    const question = await getQuestionById(questionId);
+    let found = false;
+    for (ans of question.answers) {
+        if (answerId.equals(ans._id)) {
+            found = true;
+            break;
+        }
+    }
+    if (!found) throw "Error: invalid question and answer pair";
+
+    // get the collection
     const questionCollection = await questions();
     const updatedInfo = await questionCollection.updateOne(
-        {_id: answerId},
-        {$set: updatedAnswerData}
+        {_id: questionId, "answers._id": answerId},
+        {$set: {"answers.$.answer": answer}}
     );
     if (!updatedInfo.matchedCount && !updatedInfo.modifiedCount) throw 'Error: Could not update answer successfully.';
-    return await this.getAnswerById(id);
+
+    const newAnswer = await getAnswerById(answerId);
+    return newAnswer;
 }
 
 async function deleteQuestion(id) {
