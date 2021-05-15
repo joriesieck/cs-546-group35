@@ -262,13 +262,13 @@ const main = async () => {
 	}
 	let question9;
 	try {
-		question9 = await questions.createQuestion(user4._id, "Web Dev" ,"What are the most popular lagnuages used in Web Development?" , ['Web Dev']);
+		question9 = await questions.createQuestion(user4._id, "Web Dev" ,"What are the most popular languages used in Web Development?" , ['Web Dev']);
 	} catch (e) {
 		console.log(`Error in creation of question 9: ${e}`)
 	}
 	let question10;
 	try {
-		question10 = await questions.createQuestion(user5._id, "Opertaing Systems" ,"What languages are OS's written in?" , ['Computer Science', "OS", "CS492"]);
+		question10 = await questions.createQuestion(user5._id, "Operating Systems" ,"What languages are OS's written in?" , ['Computer Science', "OS", "CS492"]);
 	} catch (e) {
 		console.log(`Error in creation of question 10: ${e}`)
 	}
